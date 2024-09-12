@@ -17,12 +17,12 @@ kwargs = {
     'prey': 500,
     
     ## prey traits
-    'prey_info': False,
+    'prey_info': True,
     'f_breed': 0.1,
     'f_energy': 100,
     
     ## predator traits
-    'predator_info': False,
+    'predator_info': True,
     's_energy': 100,
     's_breed': 0.1,
     

@@ -121,20 +121,13 @@ class Prey(mesa.Agent):
         
         ## count the number of predator agents
         
-        num_predators = len([a for a in neighbours if isinstance(a, Predator)])
+        predators = [a for a in neighbours if isinstance(a, Predator)]
         
-        ## if there are predators, move away
+        ## if there are predators, move away from them
         
-        if num_predators > 0:
+        if len(predators) > 0:
             
-            ## get the predator agent
-            for a in neighbours:
-                    
-                if isinstance(a, Predator):
-                    
-                    predator = a
-                    
-                    break
+            predator = self.model.random.choice(predators)
             
             ## get the predator pos
             
@@ -391,7 +384,7 @@ class Predator(mesa.Agent):
             
             ## get the prey pos
             
-            x_p, y_p = prey.pos
+            x_p, y_p = a.pos
             
             ## move towards the prey
             
