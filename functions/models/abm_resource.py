@@ -7,9 +7,6 @@
  
 import mesa
 import numpy as np
-from functions.models import behaviors
-
-# Define agent classes
 
 ## the abm contains a predator, prey and resource agent class
 
@@ -25,16 +22,18 @@ class Prey(mesa.Agent):
     - pos: tuple, x,y coordinates of the prey on the grid   
     '''
     
-    def __init__(self, model, unique_id, pos, energy = 10, info = False, r = 0.1):
+    def __init__(self, model, unique_id, pos, **kwargs):
         
         self.unique_id = unique_id
         self.model = model
-        self.energy = energy
+        self.energy = kwargs.get('f_energy', 10)
         self.pos = pos
         self.amount = 1
-        self.info = info
-        self.r = r
+        self.info = kwargs.get('prey_info', False)
+        self.r = kwargs.get('f_breed', 0.1)
 
+        self.kwargs = kwargs
+        
     ## reproduce function
     
     def prey_reproduce_energy(self):
@@ -51,7 +50,14 @@ class Prey(mesa.Agent):
             
             ## create a new prey agent
             
-            a = Prey(unique_id=self.model.schedule.get_agent_count(), model=self.model, pos=self.pos)
+            traits = {k : v for k, v in self.kwargs.items()}
+            
+            ## update energy
+            
+            energy = traits['f_energy'] = energy / 2
+            
+            a = Prey(unique_id=self.model.schedule.get_agent_count(), model=self.model, pos=self.pos, 
+                     **{k : v for k, v in traits.items()})
             
             self.model.schedule.add(a)
             
@@ -59,14 +65,172 @@ class Prey(mesa.Agent):
             
             #print('Prey agent reproduced:', a.unique_id, a.pos)
         
-            #energy = energy / 2
-            
-            #a.energy = energy
             
         ## update the energy
         
         self.energy = energy    
+
+    ## move function
+
+    def move(self):
         
+        ## get the current position
+        
+        x, y = self.pos
+        
+        ## find an empty cell
+        
+        #empty = self.model.grid.get_neighborhood((x,y), moore=True, include_center=False)
+        
+        ## if there are empty cells, move to a random empty cell
+        
+        #if len(empty) > 0:
+            
+        #    x, y = self.model.random.choice(empty)
+            
+            ## move the agent
+            
+        #    self.model.grid.move_agent(self, (x,y))
+            
+        ## if there are no empty cells, stay in the same position
+        
+        #else:
+            
+        #    self.model.grid.move_agent(self, (x,y))
+        
+        ## random walk
+        
+        x += np.random.choice([-1,0,1])
+        y += np.random.choice([-1,0,1])
+        
+        ## move the agent
+        
+        self.model.grid.move_agent(self, (x,y))
+
+    ##Prey information function 
+
+    def risk(self):
+        
+        ## get current pos
+        
+        x, y = self.pos
+        
+        ## get neighbouring predator agents
+        
+        neighbours = self.model.grid.get_neighbors((x,y), moore=True, include_center=False)
+        
+        ## count the number of predator agents
+        
+        num_predators = len([a for a in neighbours if isinstance(a, Predator)])
+        
+        ## if there are predators, move away
+        
+        if num_predators > 0:
+            
+            ## get the predator agent
+            for a in neighbours:
+                    
+                if isinstance(a, Predator):
+                    
+                    predator = a
+                    
+                    break
+            
+            ## get the predator pos
+            
+            x_p, y_p = predator.pos
+            
+            ## move away from the predator
+            
+            ## calculate the distance between the prey and the predator
+            
+            distance = np.sqrt((x-x_p)**2 + (y-y_p)**2)
+            
+            ## move away from the predator without jumping over the grid
+            
+            self.escape(x, y, x_p, y_p)
+            
+        else:
+            
+            self.move()
+    
+    def escape(self, x, y, x_p, y_p):
+        
+        ## move away from the predator
+        
+        x += np.random.choice([-1,0,1])
+        y += np.random.choice([-1,0,1])
+        
+        if ((x,y) == (x_p, y_p) or (x,y) == (x_p+1, y_p) or (x,y) == (x_p-1, y_p) or (x,y) == (x_p, y_p+1) or (x,y) == (x_p, y_p-1)):
+            
+            # avoid moving to the predator's position
+            
+            self.escape(x, y, x_p, y_p)
+        
+        elif (x,y) == self.pos:
+            
+            # avoid staying in the same position
+             
+            self.escape(x, y, x_p, y_p)
+        
+        else:
+            
+            # move
+            
+            self.model.grid.move_agent(self, (x,y)) 
+    
+    ## predator eat function
+        
+    def prey_eat(self):
+        
+        ## get the current energy
+        
+        energy = self.energy
+        
+        ## get the current pos
+        
+        x, y = self.pos
+        
+        ## get the resource at the current pos
+        
+        this_cell = self.model.grid.get_cell_list_contents((x,y))
+        
+        ## check if there is a resource in the cell
+        
+        for agent in this_cell:
+            
+            if isinstance(agent, Resource):
+                
+                if agent.amount > 0:
+                    
+                    ## if there is a resource, eat it
+                    
+                    # pick a random amount of resource to eat
+                    
+                    food = np.random.choice(list(range(0, agent.amount+1)))
+                    
+                    energy += food
+                    
+                    agent.amount -= food
+                
+            break
+        
+        ## update the energy
+        
+        self.energy = energy     
+
+    # deterministic death function
+
+    def die(self):
+        
+        ## remove the agent from the schedule
+        
+        self.model.schedule.remove(self)
+        
+        ## remove the agent from the grid
+        
+        self.model.grid.remove_agent(self)
+                                
     ## step function
     
     def step(self):
@@ -75,7 +239,7 @@ class Prey(mesa.Agent):
         
         if self.energy < 1:
             
-            behaviors.die(self)
+            self.die()
         
         else:
             
@@ -87,15 +251,15 @@ class Prey(mesa.Agent):
             
             if self.info:
                 
-                behaviors.risk(self)
+                self.risk()
             
             else:
                 
-                behaviors.move(self)
-                            
+                self.move()
+                                            
             ## eat the resource
             
-            behaviors.prey_eat(self)
+            self.prey_eat()
             
             ## update the age
             
@@ -113,15 +277,17 @@ class Predator(mesa.Agent):
     - predator eats prey, if prey is available
     '''
     
-    def __init__(self, model, unique_id, pos, energy = 10, info = False, r = 0.1):
+    def __init__(self, model, unique_id, pos, **kwargs):
         
         self.unique_id = unique_id
         self.model = model
-        self.energy = energy
+        self.energy = kwargs.get('s_energy', 10)
         self.pos = pos
         self.amount = 1
-        self.info = info
-        self.r = r 
+        self.info = kwargs.get('predator_info', False)
+        self.r = kwargs.get('s_breed', 0.1)
+        
+        self.kwargs = kwargs
     
     ## reproduce function
     
@@ -141,26 +307,141 @@ class Predator(mesa.Agent):
             
             ## create a new predator agent
             
-            a = Predator(unique_id=self.model.schedule.get_agent_count(), model=self.model, pos=self.pos)
+            ## get traits
+            
+            traits = {k : v for k, v in self.kwargs.items()}
+            
+            ## update energy
+            
+            energy = traits['s_energy'] = energy / 2
+            
+            a = Predator(unique_id=self.model.schedule.get_agent_count(), model=self.model, pos=self.pos, 
+                         **{k : v for k, v in traits.items()})
             
             self.model.schedule.add(a)
             
             ## add the agent to a random grid cell
             
             self.model.grid.place_agent(a, self.pos)
-            
-            ## give energy to the new agent
-            
-            #energy = energy / 2
-            
-            #a.energy = energy
-            
+    
             #print('Predator agent reproduced:', a.unique_id, a.pos)
         
         ## update the energy
         
         self.energy = energy
+
+    ## move function
+
+    def move(self):
         
+        ## get the current position
+        
+        x, y = self.pos
+        
+        ## find an empty cell
+        
+        #empty = self.model.grid.get_neighborhood((x,y), moore=True, include_center=False)
+        
+        ## if there are empty cells, move to a random empty cell
+        
+        #if len(empty) > 0:
+            
+        #    x, y = self.model.random.choice(empty)
+            
+            ## move the agent
+            
+        #    self.model.grid.move_agent(self, (x,y))
+            
+        ## if there are no empty cells, stay in the same position
+        
+        #else:
+            
+        #    self.model.grid.move_agent(self, (x,y))
+        
+        ## random walk
+        
+        x += np.random.choice([-1,0,1])
+        y += np.random.choice([-1,0,1])
+        
+        ## move the agent
+        
+        self.model.grid.move_agent(self, (x,y))
+
+    #Predator information function
+
+    def hunt(self):
+        
+        ## get current pos
+        
+        x, y = self.pos
+        
+        ## get neighbouring prey agents
+        
+        neighbours = self.model.grid.get_neighbors((x,y), moore=True, include_center=False)
+        
+        ## count the number of prey agents
+        
+        prey = [a for a in neighbours if isinstance(a, Prey)]
+        
+        ## choose a random prey agent
+        
+        if len(prey) > 0:
+            
+            a = self.model.random.choice(prey)
+            
+            ## get the prey pos
+            
+            x_p, y_p = prey.pos
+            
+            ## move towards the prey
+            
+            x += x_p
+            y += y_p
+            
+            ## move the agent
+            
+            self.model.grid.move_agent(self, (x,y))
+        
+        else:
+            
+            ## if there are no prey, move randomly
+            
+            self.move()
+
+    def predator_eat(self):
+    
+        ## get the current location
+        
+        x, y = self.pos
+        
+        ## get the prey at the current pos
+        
+        this_cell = self.model.grid.get_cell_list_contents((x,y))
+        
+        ## count the number of prey agents
+        
+        prey = [a for a in this_cell if isinstance(a, Prey)]
+        
+        ## choose a random prey agent
+        
+        if len(prey) > 0:
+            
+            a = self.model.random.choice(prey)
+            
+            gain = a.energy
+            
+            ## eat the prey
+            
+            self.energy += gain
+            
+            ## remove the prey from the schedule
+            
+            self.model.schedule.remove(a)
+            
+            ## remove the prey from the grid
+            
+            self.model.grid.remove_agent(a)
+            
     ## step function
     
     def step(self):
@@ -170,7 +451,7 @@ class Predator(mesa.Agent):
         
         if self.energy < 1:
             
-            behaviors.die(self)
+            self.die()
         
         else:   
             ## reproduce
@@ -181,20 +462,31 @@ class Predator(mesa.Agent):
 
             if self.info:
                 
-                behaviors.hunt(self)
+                self.hunt()
             
             else:
                 
-                behaviors.move(self)
+                self.move()
                     
             ## eat the prey
 
-            behaviors.predator_eat(self)
+            self.predator_eat()
 
             ## update the age
             
-            self.energy -= 0.1
-            
+            self.energy -= 1
+   
+   # deterministic death function
+
+    def die(self):
+        
+        ## remove the agent from the schedule
+        
+        self.model.schedule.remove(self)
+        
+        ## remove the agent from the grid
+        
+        self.model.grid.remove_agent(self)            
 class Resource(mesa.Agent):
     '''
     Resource agent class
@@ -264,11 +556,11 @@ class model_1(mesa.Model):
     - Interact agents
     '''
     
-    def __init__(self, width=20, height=20, prey=100, predator=100, prey_info=False, predator_info=False, predator_r = 0.1, prey_r = 0.1, prey_energy = 10, predator_energy = 10, patchy = 0, resource_rate = 0.5):
+    def __init__(self, **kwargs):
         
         # initialize model
-        self.width = width
-        self.height = height
+        self.width = kwargs.get('width', 20)
+        self.height = kwargs.get('height', 20)
         
         ## create grid
         ## MultiGrid allows multiple agents per cell
@@ -281,8 +573,7 @@ class model_1(mesa.Model):
         
         ## create agents
         
-        self.create_agents(predator=predator, prey=prey, prey_info=prey_info, predator_info=predator_info, 
-                           prey_r=prey_r, predator_r=predator_r, prey_energy=prey_energy, predator_energy=predator_energy, patchy=patchy, resource_rate=0.5)
+        self.create_agents(**kwargs)
         
         ## defione data collector
         
@@ -328,17 +619,15 @@ class model_1(mesa.Model):
     
     ## create agents function
     
-    def create_agents(self, prey = 100, predator = 100, prey_info = False, predator_info = False, 
-                      prey_r = 0.1, predator_r = 0.1, prey_energy = 10, predator_energy = 10, 
-                      patchy = 0, resource_rate = 0.5):    
+    def create_agents(self, **kwargs):    
         ## create prey agents
         
-        for i in range(prey):
+        for i in range(kwargs.get('prey', 10)):
             
             x = self.random.randrange(self.width)
             y = self.random.randrange(self.height)
             
-            a = Prey(unique_id=i, model=self, pos=(x,y), energy=prey_energy, info=prey_info, r=prey_r)
+            a = Prey(unique_id=i, model=self, pos=(x,y), **kwargs)
             
             self.schedule.add(a)
             
@@ -346,12 +635,12 @@ class model_1(mesa.Model):
             
             self.grid.place_agent(a, (x,y))
         
-        for i in range(predator):
+        for i in range(kwargs.get('predator', 10)):
             
             x = self.random.randrange(self.width)
             y = self.random.randrange(self.height)
             
-            a = Predator(unique_id=i, model=self, pos=(x,y), energy=predator_energy, info=predator_info, r=predator_r)
+            a = Predator(unique_id=i, model=self, pos=(x,y), **kwargs)
             
             self.schedule.add(a)
             
@@ -363,13 +652,15 @@ class model_1(mesa.Model):
         
         # place a resource agent in each cell
         
+        patchy = kwargs.get('patchy', 0)
+        
         if patchy == 0:
             
             for x in range(self.width):
                 
                 for y in range(self.height):
                         
-                    a = Resource(unique_id=i, model=self, pos=(x,y), r = resource_rate)
+                    a = Resource(unique_id=i, model=self, pos=(x,y), r = kwargs.get('resource_rate', 0.5))
                 
                     self.schedule.add(a)
                 
@@ -384,7 +675,7 @@ class model_1(mesa.Model):
             
             for i in range(len(x)):
                 
-                a = Resource(unique_id=i, model=self, pos=(x[i],y[i]), r = resource_rate)
+                a = Resource(unique_id=i, model=self, pos=(x[i],y[i]), r = kwargs.get('resource_rate', 0.5))
                 
                 self.schedule.add(a)
                 
@@ -403,19 +694,27 @@ class model_1(mesa.Model):
         
     ## run function
     
-    def run_model(self, steps = 100):
+    def run_model(self, steps = 100, info = False, progress = False):
         
         for i in range(steps):
             
-            # stop if there are no more prey or predators
+            ## end the model if there are no prey or predator agents
             
             if self.data_collector(Predator) == 0:
-                    
-                    break
-            
-            else:
                 
-                print('Step:', i)
-            
+                break
+    
+            else:
                 self.step()
+                
+                if info:
+                    
+                    print('Number of prey:', self.data_collector(Prey), 
+                          'Number of predators:', self.data_collector(Predator))
+                
+                if progress:
+                    
+                    print ('Number of prey:', self.data_collector(Prey), 
+                          'Number of predators:', self.data_collector(Predator),
+                          'Step:', i)
             

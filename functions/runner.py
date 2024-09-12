@@ -52,9 +52,9 @@ def plot_pop(m = None, file = 'model_pop.png'):
 
     fig = plt.figure(figsize=(10, 5))
     
-    colors = ['red', 'blue','green']
+    colors = ['blue', 'red','green']
     
-    c = 1
+    c = 0
 
     for i in data:
         
@@ -170,7 +170,7 @@ def plot_density(m = None, duration = 60, steps = 100, file = 'density.gif'):
                 x = row['x']
                 y = row['y']
                 
-                grid[x][y] = 1
+                grid[x][y] += row['Amount']
                 
             im = fig.axes[j].imshow(grid, interpolation='nearest')
             
