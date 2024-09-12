@@ -13,8 +13,8 @@ kwargs = {
     'height': 50,
     
     # number of agents to start with
-    'predator': 10,
-    'prey': 100,
+    'predator': 100,
+    'prey': 500,
     
     ## prey traits
     'prey_info': False,
@@ -27,7 +27,7 @@ kwargs = {
     's_breed': 0.1,
     
     # resource rate
-    'resource_rate': 0.5
+    'resource_rate': 1
 }   
 
 # run the model
