@@ -83,21 +83,14 @@ class Prey(mesa.Agent):
         
         ## count the number of predator agents
         
-        num_predators = len([a for a in neighbours if isinstance(a, Predator)])
+        predators = [a for a in neighbours if isinstance(a, Predator)]
         
         ## if there are predators, move away
         
-        if num_predators > 0:
+        if len(predators) > 0:
             
-            ## get the predator agent
-            for a in neighbours:
-                    
-                if isinstance(a, Predator):
-                    
-                    predator = a
-                    
-                    break
-            
+            predator = self.model.random.choice(predators)
+                        
             ## get the predator pos
             
             x_p, y_p = predator.pos
@@ -287,23 +280,17 @@ class Predator(mesa.Agent):
         
         ## count the number of prey agents
         
-        num_prey = len([a for a in neighbours if isinstance(a, Prey)])
+        prey = [a for a in neighbours if isinstance(a, Prey)]
         
-        ## if there are prey, move towards
+        ## choose a random prey agent
         
-        if num_prey > 0:
+        if len(prey) > 0:
             
-            for a in neighbours:
-                    
-                if isinstance(a, Prey):
-                    
-                    prey = a
-                    
-                    break
+            a = self.model.random.choice(prey)
             
             ## get the prey pos
             
-            x_p, y_p = prey.pos
+            x_p, y_p = a.pos
             
             ## move towards the prey
             
@@ -369,25 +356,24 @@ class Predator(mesa.Agent):
         
         ## count the number of prey agents
         
-        num_prey = len([a for a in this_cell if isinstance(a, Prey)])
+        prey = [a for a in this_cell if isinstance(a, Prey)]
         
         ## choose a random prey agent
         
-        if num_prey > 0:
-
-            for prey in this_cell:
+        if len(prey) > 0:
+            
+            a = self.model.random.choice(prey)
+            
+            ## remove the prey agent
+            
+            gain = 1
+            
+            a.die()
+            
+            ## increase the energy
+            
+            self.energy += gain
                 
-                if isinstance(prey, Prey):
-                    
-                    ## remove the prey
-                    
-                    self.model.grid.remove_agent(prey)
-                    self.model.schedule.remove(prey)
-                    
-                    self.energy += 1
-                    
-                    break
-    
     def die(self):
     
         ## remove the agent from the schedule
