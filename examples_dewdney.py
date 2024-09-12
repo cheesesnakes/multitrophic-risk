@@ -8,6 +8,7 @@ kwargs = {
     'model': 'dewdney',
     'progress': True,
     'info' : True,  
+    'limit': True,
     
     # model parameters
     'width': 20,

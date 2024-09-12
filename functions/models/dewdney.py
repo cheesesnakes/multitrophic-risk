@@ -34,6 +34,7 @@ class Prey(mesa.Agent):
         self.age = 0
         self.f_breed = kwargs.get('f_breed', 5)
         self.f_max = kwargs.get('f_max', self.model.width * self.model.height)
+        self.limit = kwargs.get('limit', False)
         
         self.kwargs = kwargs
         
@@ -41,19 +42,38 @@ class Prey(mesa.Agent):
     
     def reproduce(self):
         
-        if self.age > self.f_breed and self.model.data_collector(Prey) < self.f_max:
+        if self.age > self.f_breed:
             
-            ## create a new prey agent
+            if self.limit and self.model.data_collector(Prey) < self.f_max:
             
-            a = Prey(unique_id=self.model.schedule.get_agent_count(), model=self.model, pos=self.pos, **{k:v for k,v in self.kwargs.items() if k != 'model'})
+                ## create a new prey agent
+                
+                a = Prey(unique_id=self.model.schedule.get_agent_count(), 
+                         model=self.model, pos=self.pos, **{k:v for k,v in self.kwargs.items() if k != 'model'})
+                
+                self.model.schedule.add(a)
+                
+                self.model.grid.place_agent(a, self.pos)
+                
+                self.age = 0
+                
+                #print('Prey agent reproduced:', a.unique_id, a.pos)
             
-            self.model.schedule.add(a)
+            elif self.limit == False:
+                
+                ## create a new prey agent
+                
+                a = Prey(unique_id=self.model.schedule.get_agent_count(), 
+                         model=self.model, pos=self.pos, **{k:v for k,v in self.kwargs.items() if k != 'model'})
+                
+                self.model.schedule.add(a)
+                
+                self.model.grid.place_agent(a, self.pos)
+                
+                self.age = 0
+                
+                #print('Prey agent reproduced:', a.unique_id, a.pos)
             
-            self.model.grid.place_agent(a, self.pos)
-            
-            self.age = 0
-            
-            #print('Prey agent reproduced:', a.unique_id, a.pos)
  
     ## movement function: brownian motion
     
