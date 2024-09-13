@@ -244,6 +244,7 @@ class Predator(mesa.Agent):
         self.info = kwargs.get('info', False)
         self.s_breed = kwargs.get('s_breed', 0.1)
         self.energy = kwargs.get('s_energy', 10)
+        self.lethality = kwargs.get('s_lethality', 0.5)
         self.amount = 1
         
         self.kwargs = kwargs
@@ -377,11 +378,17 @@ class Predator(mesa.Agent):
             
             gain = 1
             
-            a.die()
+            l = np.random.binomial(1, self.lethality)
             
-            ## increase the energy
+            if l == 1:
             
-            self.energy += gain
+                self.model.grid.remove_agent(a)
+                
+                self.model.schedule.remove(a)
+                
+                ## increase the energy
+                
+                self.energy += gain
                 
     def die(self):
     

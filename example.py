@@ -27,7 +27,8 @@ kwargs = {
     ## predator traits
     'predator_info': True,
     's_energy': 10,
-    's_breed': 0.1
+    's_breed': 0.1,
+    's_lethality': 0.5,
 }
 
 # run the model
