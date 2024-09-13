@@ -35,11 +35,12 @@ kwargs = {
     
     ## apex predator traits
     
-    'super_target': 'predator'
+    'super_target': 'predator',
+    'super_lethality': 1
 }
 
 # run the model
-m = model_run(**kwargs, steps=100)
+m = model_run(**kwargs, steps=1000)
 
 # plot the number of agents over time
 plot_pop(m, file = f'{kwargs['model']}_pop.png')
