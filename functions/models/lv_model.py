@@ -34,6 +34,9 @@ class Prey(mesa.Agent):
         self.f_breed = kwargs.get('f_breed', 0.5)
         self.f_die = kwargs.get('f_die', 0.1)
         self.f_max = kwargs.get('f_max', self.model.width*self.model.height/2)
+        self.risk_cost = kwargs.get('risk_cost', 0.1)
+        self.amount = 1
+        
         self.kwargs = kwargs
         
     def prey_random_reproduce(self):
@@ -46,7 +49,7 @@ class Prey(mesa.Agent):
         
         k = 1 - (num_prey/self.f_max)
         
-        if k > 0:
+        if k > 0 and self.f_breed > 0:
             
             breed = self.f_breed*k
             
@@ -97,17 +100,22 @@ class Prey(mesa.Agent):
             
             ## move away from the predator
             
-            ## calculate the distance between the prey and the predator
-            
-            distance = np.sqrt((x-x_p)**2 + (y-y_p)**2)
-            
             ## move away from the predator without jumping over the grid
             
             self.escape(x, y, x_p, y_p)
             
+            ## add cost to birth rate
+            
+                
+            self.f_breed = self.f_breed - self.risk_cost
+            
         else:
             
             self.move()
+            
+            if self.f_breed < self.kwargs.get('f_breed', 0.5): # max birth rate
+            
+                self.f_breed = self.f_breed + self.risk_cost
     
     def escape(self, x, y, x_p, y_p):
         
@@ -236,7 +244,8 @@ class Predator(mesa.Agent):
         self.info = kwargs.get('info', False)
         self.s_breed = kwargs.get('s_breed', 0.1)
         self.energy = kwargs.get('s_energy', 10)
-
+        self.amount = 1
+        
         self.kwargs = kwargs
 
     
