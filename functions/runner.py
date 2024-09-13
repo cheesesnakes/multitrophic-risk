@@ -15,17 +15,17 @@ def model_run(model = "lv", steps = 50, **kwargs):
         
         from functions.models.lv_model import model_1
         
-    elif model == "dewdney":
+    elif model == "super":
 
-        from functions.models.dewdney import model_1
+        from functions.models.super import model_1
 
-    elif model == "resource":
+    elif model == "apex":
 
-        from functions.models.abm_resource import model_1
+        from functions.models.apex import model_1
 
     else:
 
-        raise ValueError("Invalid model. Available models are resource, dewdney and lv")
+        raise ValueError("Invalid model. Available models are lv, super and apex.")
         
 
     # Run model
@@ -104,7 +104,7 @@ def plot_space(m = None, steps = 100, duration = 60, file = 'space.gif'):
             x = row['x']
             y = row['y']
                         
-            if row['AgentType'] == 'Resource' and row['Amount'] == 1:
+            if row['AgentType'] == 'Apex':
                 grid[x][y] = 30
             elif row['AgentType'] == 'Prey':
                 grid[x][y] = 10
@@ -170,7 +170,7 @@ def plot_density(m = None, duration = 60, steps = 100, file = 'density.gif'):
                 x = row['x']
                 y = row['y']
                 
-                grid[x][y] += row['Amount']
+                grid[x][y] += 1
                 
             im = fig.axes[j].imshow(grid, interpolation='nearest')
             

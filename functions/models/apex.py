@@ -242,7 +242,7 @@ class Predator(mesa.Agent):
         self.age = 0
         self.pos = pos
         self.info = kwargs.get('predator_info', False)
-        self.s_breed = kwargs.get('s_breed', 0.1)
+        self.breed = kwargs.get('s_breed', 0.1)
         self.energy = kwargs.get('s_energy', 10)
         self.lethality = kwargs.get('s_lethality', 0.5)
         self.amount = 1
@@ -256,7 +256,7 @@ class Predator(mesa.Agent):
             
         # get probability of reproduction
         
-        reproduce = np.random.binomial(1, self.s_breed)  
+        reproduce = np.random.binomial(1, self.breed)  
         
         ## check if the energy is enough to reproduce
         
@@ -433,6 +433,216 @@ class Predator(mesa.Agent):
             
             #print('Predator energy:', self.energy)
 
+class Apex(mesa.Agent):
+    ''' 
+    Apex Predator agent class
+    
+    Attributes:
+    - unique_id: int
+    - energy: float, amount of energy the predator has
+    - age: int, age of the predator, determines survival
+    - location: tuple, x,y coordinates of the predator on the grid
+    - predator eats prey, if prey is available
+    '''
+    
+    def __init__(self, model, unique_id, pos, **kwargs):
+        
+        self.unique_id = unique_id
+        self.model = model
+        self.age = 0
+        self.pos = pos
+        self.info = kwargs.get('apex_info', False)
+        self.breed = kwargs.get('a_breed', 0.1)
+        self.energy = kwargs.get('a_energy', 10)
+        self.lethality = kwargs.get('a_lethality', 0.15)
+        self.amount = 1
+        
+        self.kwargs = kwargs
+
+    
+    ## reproduce function predator
+
+    def apex_random_reproduce(self):
+            
+        # get probability of reproduction
+        
+        reproduce = np.random.binomial(1, self.breed)  
+        
+        ## check if the energy is enough to reproduce
+        
+        if reproduce == 1:
+            
+            ## create a new predator agent
+            
+            a = Apex(unique_id=self.model.schedule.get_agent_count(), 
+                        model=self.model, pos=self.pos, 
+                        **{k: v for k, v in self.kwargs.items()})
+            
+            self.model.schedule.add(a)
+            
+            ## add the agent to a random grid cell
+            
+            self.model.grid.place_agent(a, self.pos)
+            
+            #print('Predator agent reproduced:', a.unique_id, a.pos)
+    
+    #Predator information function
+
+    def apex_hunt(self):
+        
+        ## get current pos
+        
+        x, y = self.pos
+        
+        ## get neighbouring prey agents
+        
+        neighbours = self.model.grid.get_neighbors((x,y), moore=True, include_center=False)
+        
+        ## count the number of prey agents
+        
+        prey = [a for a in neighbours if isinstance(a, Predator)]
+        
+        ## choose a random prey agent
+        
+        if len(prey) > 0:
+            
+            a = self.model.random.choice(prey)
+            
+            ## get the prey pos
+            
+            x_p, y_p = a.pos
+            
+            ## move towards the prey
+            
+            x += x_p
+            y += y_p
+            
+            ## move the agent
+            
+            self.model.grid.move_agent(self, (x,y))
+        
+        else:
+            
+            ## if there are no prey, move randomly
+            
+            self.move()
+
+    ## move function
+
+    def move(self):
+        
+        ## get the current position
+        
+        x, y = self.pos
+        
+        ## find an empty cell
+        
+        #empty = self.model.grid.get_neighborhood((x,y), moore=True, include_center=False)
+        
+        ## if there are empty cells, move to a random empty cell
+        
+        #if len(empty) > 0:
+            
+        #    x, y = self.model.random.choice(empty)
+            
+            ## move the agent
+            
+        #    self.model.grid.move_agent(self, (x,y))
+            
+        ## if there are no empty cells, stay in the same position
+        
+        #else:
+            
+        #    self.model.grid.move_agent(self, (x,y))
+        
+        ## random walk
+        
+        x += self.model.random.randint(-1,1)
+        y += self.model.random.randint(-1,1)
+        
+        ## move the agent
+        
+        self.model.grid.move_agent(self, (x,y))        
+    
+    def apex_eat(self):
+    
+        ## get the current location
+        
+        x, y = self.pos
+        
+        ## get the prey at the current pos
+        
+        this_cell = self.model.grid.get_cell_list_contents((x,y))
+        
+        ## count the number of prey agents
+        
+        prey = [a for a in this_cell if isinstance(a, Predator)]
+        
+        ## choose a random prey agent
+        
+        if len(prey) > 0:
+            
+            a = self.model.random.choice(prey)
+            
+            ## remove the prey agent
+            
+            gain = 1
+            
+            l = np.random.binomial(1, self.lethality)
+            
+            if l == 1:
+            
+                self.model.grid.remove_agent(a)
+                
+                self.model.schedule.remove(a)
+                
+                ## increase the energy
+                
+                self.energy += gain
+                
+    def die(self):
+    
+        ## remove the agent from the schedule
+        
+        self.model.schedule.remove(self)
+        
+        ## remove the agent from the grid
+        
+        self.model.grid.remove_agent(self)
+                
+    ## step function
+    
+    def step(self):
+        
+        if self.energy <= 1:
+            
+            self.die()            
+        else:
+        
+            ## reproduce
+
+            self.apex_random_reproduce()
+            
+            ## move the agent
+
+            if self.info:
+                
+                self.apex_hunt()
+            
+            else:
+                
+                self.move()
+                
+            ## eat the prey
+
+            self.apex_eat()
+            
+            ## decrease energy
+            
+            self.energy -= 1
+            
+            #print('Predator energy:', self.energy)
+
         
 # Define model class
 
@@ -471,7 +681,8 @@ class model_1(mesa.Model):
         
         self.count = mesa.DataCollector(
             model_reporters = {'Prey': lambda m: m.data_collector(Prey), 
-                           'Predator': lambda m: m.data_collector(Predator)
+                           'Predator': lambda m: m.data_collector(Predator),
+                            'Apex': lambda m: m.data_collector(Apex)
                            }
             )
         
@@ -531,7 +742,20 @@ class model_1(mesa.Model):
             ## add the agent to a random grid cell
             
             self.grid.place_agent(a, (x,y))
-
+        
+        for i in range(kwargs.get('apex', 1)):
+            
+            x = self.random.randrange(self.width)
+            y = self.random.randrange(self.height)
+            
+            a = Apex(unique_id=i, model=self, pos=(x,y), 
+                     **{k: v for k, v in kwargs.items()})
+            
+            self.schedule.add(a)
+            
+            ## add the agent to a random grid cell
+            
+            self.grid.place_agent(a, (x,y))
         
     ## step function
     
@@ -563,11 +787,13 @@ class model_1(mesa.Model):
                 if info:
                     
                     print('Number of prey:', self.data_collector(Prey), 
-                          'Number of predators:', self.data_collector(Predator))
+                          'Number of predators:', self.data_collector(Predator),
+                          'Number of apex predators:', self.data_collector(Apex))
                 
                 if progress:
                     
                     print ('Number of prey:', self.data_collector(Prey), 
                           'Number of predators:', self.data_collector(Predator),
+                          'Number of apex predators:', self.data_collector(Apex),
                           'Step:', i)
             
