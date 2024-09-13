@@ -5,7 +5,7 @@ p_load(dplyr, tidyr, ggplot2)
 
 # import data
 
-data <- read.csv("output/results.csv")
+data <- read.csv("lv_results.csv")
 
 # summarise data
 
@@ -40,10 +40,14 @@ ggplot(data_summary, aes(x = s_breed, y = f_breed, fill = mean_score))+
     scale_fill_viridis_c()+
     facet_grid(strat~f_die, scales = "free")+
     theme_bw()+
-    theme(text = element_text(size = 20),
-    legend.position = "bottom")
+    theme(text = element_text(size = 30),
+    legend.position = "bottom",
+    # increase size of legend key
+    legend.key.size = unit(20, "mm"),
+    # increase spaing for legend title
+    legend.title = element_text(size = 20))
 
-ggsave("score_grid_f-die.png", height = 24, width = 12, dpi = 300)
+ggsave("score_grid_f-die.png", height = 24, width = 30, dpi = 300)
 
 # plot grid of s_breed vs f_breed
 
@@ -52,7 +56,10 @@ ggplot(data_summary, aes(x = s_breed, y = f_breed, fill = mean_score))+
     scale_fill_viridis_c()+
     facet_grid(strat~s_energy, scales = "free")+
     theme_bw()+
-    theme(text = element_text(size = 20),
-    legend.position = "bottom")
+    theme(text = element_text(size = 30),
+    legend.position = "bottom",
+    # increase size of legend key
+    legend.key.size = unit(20, "mm"))
+    
 
-ggsave("score_grid_s-energy.png", height = 24, width = 6, dpi = 300)
+ggsave("score_grid_s-energy.png", height = 24, width = 30, dpi = 300)
