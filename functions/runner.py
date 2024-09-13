@@ -104,7 +104,7 @@ def plot_space(m = None, steps = 100, duration = 60, file = 'space.gif'):
             x = row['x']
             y = row['y']
                         
-            if row['AgentType'] == 'Apex':
+            if row['AgentType'] == 'Apex' or row['AgentType'] == 'Super':
                 grid[x][y] = 30
             elif row['AgentType'] == 'Prey':
                 grid[x][y] = 10

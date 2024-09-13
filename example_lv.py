@@ -38,8 +38,8 @@ m = model_run(**kwargs, steps=1000)
 plot_pop(m, file = f'{kwargs['model']}_pop.png')
 
 # plot the space
-plot_space(m, file = f'{kwargs['model']}_space.png', duration=10, steps=1000)
+plot_space(m, file = f'{kwargs['model']}_space.gif', duration=10, steps=1000)
 
 # plot the density
 
-plot_density(m, file = f'{kwargs['model']}_density.png', duration = 10, steps = 1000)
+plot_density(m, file = f'{kwargs['model']}_density.gif', duration = 10, steps = 1000)

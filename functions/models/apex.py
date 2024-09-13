@@ -246,6 +246,7 @@ class Predator(mesa.Agent):
         self.energy = kwargs.get('s_energy', 10)
         self.lethality = kwargs.get('s_lethality', 0.5)
         self.amount = 1
+        self.apex_risk = kwargs.get('s_apex_risk', False)
         
         self.kwargs = kwargs
 
@@ -317,6 +318,66 @@ class Predator(mesa.Agent):
             
             self.move()
 
+    def predator_risk(self):
+        
+        ## get current pos
+        
+        x, y = self.pos
+        
+        ## get neighbouring predator agents
+        
+        neighbours = self.model.grid.get_neighbors((x,y), moore=True, include_center=False)
+        
+        ## count the number of predator agents
+        
+            
+        predators = [a for a in neighbours if isinstance(a, Apex)]
+        
+        ## if there are predators, move away
+        
+        if len(predators) > 0:
+            
+            predator = self.model.random.choice(predators)
+                        
+            ## get the predator pos
+            
+            x_p, y_p = predator.pos
+            
+            ## move away from the predator
+            
+            ## move away from the predator without jumping over the grid
+            
+            self.escape(x, y, x_p, y_p)
+            
+        else:
+            
+            self.move()
+            
+    def escape(self, x, y, x_p, y_p):
+        
+        ## move away from the predator
+        
+        x += np.random.choice([-1,0,1])
+        y += np.random.choice([-1,0,1])
+        
+        if ((x,y) == (x_p, y_p) or (x,y) == (x_p+1, y_p) or (x,y) == (x_p-1, y_p) or (x,y) == (x_p, y_p+1) or (x,y) == (x_p, y_p-1)):
+            
+            # avoid moving to the predator's position
+            
+            self.escape(x, y, x_p, y_p)
+        
+        elif (x,y) == self.pos:
+            
+            # avoid staying in the same position
+             
+            self.escape(x, y, x_p, y_p)
+        
+        else:
+            
+            # move
+            
+            self.model.grid.move_agent(self, (x,y))
+                       
     ## move function
 
     def move(self):
@@ -415,14 +476,21 @@ class Predator(mesa.Agent):
             
             ## move the agent
 
-            if self.info:
+            if self.info and self.apex_risk:
+                
+                self.hunt()
+                
+                self.predator_risk()
+            
+            elif self.info:
                 
                 self.hunt()
             
             else:
                 
                 self.move()
-                
+            
+            
             ## eat the prey
 
             self.predator_eat()
