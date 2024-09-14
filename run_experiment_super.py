@@ -9,7 +9,7 @@ import numpy as np
 kwargs = {
     
     # model to run
-    'model': 'apex', 
+    'model': 'super', 
     
     # model parameters
     'width': 50,
@@ -19,7 +19,7 @@ kwargs = {
     # number of agents to start with
     'predator': 10,
     'prey': 500,
-    'apex' : 100,
+    'super' : 250,
     
     ## prey traits
     'prey_info': True,
@@ -37,7 +37,7 @@ kwargs = {
     
     ## apex predator traits
 
-    'params': ['s_energy', 's_breed', 'f_breed', 'f_die']}
+    'params': ['s_energy', 's_breed', 'f_breed', 'f_die', 'super_target', 'super_lethality']}
 
 def run():
     
@@ -66,14 +66,14 @@ def run():
             
         # print progress
         
-        print(f'Running {kwargs['model']} model experiment with s_energy = {vars[1, i]}, f_die = {vars[0, i]}, super_target = {vars[2, i]}, super_lethality = {vars[3, i]}')
+        print(f'Running {kwargs['model']} model experiment with s_energy = {vars[i, 1]}, f_die = {vars[i,0]}, super_target = {vars[i, 2]}, super_lethality = {vars[i ,3]}')
         
         # update parameters
         
-        kwargs['s_energy'] = vars[1, i]
-        kwargs['f_die'] = vars[0, i]
-        kwargs['super_target'] = vars[2, i]
-        kwargs['super_lethality'] = vars[3, i]
+        kwargs['s_energy'] = vars[i, 1]
+        kwargs['f_die'] = vars[i, 0]
+        kwargs['super_target'] = vars[i, 2]
+        kwargs['super_lethality'] = vars[i, 3]
         
         # create an instance of the experiment
 

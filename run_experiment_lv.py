@@ -62,7 +62,7 @@ def run():
     
     # run experiments
     
-    for e, f in vars:
+    for f, e in vars:
             
         # print progress
         

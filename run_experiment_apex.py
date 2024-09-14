@@ -67,7 +67,7 @@ def run():
     
     # run experiments
     
-    for e, f in vars:
+    for f, e in vars:
             
         # print progress
         
@@ -75,7 +75,7 @@ def run():
         
         # update parameters
         
-        kwargs['s_energy'] = e*10
+        kwargs['s_energy'] = e
         kwargs['f_die'] = f
         
         # create an instance of the experiment
