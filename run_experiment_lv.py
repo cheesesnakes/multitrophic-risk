@@ -14,8 +14,8 @@ kwargs = {
     # model parameters
     
     ## grid size
-    'width': 20, 
-    'height': 20, 
+    'width': 50, 
+    'height': 50, 
     
     ## number of agents to start with
     'predator': 10, 

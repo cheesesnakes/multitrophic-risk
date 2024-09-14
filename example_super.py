@@ -16,7 +16,7 @@ kwargs = {
     # number of agents to start with
     'predator': 10,
     'prey': 500,
-    'super' : 50,
+    'super' : 250,
     
     ## prey traits
     'prey_info': True,
@@ -24,7 +24,7 @@ kwargs = {
     'f_die': 0.01,
     'f_max': 2500,
     'risk_cost': 0.01,
-    'f_super_risk': True,
+    'f_super_risk': False,
     
     ## predator traits
     'predator_info': True,

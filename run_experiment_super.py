@@ -19,7 +19,7 @@ kwargs = {
     # number of agents to start with
     'predator': 10,
     'prey': 500,
-    'apex' : 10,
+    'apex' : 100,
     
     ## prey traits
     'prey_info': True,

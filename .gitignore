@@ -3,3 +3,4 @@ abm_env/
 output/
 *.png
 *.csv
+run_all.sh

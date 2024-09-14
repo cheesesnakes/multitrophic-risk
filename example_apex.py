@@ -16,7 +16,7 @@ kwargs = {
     # number of agents to start with
     'predator': 10,
     'prey': 500,
-    'apex' : 10,
+    'apex' : 100,
     
     ## prey traits
     'prey_info': True,
@@ -35,9 +35,9 @@ kwargs = {
     ## apex predator traits
     
     'apex_info': True,
-    'a_energy': 10,
+    'a_energy': 50,
     'a_breed': 0.1,
-    'a_lethality': 0.15,
+    'a_lethality': 0.15
 }
 
 # run the model
