@@ -92,7 +92,7 @@ def run():
         
         # save results
         
-        results.to_csv(f'{kwargs['model']}_results.csv')
+        results.to_csv(f'results_{kwargs['model']}.csv')
             
 if __name__ == '__main__':
     

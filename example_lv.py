@@ -34,12 +34,16 @@ kwargs = {
 # run the model
 m = model_run(**kwargs, steps=1000)
 
+# save data
+
+m.count.get_model_vars_dataframe().to_csv(f'data_{kwargs['model']}.csv')
+
 # plot the number of agents over time
-plot_pop(m, file = f'{kwargs['model']}_pop.png')
+plot_pop(m, file = f'pop_{kwargs['model']}.png')
 
 # plot the space
-plot_space(m, file = f'{kwargs['model']}_space.gif', duration=10, steps=1000)
+plot_space(m, file = f'space_{kwargs['model']}.gif', duration=10, steps=1000)
 
 # plot the density
 
-plot_density(m, file = f'{kwargs['model']}_density.gif', duration = 10, steps = 1000)
+plot_density(m, file = f'density_{kwargs['model']}.gif', duration = 10, steps = 1000)
