@@ -31,7 +31,7 @@ def model_run(model = "lv", steps = 50, **kwargs):
     # Run model
 
     print('Running model...')
-
+    
     m = model_1(**{k: v for k, v in kwargs.items() if k != 'model'})
 
     m.run_model(steps, progress=kwargs.get('progress', False), info=kwargs.get('info', False))

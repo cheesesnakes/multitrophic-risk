@@ -10,6 +10,7 @@ kwargs = {
     
     # model to run
     'model': 'lv',
+    'num_cpus': 10,
           
     # model parameters
     
@@ -37,7 +38,7 @@ kwargs = {
     'steps': 1000, 
     'sample_id': 1, 
     'rep_id': 1,
-    'params': ['s_energy', 's_breed', 'f_breed', 'f_die']}
+    'params': ['f_die', 's_energy', 's_breed', 'f_breed']}
 
 def run():
     
@@ -49,46 +50,36 @@ def run():
     
     f_die = np.array([0.1, 0.5, 0.9])
     s_energy = np.array([1, 5, 10])
+    s_breed = np.array([0.1, 0.5, 0.9])
+    f_breed = np.array([0.1, 0.5, 0.9])
     
     # create a meshgrid
     
-    vars = np.array(np.meshgrid(f_die, s_energy))
+    vars = np.array(np.meshgrid(f_die, s_energy, s_breed, f_breed))
     
-    vars = vars.T.reshape(-1, 2)
+    vars = vars.T.reshape(-1, 4)
     
     # print number of experiments
     
     print('Number of experiments:', len(vars))
     
-    # run experiments
-    
-    for f, e in vars:
             
-        # print progress
-        
-        print(f'Running {kwargs['model']} model experiment with s_energy =', e, 'f_die =', f)
-        
-        # update parameters
-        
-        kwargs['s_energy'] = e
-        kwargs['f_die'] = f
-        
-        # create an instance of the experiment
+    # create an instance of the experiment
 
-        exp = experiment(**kwargs)
+    exp = experiment(**kwargs)
 
-        # run the experiment
+    # run the experiment
 
-        run = exp.parallel(vary=['s_breed', 'f_breed'], params = kwargs['params'], rep=5, n=20)
-        
-        # append results to data frame
-        
-        results = pd.concat([results, run])  
-        
-        # save results
-        
-        results.to_csv(f'results_{kwargs['model']}.csv')
-           
+    run = exp.parallel(v = vars, rep=5, **kwargs)
+    
+    # append results to data frame
+    
+    results = pd.concat([results, run])  
+    
+    # save results
+    
+    results.to_csv(f'{kwargs['model']}_results.csv')
+    
 if __name__ == '__main__':
     
     run()

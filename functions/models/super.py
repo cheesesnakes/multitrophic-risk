@@ -529,7 +529,19 @@ class Super(mesa.Agent):
         self.info = True
         self.lethality = kwargs.get('super_lethality', 1)
         self.amount = 1
-        self.target = kwargs.get('target', 'predator')
+        self.target = kwargs.get('super_target', '2')
+        
+        if self.target == '1':
+            
+            self.target = 'prey'
+        
+        elif self.target == '2':
+            
+            self.target = 'predator'
+        
+        else:
+            
+            self.target = 'both'
         
         self.kwargs = kwargs
 

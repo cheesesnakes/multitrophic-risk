@@ -10,6 +10,7 @@ kwargs = {
     
     # model to run
     'model': 'super', 
+    'num_cpus': 10,
     
     # model parameters
     'width': 50,
@@ -27,6 +28,7 @@ kwargs = {
     'f_die': 0.01,
     'f_max': 2500,
     'risk_cost': 0.01,
+    'f_super_risk': False,
     
     ## predator traits
     'predator_info': True,
@@ -37,7 +39,7 @@ kwargs = {
     
     ## apex predator traits
 
-    'params': ['s_energy', 's_breed', 'f_breed', 'f_die', 'super_target', 'super_lethality']}
+    'params': ['f_die', 's_energy', 'super_target', 'super_lethality', 's_breed', 'f_breed']}
 
 def run():
     
@@ -49,48 +51,38 @@ def run():
     
     f_die = np.array([0.1, 0.5, 0.9])
     s_energy = np.array([1, 5, 10])
-    super_targets = np.array(['prey', 'predator', 'both'])
+    super_target = np.array([1, 2, 12]) # 1 = prey, 2 = predator, 12 = both
     super_lethality = np.array([0, 1])
+    s_breed = np.array([0.1, 0.5, 0.9])
+    f_breed = np.array([0.1, 0.5, 0.9])
     
     # create a meshgrid
     
-    vars = np.array(np.meshgrid(f_die, s_energy, super_targets, super_lethality))
+    vars = np.array(np.meshgrid(f_die, s_energy, super_target, super_lethality, s_breed, f_breed))
     
-    vars = vars.T.reshape(-1, 4)
+    vars = vars.T.reshape(-1, 6)
     
     # print number of experiments
     
     print('Number of experiments:', len(vars))
     
-    for i in range(len(vars)):
             
-        # print progress
-        
-        print(f'Running {kwargs['model']} model experiment with s_energy = {vars[i, 1]}, f_die = {vars[i,0]}, super_target = {vars[i, 2]}, super_lethality = {vars[i ,3]}')
-        
-        # update parameters
-        
-        kwargs['s_energy'] = vars[i, 1]
-        kwargs['f_die'] = vars[i, 0]
-        kwargs['super_target'] = vars[i, 2]
-        kwargs['super_lethality'] = vars[i, 3]
-        
-        # create an instance of the experiment
+    # create an instance of the experiment
 
-        exp = experiment(**kwargs)
+    exp = experiment(**kwargs)
 
-        # run the experiment
+    # run the experiment
 
-        run = exp.parallel(vary=['s_breed', 'f_breed'], params = kwargs['params'], rep=5, n=20)
-        
-        # append results to data frame
-        
-        results = pd.concat([results, run])  
-        
-        # save results
-        
-        results.to_csv(f'{kwargs['model']}_results.csv')
+    run = exp.parallel(v = vars, rep=5, **kwargs)
     
+    # append results to data frame
+    
+    results = pd.concat([results, run])  
+    
+    # save results
+    
+    results.to_csv(f'{kwargs['model']}_results.csv')
+
 if __name__ == '__main__':
     
     run()

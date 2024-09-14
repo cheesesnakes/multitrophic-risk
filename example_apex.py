@@ -35,7 +35,7 @@ kwargs = {
     ## apex predator traits
     
     'apex_info': True,
-    'a_energy': 50,
+    'a_energy': 10,
     'a_breed': 0.1,
     'a_lethality': 0.15
 }

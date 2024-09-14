@@ -25,7 +25,7 @@ class experiment():
                     'prey_info': False, 'predator_info': False, 
                     's_energy': 10, 's_breed': 0.01,
                     'f_breed': 0.01, 'f_die': 0.1,
-                    'steps': 50, 'sample_id': 1, 'rep_id': 1}
+                    'steps': 50, 'sample_id': 1, 'rep_id': 1, 'super_target': 2, 'super_lethality': 1,}
 
         # if kwargs is empty, use defaults
         
@@ -75,52 +75,39 @@ class experiment():
         
         vars = []
         
-        for i in range(len(vary)):
+        for p in params:
             
-            if vary[i] == "predator_info" or vary[i] == "prey_info" or vary[i] == "s_super_risk" or vary[i] == "f_super_risk" or vary[i] == "s_apex_risk":
+            if p in vary:
+                    
+                if p == "predator_info" or p == "prey_info" or p == "s_super_risk" or p == "f_super_risk" or p == "s_apex_risk":
+                    
+                    t = np.array([True, False])
                 
-                t = np.array([True, False])
+                else:
+                
+                    t = np.linspace(0.1, 1, n)
+                    
+                    if p == "s_energy" or p == "a_energy":
+                        
+                        t = t*10
+                
+                vars.append(t)
             
             else:
+                
+                t = np.repeat(self.kwargs[p], n)
+                
+                vars.append(t)
             
-                t = np.linspace(0.1, 1, n)
-            
-            vars.append(t)
-        
         # create a meshgrid of all combinations
         mesh = np.meshgrid(*vars)
         
         # reshape the meshgrid to the correct shape
-        vars = np.array(mesh).T.reshape(-1, len(vary))
-        
-        # create the vector of parameters
-        
-        vec = np.zeros((vars.shape[0], len(params)))
-        
-        # iterate over the parameters
-        
-        for p in params:
-            
-            if p in vary:
-                
-                i = vary.index(p)
-                
-                if p == "s_energy" or p == "a_energy":
-                    
-                    vec[:, params.index(p)] = vars[:, i] * 10
-                
-                else:
-                
-                    vec[:, params.index(p)] = vars[:, i]
-                
-            else:
-                
-                vec[:, params.index(p)] = self.kwargs[p]    
-            
+        vars = np.array(mesh).T.reshape(-1, len(params))
         
         # return the vector of parameters
         
-        return vec
+        return vars
     
     # function: run the model
     
@@ -151,9 +138,9 @@ class experiment():
                     
             # update kwargs.valeus
             
-            for p in params:
+            for i, p in enumerate(params):
                 
-                kwargs[p] = v[params.index(p)]
+                kwargs[p] = v[i]
             
             # progress
             
@@ -161,7 +148,7 @@ class experiment():
                 
             # create the model
             
-            m = model_run(kwargs=kwargs)
+            m = model_run(**kwargs)
             
             # get the results
             
@@ -184,47 +171,10 @@ class experiment():
             # update the sample id
             
             self.sample_id += 1
-        
-        else: 
+        else:
             
-            for i in range(v.shape[0]):
-                        
-                # update kwargs in order such that
-                
-                for p in params:
-                    
-                    kwargs[p] = v[i, params.index(p)]
-                    
-                # progress
-                
-                print(f"Running replicate {rep_id}, sample {sample_id}")
-                    
-                # create the model
-                
-                m = model_run(kwargs=kwargs)
-                
-                # get the results
-                
-                sample = m.count.get_model_vars_dataframe()
-                
-                # get the results and append to the data frame
-                
-                res = [rep_id, self.sample_id, *v[i,:], sample['Prey'].iloc[-1], sample['Predator'].iloc[-1], sample.index[-1]]
-                
-                # create a data frame
-                
-                res = pd.DataFrame([res], columns = ['rep_id', 'sample_id', *params, 'Prey', 'Predator', 'step'])
-                
-                # append to the results
-                
-                results = pd.concat([results, res], axis = 0)         
-                
-                results.to_csv(f"sample.csv", index = False)               
-                
-                # update the sample id
-                
-                self.sample_id += 1       
-        
+            Exception("v should be one dimensional")
+            
         return results
 
     # replicate the experiment
@@ -259,11 +209,11 @@ class experiment():
 
     # parallel processing
 
-    def parallel(self, vary = ['s_breed', 'f_breed'], params = [],rep = 1, n = 5):
+    def parallel(self, v, params = [],rep = 1, **kwargs):
         
-        ray.init(num_cpus = 10)
+        num_cpus = kwargs.get('num_cpus', 4)
         
-        v = self.variables(vary = vary, n = n, params=params)
+        ray.init(num_cpus = num_cpus)
         
         # results data frame
         
@@ -272,33 +222,31 @@ class experiment():
         # iterate over the replicates
         
         print("Number of parameter combinations: ", v.shape[0])
-        
-        # create an empty future
-        
-        future = []
+         
+        print("Number of runs: ", v.shape[0]*rep)
         
         # iterate over the replicates
         
         for i in range(rep):
             
-            for j in range(v.shape[0]):
+            # assign num_cpu tasks at a time
+            
+            for j in range(v.shape[0]//num_cpus):
                 
-                # concatenate the futures
+                future = []
+                
+                for k in range(num_cpus):
+                    
+                    future.append(self.run.remote(self = self, v = v[j+k,:], rep_id = i+1, sample_id = j+k, params = params, **kwargs))
+                
+                res = ray.get(future)
+                    
+                for r in res:
+                    
+                    self.data = pd.concat([self.data, r], axis = 0)
+                
+                self.data.to_csv(f"{self.model}_results.csv", index = False)
             
-                future.append(self.run.remote(self = self, v = v[j, :], params = params, rep_id = i + 1, sample_id = j + 1))
-
-        print("Number of runs: ", len(future))
-        
-        res = ray.get(future)
-            
-        for r in res:
-            
-            self.data = pd.concat([self.data, r], axis = 0)
-        
-        self.data.to_csv(f"{self.model}_results.csv", index = False)
-    
         ray.shutdown()
         
         return self.data
-
-test = experiment()

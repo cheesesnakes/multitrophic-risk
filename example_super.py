@@ -35,7 +35,7 @@ kwargs = {
     
     ## apex predator traits
     
-    'super_target': 'predator',
+    'super_target': 2,
     'super_lethality': 1
 }
 
