@@ -553,7 +553,7 @@ class model_1(mesa.Model):
             
             ## end the model if there are no prey or predator agents
             
-            if self.data_collector(Predator) == 0:
+            if self.data_collector(Predator) == 0 or self.data_collector(Prey) == 0 or self.data_collector(Predator) + self.data_collector(Prey) > self.width*self.height*4:
                 
                 break
     
