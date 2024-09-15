@@ -227,25 +227,23 @@ class experiment():
         
         # iterate over the replicates
         
+        future = []
+        
         for i in range(rep):
             
             # assign num_cpu tasks at a time
             
-            for j in range(v.shape[0]//num_cpus):
-                
-                future = []
-                
-                for k in range(num_cpus):
-                    
-                    future.append(self.run.remote(self = self, v = v[j+k,:], rep_id = i+1, sample_id = j+k, params = params, **kwargs))
-                
-                res = ray.get(future)
-                    
-                for r in res:
-                    
-                    self.data = pd.concat([self.data, r], axis = 0)
-                
-                self.data.to_csv(f"{self.model}_results.csv", index = False)
+            for j in range(v.shape[0]):
+                        
+                future.append(self.run.remote(self = self, v = v[j,:], rep_id = i+1, sample_id = j, params = params, **kwargs))
+        
+        res = ray.get(future)
+            
+        for r in res:
+            
+            self.data = pd.concat([self.data, r], axis = 0)
+        
+        self.data.to_csv(f"{self.model}_results.csv", index = False)
             
         ray.shutdown()
         

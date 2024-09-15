@@ -36,8 +36,6 @@ kwargs = {
     ## experiment parameters
                     
     'steps': 1000, 
-    'sample_id': 1, 
-    'rep_id': 1,
     'params': ['f_die', 's_energy', 's_breed', 'f_breed']}
 
 def run():
