@@ -2,7 +2,7 @@
 # load libraries
 
 library(pacman)
-p_load(dplyr, tidyr, ggplot2, viridis, cowplot, gridExtra)
+p_load(dplyr, tidyr, ggplot2, viridis, cowplot, gridExtra, lme4)
 
 
 # loop through models, skip if file does not exist
@@ -52,7 +52,7 @@ mutate(outcome = ifelse(Predator == 0, "Prey Wins",
 ## apex: s_breed, f_breed, f_die, s_energy
 ## super: s_breed, f_breed, f_die, s_energy, super_target, super_lethality
 
-# plot 1: mean score by s_breed vs f_breed for each f_die, grid for each s_energy
+# plot mean score by s_breed vs f_breed for each f_die, grid for each s_energy
 
 # lv model
 
@@ -101,7 +101,7 @@ ggsave("output/figures/apex_params.png", width = 10, height = 10, dpi = 300)
 
 # super model
 
-# create grid for super_target and super_lethality
+# plot outcomes for super_target and super_lethality
 
 super_target = c("Prey", "Predator", "Both")
 super_lethality = c("Lethal", "Non-lethal")
@@ -149,3 +149,49 @@ for (i in super_target){
 super_plot = grid.arrange(grobs = plots, ncol = 2, nrow = 3)
 
 ggsave(super_plot, file = "output/figures/super_params.png", width = 20, height = 30, dpi = 300)
+
+# analysis of outcomes
+
+# do models differ in outcomes?
+
+outcomes = data_scored%>%
+    group_by(model, s_breed, f_breed, f_die, s_energy, super_target, super_lethality, outcome)%>%
+    summarise(n = n())%>%
+    group_by(model, s_breed, f_breed, f_die, s_energy, super_target, super_lethality)%>%
+    mutate(prop = n/sum(n))
+
+head(outcomes)
+
+# plot outcomes across models
+
+model_comp = data_scored%>%
+    filter(super_lethality == 1 | is.na(super_lethality))
+
+## generlised linear mixed model
+
+# fit model
+
+model = lmer(score ~ model + (1|s_breed) + (1|f_breed) + (1|f_die) + (1|s_energy), data = model_comp)
+
+# summary
+
+summary(model)
+
+# compare lethal and non-lethal super model
+
+super = data_scored%>%
+    filter(model == "super")
+
+model = lmer(score ~ super_lethality + (1|super_target) + (1|s_breed) + (1|f_breed) + (1|f_die) + (1|s_energy), data = super)
+
+# summary
+
+summary(model)
+
+# compare target of super model
+
+model = lmer(score ~ super_target + (1|super_lethality) + (1|s_breed) + (1|f_breed) + (1|f_die) + (1|s_energy), data = super)
+
+# summary
+
+summary(model)
