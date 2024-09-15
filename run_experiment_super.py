@@ -50,11 +50,11 @@ def run():
     # create parameter space
     
     f_die = np.array([0.1, 0.5, 0.9])
-    s_energy = np.array([1, 5, 10])
+    s_energy = np.array([2, 5, 10])
+    s_breed = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
+    f_breed = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
     super_target = np.array([1, 2, 12]) # 1 = prey, 2 = predator, 12 = both
     super_lethality = np.array([0, 1])
-    s_breed = np.array([0.1, 0.5, 0.9])
-    f_breed = np.array([0.1, 0.5, 0.9])
     
     # create a meshgrid
     
@@ -73,7 +73,7 @@ def run():
 
     # run the experiment
 
-    run = exp.parallel(v = vars, rep=5, **kwargs)
+    run = exp.parallel(v = vars, rep=100, **kwargs)
     
     # append results to data frame
     
@@ -81,7 +81,7 @@ def run():
     
     # save results
     
-    results.to_csv(f'{kwargs['model']}_results.csv')
+    results.to_csv(f'output/{kwargs['model']}_results.csv')
 
 if __name__ == '__main__':
     
