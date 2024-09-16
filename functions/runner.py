@@ -105,6 +105,10 @@ def plot_space(m = None, steps = 100, duration = 60, file = 'space.gif'):
 
     spatial_data.reset_index(inplace=True)
     
+    if steps < spatial_data.Step.max():
+        
+        steps = spatial_data.Step.max()
+        
     # create plot
     
     fig, ax = plt.subplots()
@@ -157,6 +161,10 @@ def plot_density(m = None, duration = 60, steps = 100, file = 'density.gif'):
 
     spatial_data.reset_index(inplace=True)
     
+    if steps < spatial_data.Step.max():
+        
+        steps = spatial_data.Step.max()
+        
     # loop over types of agents
     
     agent_types = spatial_data.AgentType.unique()
@@ -216,6 +224,10 @@ def plot_space_pop(m=None, steps=100, duration=60, file='space_pop.png'):
     space_data = m.spatial.get_agent_vars_dataframe()
     space_data.reset_index(inplace=True)
     
+    if steps < len(pop_data):
+        
+        steps = len(pop_data)
+        
     params = m.kwargs
 
     # Clean population data
@@ -282,12 +294,12 @@ def plot_space_pop(m=None, steps=100, duration=60, file='space_pop.png'):
     text = [f'{key} = {params[key]}' for key in params if key != 'model' and key != 'progress' and key != 'info']
     text = ', '.join(text)
     fig.text(0.5, 0.05, text, ha="center", fontsize=10, wrap=True,
-             bbox={"facecolor": "white", "alpha": 0.5, "pad": 10,})
+             bbox={"facecolor": "white", "alpha": 0.5, "pad": 10})
 
     fig.subplots_adjust(bottom=0.25)
     
     # Create the animation
-    ani = animation.FuncAnimation(fig, update, frames=range(1, steps+1), init_func=init, blit=False, interval=50)
+    ani = animation.FuncAnimation(fig, update, frames=range(1, steps-1), init_func=init, blit=False, interval=50)
     
     # Save the animation
     ani.save(file, writer='imagemagick', fps=steps/duration)

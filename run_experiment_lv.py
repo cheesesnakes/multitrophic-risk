@@ -25,20 +25,20 @@ kwargs = {
     ## prey traits
     'prey_info': True,
     'f_breed': 0.5, # max birth rate
-    'f_die': 0.01,
+    'f_die': 0.1, # constant
     'f_max': 2500,
     'risk_cost': 0,
     
     ## predator traits
     'predator_info': True,
     's_energy': 10,
-    's_breed': 0.1,
+    's_breed': 0.1, # constant
     's_lethality': 0.5,
     
     ## experiment parameters
                     
     'steps': 1000, 
-    'params': ['f_die', 's_energy', 's_breed', 'f_breed']}
+    'params': ['s_energy', 'f_breed']}
 
 def run():
     
@@ -48,16 +48,14 @@ def run():
         
     # create parameter space
     
-    f_die = np.array([0.1, 0.5, 0.9])
-    s_energy = np.array([2, 5, 10])
-    s_breed = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
-    f_breed = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
+    s_energy = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    f_breed = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
     
     # create a meshgrid
     
-    vars = np.array(np.meshgrid(f_die, s_energy, s_breed, f_breed))
+    vars = np.array(np.meshgrid(s_energy, f_breed))
     
-    vars = vars.T.reshape(-1, 4)
+    vars = vars.T.reshape(-1, 2)
     
     # print number of experiments
     
