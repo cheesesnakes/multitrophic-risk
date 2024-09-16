@@ -18,7 +18,7 @@ kwargs = {
     'steps' : 1000,
     
     # number of agents to start with
-    'predator': 10,
+    'predator': 500,
     'prey': 500,
     'super' : 250,
     
@@ -27,7 +27,7 @@ kwargs = {
     'f_breed': 0.1, # max birth rate
     'f_die': 0.01,
     'f_max': 2500,
-    'risk_cost': 0.01,
+    'risk_cost': 0,
     'f_super_risk': False,
     
     ## predator traits
