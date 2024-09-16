@@ -1,4 +1,4 @@
-from functions.runner import model_run, plot_pop, plot_space, plot_density
+from functions.runner import model_run, plot_pop, plot_space, plot_density, plot_space_pop
 
 # set model parameters
 
@@ -40,19 +40,25 @@ kwargs = {
     'a_lethality': 0.15
 }
 
+steps = 1000
+
 # run the model
-m = model_run(**kwargs, steps=1000)
+m = model_run(**kwargs, steps=steps)
 
 # save data
 
 m.count.get_model_vars_dataframe().to_csv(f'data_{kwargs['model']}.csv')
 
+# plot population dynamics and space
+
+plot_space_pop(m, file = f'space_pop_{kwargs['model']}.gif', duration=10, steps=steps)
+
+# plot the space
+plot_space(m, file = f'space_{kwargs['model']}.gif', duration=10, steps=steps)
+
 # plot the number of agents over time
 plot_pop(m, file = f'pop_{kwargs['model']}.png')
 
-# plot the space
-plot_space(m, file = f'space_{kwargs['model']}.gif', duration=10, steps=1000)
-
 # plot the density
 
-plot_density(m, file = f'density_{kwargs['model']}.gif', duration = 10, steps = 1000)
+plot_density(m, file = f'density_{kwargs['model']}.gif', duration = 10, steps = steps)

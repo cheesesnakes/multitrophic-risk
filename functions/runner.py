@@ -206,3 +206,90 @@ def plot_density(m = None, duration = 60, steps = 100, file = 'density.gif'):
     ani.save(file, writer='imagemagick', fps=steps/duration)
     
     return ani
+
+# animate space and number of agents over time together
+
+def plot_space_pop(m=None, steps=100, duration=60, file='space_pop.png'):
+    
+    # Retrieve data for population and space
+    pop_data = m.count.get_model_vars_dataframe()
+    space_data = m.spatial.get_agent_vars_dataframe()
+    space_data.reset_index(inplace=True)
+    
+    params = m.kwargs
+
+    # Clean population data
+    pop_data = pop_data[[col for col in pop_data.columns if '_' not in col]]
+
+    # Prepare the grid for the two plots
+    fig = plt.figure(figsize=(15, 6))
+    gs = fig.add_gridspec(1, 2, width_ratios=[2, 1])  # Two-thirds for population, one-third for space
+    
+    # Population plot
+    ax_pop = fig.add_subplot(gs[0, 0])
+    colors = ['blue', 'red', 'green']
+    lines = [ax_pop.plot([], [], label=label, color=colors[i])[0] for i, label in enumerate(pop_data.columns)]
+    
+    ax_pop.set_xlim(0, steps)
+    ax_pop.set_ylim(0, max(pop_data.max()) * 1.1)  # Set y-limit based on max values in the population data
+    ax_pop.set_xlabel('Time')
+    ax_pop.set_ylabel('Number of agents')
+    ax_pop.set_title('Number of agents over time')
+    ax_pop.legend()
+
+    # Space plot
+    ax_space = fig.add_subplot(gs[0, 1])
+    
+    def init():
+        # Initialize population plot
+        for line in lines:
+            line.set_data([], [])
+        # Initialize space plot
+        ax_space.clear()
+        return lines
+
+    # Create function to update both the population plot and space plot
+    def update(frame):
+        # Update population plot
+        x = np.arange(frame)
+        for i, line in enumerate(lines):
+            line.set_data(x, pop_data.iloc[:frame, i])
+
+        # Update space plot
+        space_data_time = space_data[space_data.Step == frame]
+        grid = np.zeros((m.width, m.height))
+        
+        for index, row in space_data_time.iterrows():
+            x = row['x']
+            y = row['y']
+            
+            if row['AgentType'] == 'Apex' or row['AgentType'] == 'Super':
+                grid[x][y] = 30
+            elif row['AgentType'] == 'Prey':
+                grid[x][y] = 10
+            elif row['AgentType'] == 'Predator':
+                grid[x][y] = 20
+            else:
+                grid[x][y] = 0
+
+        ax_space.clear()
+        ax_space.imshow(grid, interpolation='nearest')
+        ax_space.set_title(f'Step {frame}')
+        
+        return lines
+
+    # Print parameters below the population plot
+    text = [f'{key} = {params[key]}' for key in params if key != 'model' and key != 'progress' and key != 'info']
+    text = ', '.join(text)
+    fig.text(0.5, 0.05, text, ha="center", fontsize=10, wrap=True,
+             bbox={"facecolor": "white", "alpha": 0.5, "pad": 10,})
+
+    fig.subplots_adjust(bottom=0.25)
+    
+    # Create the animation
+    ani = animation.FuncAnimation(fig, update, frames=range(1, steps+1), init_func=init, blit=False, interval=50)
+    
+    # Save the animation
+    ani.save(file, writer='imagemagick', fps=steps/duration)
+    
+    return ani
