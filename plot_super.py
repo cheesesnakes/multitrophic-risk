@@ -1,4 +1,4 @@
-from functions.runner import plot_pop, plot_density, plot_space, plot_space_pop
+from functions.runner import plot_pop, plot_density, plot_space, plot_space_pop, plot_age, plot_dist, plot_energy, plot_nnd
 import pandas as pd
 
 # load data
@@ -49,6 +49,22 @@ steps = 1000
 # plot the number of agents over time
 
 plot_pop(model_data=model_data, params = params, file = 'pop_super.png', steps=steps)
+
+# plot the age distribution of agents
+
+plot_age(agent_data=agent_data, file = 'age_super.png', steps=steps)
+
+# plot the energy distribution of agents
+
+plot_energy(agent_data=agent_data, file = 'energy_super.png', steps=steps)
+
+# plot the distance distribution of agents
+
+#plot_dist(agent_data=agent_data, file = 'dist_super.png', steps=steps)
+
+# plot the nearest neighbour distance distribution of agents
+
+#plot_nnd(agent_data=agent_data, file = 'nnd_super.png', steps=steps)
 
 # plot density of agents
 

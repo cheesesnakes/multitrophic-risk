@@ -43,6 +43,8 @@ def model_run(model = "lv", steps = 50, **kwargs):
 
 def plot_pop(model_data = None, params = {}, file = 'model_pop.png', steps = 50):
 
+    print('Creating population plot...')
+    
     # Check if model_data is None or not a DataFrame
     if model_data is None or not hasattr(model_data, 'columns'):
         raise ValueError("model_data must be a pandas DataFrame with a 'columns' attribute.")
@@ -81,10 +83,13 @@ def plot_pop(model_data = None, params = {}, file = 'model_pop.png', steps = 50)
     
     plt.savefig(file)
 
+    print('Population plot created.')
 
 ## create a function to animate the spatial distribution of agents over time
 
 def plot_space(agent_data = None, steps = 100, file = 'space.gif'):
+    
+    print('Creating spatial plot...')
     
     ## get the spatial data
 
@@ -140,11 +145,15 @@ def plot_space(agent_data = None, steps = 100, file = 'space.gif'):
     
     ani.save(file, writer='imagemagick', fps=24)
     
+    print('Spatial plot created.')
+    
     return ani    
     
 ## create a function to animate the density of agents over time
 
 def plot_density(spatial_data = None, steps = 100, file = 'density.gif'):
+    
+    print('Creating density plot...')
     
     ## convert index to columns
 
@@ -202,11 +211,15 @@ def plot_density(spatial_data = None, steps = 100, file = 'density.gif'):
     
     ani.save(file, writer='imagemagick', fps=24)
     
+    print('Density plot created.')
+    
     return ani
 
 # animate space and number of agents over time together
 
 def plot_space_pop(model_data=None, agent_data=None, params = None, steps=100, file='space_pop.png'):
+    
+    print('Creating spatial and population plot...')
     
     # Check if model_data is None or not a DataFrame
     if model_data is None or not hasattr(model_data, 'columns'):
@@ -310,4 +323,218 @@ def plot_space_pop(model_data=None, agent_data=None, params = None, steps=100, f
     
     ani.save(file, writer='imagemagick', fps=24)
     
+    print('Spatial and population plot created.')
+    
     return ani
+
+# plot mean age for each type of agent over time
+
+def plot_age(agent_data=None, steps=100, file='mean_age.png'):
+    
+    print('Creating age plot...')
+    
+    age_data = agent_data[['Step', 'AgentType', 'Age']]
+    
+    # calculate mean age for each type of agent
+    
+    mean_age = age_data.groupby(['Step', 'AgentType']).mean().reset_index()
+    
+    # get sd of age for each type of agent
+    
+    sd_age = age_data.groupby(['Step', 'AgentType']).std().reset_index()
+    
+    plt.rcParams["axes.prop_cycle"] = plt.cycler("color", plt.cm.tab10.colors)
+    
+    # create plot
+    
+    fig, ax = plt.subplots(figsize=(10, 6))
+    
+    # plot the mean age of agents over time
+    
+    for i in mean_age.AgentType.unique():
+        
+        agent_data = mean_age[mean_age.AgentType == i]
+        sd = sd_age[sd_age.AgentType == i]
+        
+        ax.plot(agent_data.Step, agent_data.Age, label=i)
+        ax.fill_between(sd.Step, agent_data.Age - sd.Age, agent_data.Age + sd.Age, alpha=0.2)
+        
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Mean age')
+    ax.set_title('Mean age of agents over time')
+    ax.legend()
+    ax.set_xlim(0, steps)
+    
+    # save the plot
+    
+    plt.savefig(file)
+    
+    print('Age plot created.')
+    
+    return fig
+
+# plot mean energy for predator and/or apex predator over time
+
+def plot_energy(agent_data=None, steps=100, file='mean_energy.png'):
+    
+    print('Creating energy plot...')
+    
+    energy_data = agent_data[['Step', 'AgentType', 'Energy']]
+    
+    # calculate mean energy for each type of agent
+    
+    mean_energy = energy_data.groupby(['Step', 'AgentType']).mean().reset_index()
+    sd_energy = energy_data.groupby(['Step', 'AgentType']).std().reset_index()
+    
+    plt.rcParams["axes.prop_cycle"] = plt.cycler("color", plt.cm.tab10.colors)
+    
+    # create plot
+    
+    fig, ax = plt.subplots(figsize=(8, 6))
+    
+    # plot the mean energy of agents over time
+    
+    for i in mean_energy.AgentType.unique():
+        
+        agent_data = mean_energy[mean_energy.AgentType == i]
+        sd = sd_energy[sd_energy.AgentType == i]
+        
+        ax.plot(agent_data.Step, agent_data.Energy, label=i)
+        ax.fill_between(sd.Step, agent_data.Energy - sd.Energy, agent_data.Energy + sd.Energy, alpha=0.2)
+        
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Mean energy')
+    ax.set_title('Mean energy of agents over time')
+    ax.legend()
+    ax.set_xlim(0, steps)
+    
+    # save the plot
+    
+    plt.savefig(file)
+    
+    print('Energy plot created.')
+    
+    return
+
+# plot average distance between agents over time
+
+def plot_nnd(agent_data=None, steps = 100, file='mean_nnd.png'):
+    
+    print('Creating nearest neighbor distance plot...')
+    
+    nnd = []
+    sd = []
+    
+    for i in range(steps):
+        
+        agent_data_i = agent_data[agent_data.Step == i]    
+        
+        # calculate the distance between each pair of agents
+        
+        # get unique ids
+        
+        agent_ids = agent_data_i.UniqueID.unique()
+        
+        # create combinations of ids
+        
+        from itertools import combinations
+        
+        pairs = list(combinations(agent_ids, 2))
+        
+        print(f'Total pairs: {len(pairs)}')
+        
+        # get the x and y coordinates of each agent
+        
+        agent_data_i = agent_data_i.set_index('UniqueID')
+        
+        # calculate the distance between each pair of agents
+        
+        distances = np.array([])
+        
+        for pair in pairs:
+            
+            print(f'Calculating distance between {pair[0]} and {pair[1]} at time {i}')
+            
+            agent1 = agent_data_i.loc[pair[0]]
+            agent2 = agent_data_i.loc[pair[1]]
+            
+            distance = np.sqrt((agent1.x - agent2.x)**2 + (agent1.y - agent2.y)**2)
+            
+            np.append(distances, distance)
+        
+        # calculate the mean nearest neighbor distance
+        
+        mean_nnd = np.mean(distances)
+        sd_nnd = np.std(distances)
+        
+        nnd.append(mean_nnd)
+        sd.append(sd_nnd)
+    
+    # create plot
+    
+    fig, ax = plt.subplots(figsize=(8, 6))
+    
+    ax.plot(range(steps), nnd)
+    ax.fill_between(range(steps), np.array(nnd) - np.array(sd), np.array(nnd) + np.array(sd), alpha=0.2)
+    
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Mean nearest neighbor distance')
+    ax.set_title('Mean nearest neighbor distance over time')
+    ax.set_xlim(0, steps)
+    
+    # save the plot
+    
+    plt.savefig(file)
+    
+    print('Nearest neighbor distance plot created.')
+    
+    return fig
+
+# plot distance travelled by each agent
+
+def plot_dist(agent_data=None, steps = 100, file='mean_dis.png'):
+    
+    print('Creating distance travelled plot...')
+    
+    agents = agent_data.UniqueID.unique()
+    
+    dist = np.array([])
+    
+    for agent in agents:
+        
+        agent_data_i = agent_data[agent_data.UniqueID == agent]
+        
+        # calculate the distance travelled by the agent
+        
+        distance = 0
+        
+        print(f'Calculating distance travelled by agent {agent} for {agent_data_i.Step.max()} steps.')
+        
+        for i in range(1, agent_data_i.Step.max()):
+                       
+            agent_data_i_t = agent_data_i[agent_data_i.Step == i]
+            agent_data_i_t_1 = agent_data_i[agent_data_i.Step == i-1]
+            
+            distance += np.sqrt((agent_data_i_t.x - agent_data_i_t_1.x)**2 + 
+                                (agent_data_i_t.y - agent_data_i_t_1.y)**2)
+        
+        np.append(dist, distance)
+        
+    # create plot
+    
+    fig, ax = plt.subplots(figsize=(8, 6))
+    
+    ax.hist(dist, bins=20)
+    
+    ax.set_xlabel('Distance travelled')
+    ax.set_ylabel('Number of agents')
+    
+    # save the plot
+    
+    plt.savefig(file)
+    
+    print('Distance travelled plot created.')
+    
+    return fig
+
+    
