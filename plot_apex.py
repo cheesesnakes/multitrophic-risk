@@ -1,0 +1,64 @@
+from functions.runner import plot_pop, plot_density, plot_space, plot_space_pop
+import pandas as pd
+
+# load data
+
+model_data = pd.read_csv('data_model_apex.csv')
+agent_data = pd.read_csv('data_agents_apex.csv')
+
+params = {
+    
+    # model to run
+    'model': 'apex',
+    'progress': True,
+    'info' : False,    
+    'limit' : 50*50*4,
+    
+    # model parameters
+    'width': 50,
+    'height': 50,
+    
+    # number of agents to start with
+    'predator': 500,
+    'prey': 500,
+    'apex' : 250,
+    
+    ## prey traits
+    'prey_info': True,
+    'f_breed': 0.5, # max birth rate
+    'f_die': 0.1,
+    'f_max': 2500,
+    'risk_cost': 0,
+    'f_apex_risk': False,
+    
+    ## predator traits
+    'predator_info': True,
+    's_energy': 10,
+    's_breed': 0.1,
+    's_lethality': 0.5,
+    's_apex_risk': True,
+    
+    ## apex predator traits
+    
+    'apex_target': 2,
+    'apex_lethality': 1
+}
+
+steps = 1000
+
+# plot the number of agents over time
+
+plot_pop(model_data=model_data, params = params, file = 'pop_apex.png', steps=steps)
+
+# plot density of agents
+
+plot_density(spatial_data=agent_data, file = 'density_apex.gif', steps=steps)
+
+# plot spatial distribution of agents
+
+plot_space(agent_data=agent_data,file = 'space_apex.gif', steps=steps)
+
+# plot spatial distribution of agents with population size
+
+plot_space_pop(agent_data=agent_data, model_data=model_data, params=params,
+             file = 'space_pop_apex.gif', steps=steps)

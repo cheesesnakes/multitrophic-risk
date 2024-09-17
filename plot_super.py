@@ -45,6 +45,20 @@ params = {
 }
 
 steps = 1000
+
 # plot the number of agents over time
 
 plot_pop(model_data=model_data, params = params, file = 'pop_super.png', steps=steps)
+
+# plot density of agents
+
+plot_density(spatial_data=agent_data, file = 'density_super.gif', steps=steps)
+
+# plot spatial distribution of agents
+
+plot_space(agent_data=agent_data,file = 'space_super.gif', steps=steps)
+
+# plot spatial distribution of agents with population size
+
+plot_space_pop(agent_data=agent_data, model_data=model_data, params=params,
+             file = 'space_pop_super.gif', steps=steps)

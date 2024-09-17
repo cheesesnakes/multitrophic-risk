@@ -19,8 +19,11 @@ cat analysis.R | r
 
 # run the examples
 python example_super.py
+python plot_super.py
 python example_apex.py
+python plot_apex.py
 python example_lv.py
+python plot_lv.py
 
 echo "Chapter 2: Done running all scripts"
 

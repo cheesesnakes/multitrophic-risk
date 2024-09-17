@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 from matplotlib import animation
 from matplotlib.pyplot import colorbar
 import numpy as np
-import pandas as pd
-
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -84,73 +82,73 @@ def plot_pop(model_data = None, params = {}, file = 'model_pop.png', steps = 50)
 
 ## create a function to animate the spatial distribution of agents over time
 
-def plot_space(m = None, steps = 100, duration = 60, file = 'space.gif'):
+def plot_space(agent_data = None, steps = 100, file = 'space.gif'):
     
     ## get the spatial data
 
-    spatial_data = m.spatial.get_agent_vars_dataframe()
+    spatial_data = agent_data
 
     ## convert index to columns
-
-    spatial_data.reset_index(inplace=True)
     
-    if steps < spatial_data.Step.max():
+    if steps > spatial_data.Step.max():
         
         steps = spatial_data.Step.max()
         
+    # define plot parameters
+    
+    colors = ['blue', 'red', 'green']
+    marker = ['o', '^', 's']
+    agent_types = spatial_data.AgentType.unique()
+    
     # create plot
     
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(8, 8))
     
-    ims = []
+    # create list of images
+
+    spaces = [ax.scatter([], [], label=agent, alpha=0.4, s=50,
+                         color=colors[i], marker=marker[i]) for i, agent in enumerate(agent_types)]
     
-    for i in range(1, steps, 1):
+    ax.set_xlim(0, spatial_data.x.max())
+    ax.set_ylim(0, spatial_data.y.max())
+    # remove ticks and labels
+    ax.set_xticks([])   
+    ax.set_yticks([])
+    ax.set_xlabel(None)
+    ax.set_ylabel(None)
+    ax.set_title('Spatial distribution of agents')
+    # set legend above the plot
+    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), shadow=True, ncol=3)
+
+    def update(frame):
         
-        spatial_data_time = spatial_data[spatial_data.Step == i]
-        
-        grid = np.zeros((m.width, m.height))
-        
-        for index, row in spatial_data_time.iterrows():
+        for i, space in enumerate(spaces):
             
-            x = row['x']
-            y = row['y']
-                        
-            if row['AgentType'] == 'Apex' or row['AgentType'] == 'Super':
-                grid[x][y] = 30
-            elif row['AgentType'] == 'Prey':
-                grid[x][y] = 10
-            elif row['AgentType'] == 'Predator':
-                grid[x][y] = 20
-            else:
-                grid[x][y] = 0
+            space_data = spatial_data[(spatial_data.Step == frame) & (spatial_data.AgentType == agent_types[i])]
             
-        im = ax.imshow(grid, interpolation='nearest')       
+            space.set_offsets(space_data[['x', 'y']])
         
-        text = plt.text(1, -2, f'Step {i}', fontsize=12, color='black')
-        
-        ims.append([im, text])
-        
-    ani = animation.ArtistAnimation(fig, ims, interval=50, blit=False, repeat_delay=1000)
+        # set title
+        ax.set_title(f'Step {frame}')
+        return spaces
+
+    ani = animation.FuncAnimation(fig, update, frames=range(1, steps-1), blit=False, interval=50)
     
     # save the animation
     
-    ani.save(file, writer='imagemagick', fps=steps/duration)
+    ani.save(file, writer='imagemagick', fps=60)
     
     return ani    
     
 ## create a function to animate the density of agents over time
 
-def plot_density(m = None, duration = 60, steps = 100, file = 'density.gif'):
+def plot_density(spatial_data = None, steps = 100, file = 'density.gif'):
     
-    ## get the spatial data
-
-    spatial_data = m.spatial.get_agent_vars_dataframe()
-
     ## convert index to columns
 
     spatial_data.reset_index(inplace=True)
     
-    if steps < spatial_data.Step.max():
+    if steps > spatial_data.Step.max():
         
         steps = spatial_data.Step.max()
         
@@ -176,7 +174,7 @@ def plot_density(m = None, duration = 60, steps = 100, file = 'density.gif'):
         
         for j, agent in enumerate(agent_types):
             
-            grid = np.zeros((m.width, m.height))
+            grid = np.zeros((spatial_data.x.max()+1, spatial_data.y.max()+1))
             
             spatial_data_agent = spatial_data_time[spatial_data_time.AgentType == agent]
             
@@ -196,101 +194,117 @@ def plot_density(m = None, duration = 60, steps = 100, file = 'density.gif'):
             
         ims.append(step_images)
         
-    ani = animation.ArtistAnimation(fig, ims, interval=10, blit=False, repeat_delay=1000)
+    ani = animation.ArtistAnimation(fig, ims, interval=50, blit=False, repeat_delay=1000)
     
     # save the animation
     
-    ani.save(file, writer='imagemagick', fps=steps/duration)
+    ani.save(file, writer='imagemagick', fps=60)
     
     return ani
 
 # animate space and number of agents over time together
 
-def plot_space_pop(m=None, steps=100, duration=60, file='space_pop.png'):
+def plot_space_pop(model_data=None, agent_data=None, params = None, steps=100, file='space_pop.png'):
     
-    # Retrieve data for population and space
-    pop_data = m.count.get_model_vars_dataframe()
-    space_data = m.spatial.get_agent_vars_dataframe()
-    space_data.reset_index(inplace=True)
+    # Check if model_data is None or not a DataFrame
+    if model_data is None or not hasattr(model_data, 'columns'):
+        raise ValueError("model_data must be a pandas DataFrame with a 'columns' attribute.")
     
-    if steps < len(pop_data):
-        
-        steps = len(pop_data)
-        
-    params = m.kwargs
+    # Check if agent_data is None or not a DataFrame
+    if agent_data is None or not hasattr(agent_data, 'columns'):
+        raise ValueError("agent_data must be a pandas DataFrame with a 'columns' attribute.")
+    
+    ## get the spatial data
 
-    # Clean population data
-    pop_data = pop_data[[col for col in pop_data.columns if '_' not in col]]
+    spatial_data = agent_data
 
-    # Prepare the grid for the two plots
-    fig = plt.figure(figsize=(15, 6))
-    gs = fig.add_gridspec(1, 2, width_ratios=[2, 1])  # Two-thirds for population, one-third for space
+    ## convert index to columns
     
-    # Population plot
-    ax_pop = fig.add_subplot(gs[0, 0])
+    if steps > spatial_data.Step.max():
+        
+        steps = spatial_data.Step.max()
+        
+    # define plot parameters
+    
     colors = ['blue', 'red', 'green']
-    lines = [ax_pop.plot([], [], label=label, color=colors[i])[0] for i, label in enumerate(pop_data.columns)]
+    marker = ['o', '^', 's']
+    agent_types = spatial_data.AgentType.unique()
     
-    ax_pop.set_xlim(0, steps)
-    ax_pop.set_ylim(0, max(pop_data.max()) * 1.1)  # Set y-limit based on max values in the population data
-    ax_pop.set_xlabel('Time')
-    ax_pop.set_ylabel('Number of agents')
-    ax_pop.set_title('Number of agents over time')
-    ax_pop.legend()
-
-    # Space plot
-    ax_space = fig.add_subplot(gs[0, 1])
+    # create plot
     
-    def init():
-        # Initialize population plot
-        for line in lines:
-            line.set_data([], [])
-        # Initialize space plot
-        ax_space.clear()
-        return lines
+    fig = plt.figure(figsize=(12,6))
+    
+    gs = fig.add_gridspec(1, 2, width_ratios=[2, 1])
+    
+    axs = [fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1])]
+    # create list of images
 
-    # Create function to update both the population plot and space plot
-    def update(frame):
-        # Update population plot
-        x = np.arange(frame)
-        for i, line in enumerate(lines):
-            line.set_data(x, pop_data.iloc[:frame, i])
-
-        # Update space plot
-        space_data_time = space_data[space_data.Step == frame]
-        grid = np.zeros((m.width, m.height))
-        
-        for index, row in space_data_time.iterrows():
-            x = row['x']
-            y = row['y']
-            
-            if row['AgentType'] == 'Apex' or row['AgentType'] == 'Super':
-                grid[x][y] = 30
-            elif row['AgentType'] == 'Prey':
-                grid[x][y] = 10
-            elif row['AgentType'] == 'Predator':
-                grid[x][y] = 20
-            else:
-                grid[x][y] = 0
-
-        ax_space.clear()
-        ax_space.imshow(grid, interpolation='nearest')
-        ax_space.set_title(f'Step {frame}')
-        
-        return lines
-
-    # Print parameters below the population plot
+    spaces = [axs[1].scatter([], [], label=agent, alpha=0.4, s=50,
+                         color=colors[i], marker=marker[i]) for i, agent in enumerate(agent_types)]
+    
+    axs[1].set_xlim(0, spatial_data.x.max())
+    axs[1].set_ylim(0, spatial_data.y.max())
+    #set size
+    axs[1].set_aspect('equal')
+    # remove ticks and labels
+    axs[1].set_xticks([])   
+    axs[1].set_yticks([])
+    axs[1].set_xlabel(None)
+    axs[1].set_ylabel(None)
+    axs[1].set_title('Spatial distribution of agents')
+    # set legend above the plot
+    axs[1].legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), shadow=True, ncol=3)
+    
+    # plot the number of agents over time
+    
+    agent_types = model_data.columns
+    #remove Step
+    agent_types = agent_types[1:]
+    
+    lines = [axs[0].plot([], [], label=i)[0] for i in list(model_data.columns) if i != 'Step']
+    axs[0].set_xlabel('Time')
+    axs[0].set_ylabel('Number of agents')
+    axs[0].set_title('Number of agents over time')
+    axs[0].legend()
+    axs[0].set_xlim(0, steps)
+    axs[0].set_ylim(0, model_data[agent_types].max().max())
+    
+    # print parameters below the plot
+    
     text = [f'{key} = {params[key]}' for key in params if key != 'model' and key != 'progress' and key != 'info']
     text = ', '.join(text)
+    
     fig.text(0.5, 0.05, text, ha="center", fontsize=10, wrap=True,
-             bbox={"facecolor": "white", "alpha": 0.5, "pad": 10})
-
+                bbox={"facecolor": "white", "alpha": 0.5, "pad": 10})
+    
     fig.subplots_adjust(bottom=0.25)
     
-    # Create the animation
-    ani = animation.FuncAnimation(fig, update, frames=range(1, steps-1), init_func=init, blit=False, interval=50)
+    def update(frame):
+        
+        for i, space in enumerate(spaces):
+            
+            space_data = spatial_data[(spatial_data.Step == frame) & (spatial_data.AgentType == agent_types[i])]
+            
+            space.set_offsets(space_data[['x', 'y']])
+        
+        model_data_time = model_data[model_data.Step < frame]
+        
+        for i, line in enumerate(lines):
+            
+            line.set_data(range(frame), model_data_time[agent_types[i]])
+            
+        # set title
+        
+        axs[0].set_title(f'Step {frame}')
+        axs[1].set_title(f'Step {frame}')
+        
+        return spaces + lines
+            
+        
+    ani = animation.FuncAnimation(fig, update, frames=range(1, steps-1), blit=False, interval=50)
     
-    # Save the animation
-    ani.save(file, writer='imagemagick', fps=steps/duration)
+    # save the animation
+    
+    ani.save(file, writer='imagemagick', fps=60)
     
     return ani

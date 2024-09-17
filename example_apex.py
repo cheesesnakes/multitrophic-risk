@@ -1,4 +1,4 @@
-from functions.runner import model_run, plot_pop, plot_space, plot_density, plot_space_pop
+from functions.runner import model_run
 
 # set model parameters
 
@@ -51,17 +51,3 @@ model_data = m.count.get_model_vars_dataframe()
 model_data.to_csv(f'data_model_{kwargs['model']}.csv')
 agent_data = m.spatial.get_agent_vars_dataframe()
 agent_data.to_csv(f'data_agents_{kwargs['model']}.csv')
-
-# plot population dynamics and space
-
-plot_space_pop(m, file = f'space_pop_{kwargs['model']}.gif', duration=30, steps=steps)
-
-# plot the space
-plot_space(m, file = f'space_{kwargs['model']}.gif', duration=30, steps=steps)
-
-# plot the number of agents over time
-plot_pop(m, file = f'pop_{kwargs['model']}.png')
-
-# plot the density
-
-plot_density(m, file = f'density_{kwargs['model']}.gif', duration = 30, steps = steps)
