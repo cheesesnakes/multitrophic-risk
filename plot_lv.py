@@ -1,4 +1,4 @@
-from functions.runner import plot_pop, plot_density, plot_space, plot_space_pop, plot_age, plot_dist, plot_energy, plot_nnd
+from functions.runner import plot_pop, plot_density, plot_space, plot_space_pop, plot_age, plot_energy, plot_nnd
 import pandas as pd
 
 # load data
@@ -52,11 +52,11 @@ plot_energy(agent_data=agent_data, file = 'energy_lv.png', steps=steps)
 
 # plot the distance distribution of agents
 
-#plot_dist(agent_data=agent_data, file = 'dist_lv.png', steps=steps)
+#plot_dist(agent_data=agent_data, file = 'dist_lv.png')
 
 # plot the nearest neighbour distance distribution of agents
 
-#plot_nnd(agent_data=agent_data, file = 'nnd_lv.png', steps=steps)
+plot_nnd(agent_data=agent_data, file = 'nnd_lv.png', steps=steps)
 
 # plot density of agents
 

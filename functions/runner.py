@@ -303,6 +303,8 @@ def plot_space_pop(model_data=None, agent_data=None, params = None, steps=100, f
             
             space.set_offsets(space_data[['x', 'y']])
         
+        print(f'Updating frame {frame}')
+        
         model_data_time = model_data[model_data.Step < frame]
         
         for i, line in enumerate(lines):
@@ -418,123 +420,78 @@ def plot_energy(agent_data=None, steps=100, file='mean_energy.png'):
 
 # plot average distance between agents over time
 
-def plot_nnd(agent_data=None, steps = 100, file='mean_nnd.png'):
-    
+from scipy.spatial.distance import pdist, cdist
+
+def plot_nnd(agent_data=None, steps=100, file='mean_nnd.png'):
     print('Creating nearest neighbor distance plot...')
     
     nnd = []
     sd = []
     
-    for i in range(steps):
-        
-        agent_data_i = agent_data[agent_data.Step == i]    
-        
-        # calculate the distance between each pair of agents
-        
-        # get unique ids
-        
-        agent_ids = agent_data_i.UniqueID.unique()
-        
-        # create combinations of ids
-        
-        from itertools import combinations
-        
-        pairs = list(combinations(agent_ids, 2))
-        
-        print(f'Total pairs: {len(pairs)}')
-        
-        # get the x and y coordinates of each agent
-        
-        agent_data_i = agent_data_i.set_index('UniqueID')
-        
-        # calculate the distance between each pair of agents
-        
-        distances = np.array([])
-        
-        for pair in pairs:
-            
-            print(f'Calculating distance between {pair[0]} and {pair[1]} at time {i}')
-            
-            agent1 = agent_data_i.loc[pair[0]]
-            agent2 = agent_data_i.loc[pair[1]]
-            
-            distance = np.sqrt((agent1.x - agent2.x)**2 + (agent1.y - agent2.y)**2)
-            
-            np.append(distances, distance)
-        
-        # calculate the mean nearest neighbor distance
-        
-        mean_nnd = np.mean(distances)
-        sd_nnd = np.std(distances)
-        
-        nnd.append(mean_nnd)
-        sd.append(sd_nnd)
+    # caluclate nearest neighbor distance for the following agent type pairs
     
-    # create plot
+    pairs = [('Prey', 'Prey'), ('Predator', 'Predator'), ('Prey', 'Predator')]
     
+    nnd = np.zeros((len(pairs), steps))
+    sd = np.zeros((len(pairs), steps))
+    
+    for j, pair in enumerate(pairs):
+        
+        # filter data for the pair of agent types
+        
+        agent_data_pair = agent_data[(agent_data.AgentType == pair[0]) | (agent_data.AgentType == pair[1])]
+        
+        for i in range(1, steps + 1):  # Correcting range to include 'steps'
+            
+            if agent_data_pair[agent_data_pair.Step == i].empty:
+                continue
+            
+            print(f'Calculating nearest neighbor distance for {pair} at step {i}')
+            
+            agent_data_i = agent_data_pair[agent_data_pair.Step == i]  # Filter data at each time step
+            
+            if pair[0] != pair[1]:
+                
+                cords_0 = agent_data_i[agent_data_i.AgentType == pair[0]][['x', 'y']].values
+                cords_1 = agent_data_i[agent_data_i.AgentType == pair[1]][['x', 'y']].values
+                
+                # Calculate all pairwise distances using pdist from scipy
+                
+                dist_matrix = cdist(cords_0, cords_1)  # Pairwise distances as a 1D array
+                
+            else:     
+            
+                # Extract x and y coordinates of all agents at this time step
+                coords = agent_data_i[['x', 'y']].values  # shape (num_agents, 2)
+                
+                # Calculate all pairwise distances using pdist from scipy
+                dist_matrix = pdist(coords)  # Pairwise distances as a 1D array
+            
+            # Calculate mean and standard deviation of pairwise distances
+            mean_nnd = np.mean(dist_matrix)
+            sd_nnd = np.std(dist_matrix)
+        
+            nnd[j, i-1] = mean_nnd
+            sd[j, i-1] = sd_nnd
+    
+    # Create the plot
     fig, ax = plt.subplots(figsize=(8, 6))
     
-    ax.plot(range(steps), nnd)
-    ax.fill_between(range(steps), np.array(nnd) - np.array(sd), np.array(nnd) + np.array(sd), alpha=0.2)
+    ax.plot(range(1, steps + 1), nnd[0], label='Prey-Prey')
+    ax.fill_between(range(1, steps + 1), nnd[0] - sd[0], nnd[0] + sd[0], alpha=0.2, label='±1 SD')
+    ax.plot(range(1, steps + 1), nnd[1], label='Predator-Predator')
+    ax.fill_between(range(1, steps + 1), nnd[1] - sd[1], nnd[1] + sd[1], alpha=0.2, label='±1 SD')
+    ax.plot(range(1, steps + 1), nnd[2], label='Prey-Predator')
+    ax.fill_between(range(1, steps + 1), nnd[2] - sd[2], nnd[2] + sd[2], alpha=0.2, label='±1 SD')
     
     ax.set_xlabel('Time')
-    ax.set_ylabel('Mean nearest neighbor distance')
-    ax.set_title('Mean nearest neighbor distance over time')
-    ax.set_xlim(0, steps)
+    ax.set_ylabel('Mean distance between agents')
+    ax.set_xlim(1, steps)
+    ax.legend()
     
-    # save the plot
-    
+    # Save the plot
     plt.savefig(file)
     
     print('Nearest neighbor distance plot created.')
     
     return fig
-
-# plot distance travelled by each agent
-
-def plot_dist(agent_data=None, steps = 100, file='mean_dis.png'):
-    
-    print('Creating distance travelled plot...')
-    
-    agents = agent_data.UniqueID.unique()
-    
-    dist = np.array([])
-    
-    for agent in agents:
-        
-        agent_data_i = agent_data[agent_data.UniqueID == agent]
-        
-        # calculate the distance travelled by the agent
-        
-        distance = 0
-        
-        print(f'Calculating distance travelled by agent {agent} for {agent_data_i.Step.max()} steps.')
-        
-        for i in range(1, agent_data_i.Step.max()):
-                       
-            agent_data_i_t = agent_data_i[agent_data_i.Step == i]
-            agent_data_i_t_1 = agent_data_i[agent_data_i.Step == i-1]
-            
-            distance += np.sqrt((agent_data_i_t.x - agent_data_i_t_1.x)**2 + 
-                                (agent_data_i_t.y - agent_data_i_t_1.y)**2)
-        
-        np.append(dist, distance)
-        
-    # create plot
-    
-    fig, ax = plt.subplots(figsize=(8, 6))
-    
-    ax.hist(dist, bins=20)
-    
-    ax.set_xlabel('Distance travelled')
-    ax.set_ylabel('Number of agents')
-    
-    # save the plot
-    
-    plt.savefig(file)
-    
-    print('Distance travelled plot created.')
-    
-    return fig
-
-    

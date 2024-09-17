@@ -799,6 +799,7 @@ class model_1(mesa.Model):
                                 'Energy': lambda a: a.energy,
                                 'UniqueID': lambda a: a.unique_id,
                                 'Lineage': lambda a: a.lineage,
+                                'DistanceTravelled': lambda a: a.dist
                                 }
         )
     ## data collector function
