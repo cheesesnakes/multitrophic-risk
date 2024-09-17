@@ -8,7 +8,7 @@ kwargs = {
     'model': 'apex',
     'progress': True,
     'info' : False,  
-    'limit' : 50*50*4,
+    'limit' : 10000,
     # model parameters
     'width': 50,
     'height': 50,

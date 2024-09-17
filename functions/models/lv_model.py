@@ -36,8 +36,13 @@ class Prey(mesa.Agent):
         self.f_max = kwargs.get('f_max', self.model.width*self.model.height/2)
         self.risk_cost = kwargs.get('risk_cost', 0.1)
         self.amount = 1
+        self.energy = 0 #dummy variable
+        self.age = 0
+        self.lineage = kwargs.get('lineage', self.unique_id)
+        self.dist = 0
         
         self.kwargs = kwargs
+        self.kwargs['lineage'] = self.lineage
         
     def prey_random_reproduce(self):
     
@@ -204,6 +209,11 @@ class Prey(mesa.Agent):
     ## step function
     
     def step(self):
+        ##
+        
+        self.age += 1
+        
+        x,y = self.pos
         
         ## reproduce
         
@@ -218,6 +228,10 @@ class Prey(mesa.Agent):
         else:
             
             self.move()
+        
+        ## calculate distance travelled
+        
+        self.dist += np.sqrt((x - self.pos[0])**2 + (y - self.pos[1])**2)
         
         ## die
         
@@ -246,7 +260,11 @@ class Predator(mesa.Agent):
         self.energy = kwargs.get('s_energy', 10)
         self.lethality = kwargs.get('s_lethality', 0.5)
         self.amount = 1
+        self.lineage = kwargs.get('lineage', self.unique_id)
+        self.dist = 0
         
+        self.kwargs = kwargs
+        self.kwargs['lineage'] = self.lineage
         self.kwargs = kwargs
 
     
@@ -404,6 +422,10 @@ class Predator(mesa.Agent):
     
     def step(self):
         
+        self.age += 1
+        
+        x,y = self.pos
+        
         if self.energy <= 1:
             
             self.die()            
@@ -430,6 +452,10 @@ class Predator(mesa.Agent):
             ## decrease energy
             
             self.energy -= 1
+            
+            ## calculate distance travelled
+            
+            self.dist += np.sqrt((x - self.pos[0])**2 + (y - self.pos[1])**2)
             
             #print('Predator energy:', self.energy)
 
@@ -478,9 +504,13 @@ class model_1(mesa.Model):
         ## spatial data
         
         self.spatial = mesa.DataCollector(
-            agent_reporters = {'x': lambda a: a.pos[0],
+            agent_reporters= {'x': lambda a: a.pos[0],
                                'y': lambda a: a.pos[1],
-                               'AgentType': lambda a: type(a).__name__
+                               'AgentType': lambda a: type(a).__name__,
+                               'Age': lambda a: a.age,
+                                'Energy': lambda a: a.energy,
+                                'UniqueID': lambda a: a.unique_id,
+                                'Lineage': lambda a: a.lineage,
                                 }
         )
     ## data collector function
@@ -553,11 +583,9 @@ class model_1(mesa.Model):
             
             ## end the model if there are no prey or predator agents
             
-            if limit:
-                
-                if self.data_collector(Predator) == 0 or self.data_collector(Prey) == 0 or self.data_collector(Predator) + self.data_collector(Prey) > limit:
+            if self.data_collector(Predator) == 0 or self.data_collector(Prey) == 0 or self.data_collector(Predator) + self.data_collector(Prey) > limit:
                     
-                    break
+                break
     
             else:
                 self.step()
