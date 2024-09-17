@@ -7,7 +7,8 @@ kwargs = {
     # model to run
     'model': 'lv',
     'progress': True,
-    'info' : False,  
+    'info' : False,    
+    'limit' : 50*50*4,
     
     # model parameters
     'width': 50,
@@ -38,7 +39,10 @@ m = model_run(**kwargs, steps=steps)
 
 # save data
 
-m.count.get_model_vars_dataframe().to_csv(f'data_{kwargs['model']}.csv')
+model_data = m.count.get_model_vars_dataframe()
+model_data.to_csv(f'data_model_{kwargs['model']}.csv')
+agent_data = m.spatial.get_agent_vars_dataframe()
+agent_data.to_csv(f'data_agents_{kwargs['model']}.csv')
 
 # plot the space
 plot_space(m, file = f'space_{kwargs['model']}.gif', duration=30, steps=steps)

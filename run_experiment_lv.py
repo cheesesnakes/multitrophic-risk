@@ -10,7 +10,8 @@ kwargs = {
     
     # model to run
     'model': 'lv',
-    'num_cpus': 10,
+    'num_cpus': 10,  
+    'limit' : 50*50*4,
           
     # model parameters
     

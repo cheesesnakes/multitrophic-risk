@@ -9,7 +9,8 @@ import numpy as np
 kwargs = {
     
     # model to run
-    'model': 'apex', 
+    'model': 'apex',   
+    'limit' : 50*50*4,
     
     # model parameters
     'width': 50,

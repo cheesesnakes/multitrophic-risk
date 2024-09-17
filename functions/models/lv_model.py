@@ -547,15 +547,17 @@ class model_1(mesa.Model):
         
     ## run function
     
-    def run_model(self, steps = 100, progress = False, info = False):
+    def run_model(self, steps = 100, progress = False, info = False, limit = 10000):
         
         for i in range(steps):
             
             ## end the model if there are no prey or predator agents
             
-            if self.data_collector(Predator) == 0 or self.data_collector(Prey) == 0 or self.data_collector(Predator) + self.data_collector(Prey) > self.width*self.height*4:
+            if limit:
                 
-                break
+                if self.data_collector(Predator) == 0 or self.data_collector(Prey) == 0 or self.data_collector(Predator) + self.data_collector(Prey) > limit:
+                    
+                    break
     
             else:
                 self.step()
