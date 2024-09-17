@@ -1,0 +1,50 @@
+from functions.runner import plot_pop, plot_density, plot_space, plot_space_pop
+import pandas as pd
+
+# load data
+
+model_data = pd.read_csv('data_model_super.csv')
+agent_data = pd.read_csv('data_agents_super.csv')
+
+params = {
+    
+    # model to run
+    'model': 'super',
+    'progress': True,
+    'info' : False,    
+    'limit' : 50*50*4,
+    
+    # model parameters
+    'width': 50,
+    'height': 50,
+    
+    # number of agents to start with
+    'predator': 500,
+    'prey': 500,
+    'super' : 250,
+    
+    ## prey traits
+    'prey_info': True,
+    'f_breed': 0.5, # max birth rate
+    'f_die': 0.1,
+    'f_max': 2500,
+    'risk_cost': 0,
+    'f_super_risk': False,
+    
+    ## predator traits
+    'predator_info': True,
+    's_energy': 10,
+    's_breed': 0.1,
+    's_lethality': 0.5,
+    's_super_risk': True,
+    
+    ## apex predator traits
+    
+    'super_target': 2,
+    'super_lethality': 1
+}
+
+steps = 1000
+# plot the number of agents over time
+
+plot_pop(model_data=model_data, params = params, file = 'pop_super.png', steps=steps)

@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib import animation
 from matplotlib.pyplot import colorbar
 import numpy as np
+import pandas as pd
 
 import warnings
 
@@ -42,54 +43,42 @@ def model_run(model = "lv", steps = 50, **kwargs):
 
 ## visualize the model
 
-def plot_pop(m = None, file = 'model_pop.png'):
+def plot_pop(model_data = None, params = {}, file = 'model_pop.png', steps = 50):
 
-    data = m.count.get_model_vars_dataframe()
+    # Check if model_data is None or not a DataFrame
+    if model_data is None or not hasattr(model_data, 'columns'):
+        raise ValueError("model_data must be a pandas DataFrame with a 'columns' attribute.")
     
-    params = m.kwargs
+    # create plot
     
-    ## remove columns whose names contain _
+    fig, ax = plt.subplots(figsize=(8, 6))
     
-    data = data[[col for col in data.columns if '_' not in col]]
+    # plot the number of agents over time
     
-    ## plot the number of prey, predator and resource agents over time
-
-    print('Plotting number of agents over time...')
-
-    fig = plt.figure(figsize=(10,6))
-    
-    colors = ['blue', 'red','green']
-    
-    c = 0
-
-    for i in data:
+    for i in list(model_data.columns):
         
-        d = data[i]
-
-        plt.plot(d, label=i, color = colors[c])
-
-        c += 1
-
-    plt.xlabel('Time')
-    plt.ylabel('Number of agents')  
-    plt.title('Number of agents over time')
+        if i == 'Step':
+            continue
+        
+        ax.plot(model_data[i], label=i)
+        
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Number of agents')
+    ax.set_title('Number of agents over time')
+    ax.legend()
+    ax.set_xlim(0, steps)
     
-    # print praameters below the plot
-    text = [f'{key} = {params[key]}' for key in params if key != 'model' and key != 'progress' and key != 'info']
-    
-    # make the text a single string
-    
-    text = ', '.join(text)
-    
-    plt.figtext(0.5, 0.1, text, ha="center", fontsize=10, wrap=True,
-                bbox={"facecolor":"white", "alpha":0.5, "pad":10,})
-
+    # print parameters below the plot
+    if isinstance(params, dict):  # Added check for dict type
+        text = [f'{key} = {params[key]}' for key in params if key != 'model' and key != 'progress' and key != 'info']
+        text = ', '.join(text)
+        fig.text(0.5, 0.05, text, ha="center", fontsize=10, wrap=True,
+                 bbox={"facecolor": "white", "alpha": 0.5, "pad": 10})
+        
     fig.subplots_adjust(bottom=0.25)
     
-    plt.legend()
-
     # save the plot
-
+    
     plt.savefig(file)
 
 
