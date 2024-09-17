@@ -503,7 +503,7 @@ class Predator(mesa.Agent):
             
             ## move the agent
 
-            if self.info and self.apex_risk:
+            if self.info and self.super_risk:
                 
                 self.hunt()
                 
@@ -557,6 +557,7 @@ class Super(mesa.Agent):
         self.age = 0
         self.lineage = kwargs.get('lineage', self.unique_id)
         self.dist = 0
+        self.energy=0
         
         self.kwargs = kwargs
         self.kwargs['lineage'] = self.lineage
@@ -850,7 +851,7 @@ class model_1(mesa.Model):
             ## end the model if there are no prey or predator agents
             
                 
-            if self.data_collector(Predator) == 0 or self.data_collector(Prey) == 0 or self.data_collector(Predator) + self.data_collector(Prey) > limit:
+            if self.data_collector(Prey) == 0 or self.data_collector(Predator) + self.data_collector(Prey) > limit:
                 
                 break
     

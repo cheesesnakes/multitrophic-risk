@@ -47,6 +47,8 @@ def plot_pop(model_data = None, params = {}, file = 'model_pop.png', steps = 50)
     if model_data is None or not hasattr(model_data, 'columns'):
         raise ValueError("model_data must be a pandas DataFrame with a 'columns' attribute.")
     
+    plt.rcParams["axes.prop_cycle"] = plt.cycler("color", plt.cm.tab10.colors)
+    
     # create plot
     
     fig, ax = plt.subplots(figsize=(8, 6))
@@ -106,8 +108,8 @@ def plot_space(agent_data = None, steps = 100, file = 'space.gif'):
     
     # create list of images
 
-    spaces = [ax.scatter([], [], label=agent, alpha=0.4, s=50,
-                         color=colors[i], marker=marker[i]) for i, agent in enumerate(agent_types)]
+    spaces = [ax.scatter([], [], label=agent, alpha=0.6, s=50,
+                         cmap="tab10", marker=marker[i]) for i, agent in enumerate(agent_types)]
     
     ax.set_xlim(0, spatial_data.x.max())
     ax.set_ylim(0, spatial_data.y.max())
@@ -132,11 +134,11 @@ def plot_space(agent_data = None, steps = 100, file = 'space.gif'):
         ax.set_title(f'Step {frame}')
         return spaces
 
-    ani = animation.FuncAnimation(fig, update, frames=range(1, steps-1), blit=False, interval=50)
+    ani = animation.FuncAnimation(fig, update, frames=range(1, steps-1), blit=False, interval=42)
     
     # save the animation
     
-    ani.save(file, writer='imagemagick', fps=60)
+    ani.save(file, writer='imagemagick', fps=24)
     
     return ani    
     
@@ -194,11 +196,11 @@ def plot_density(spatial_data = None, steps = 100, file = 'density.gif'):
             
         ims.append(step_images)
         
-    ani = animation.ArtistAnimation(fig, ims, interval=50, blit=False, repeat_delay=1000)
+    ani = animation.ArtistAnimation(fig, ims, interval=42, blit=False, repeat_delay=1000)
     
     # save the animation
     
-    ani.save(file, writer='imagemagick', fps=60)
+    ani.save(file, writer='imagemagick', fps=24)
     
     return ani
 
@@ -214,6 +216,8 @@ def plot_space_pop(model_data=None, agent_data=None, params = None, steps=100, f
     if agent_data is None or not hasattr(agent_data, 'columns'):
         raise ValueError("agent_data must be a pandas DataFrame with a 'columns' attribute.")
     
+    plt.rcParams["axes.prop_cycle"] = plt.cycler("color", plt.cm.tab10.colors)
+    
     ## get the spatial data
 
     spatial_data = agent_data
@@ -226,7 +230,6 @@ def plot_space_pop(model_data=None, agent_data=None, params = None, steps=100, f
         
     # define plot parameters
     
-    colors = ['blue', 'red', 'green']
     marker = ['o', '^', 's']
     agent_types = spatial_data.AgentType.unique()
     
@@ -239,8 +242,8 @@ def plot_space_pop(model_data=None, agent_data=None, params = None, steps=100, f
     axs = [fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1])]
     # create list of images
 
-    spaces = [axs[1].scatter([], [], label=agent, alpha=0.4, s=50,
-                         color=colors[i], marker=marker[i]) for i, agent in enumerate(agent_types)]
+    spaces = [axs[1].scatter([], [], label=agent, alpha=0.6, s=25,
+                         cmap="tab10", marker=marker[i]) for i, agent in enumerate(agent_types)]
     
     axs[1].set_xlim(0, spatial_data.x.max())
     axs[1].set_ylim(0, spatial_data.y.max())
@@ -301,10 +304,10 @@ def plot_space_pop(model_data=None, agent_data=None, params = None, steps=100, f
         return spaces + lines
             
         
-    ani = animation.FuncAnimation(fig, update, frames=range(1, steps-1), blit=False, interval=50)
+    ani = animation.FuncAnimation(fig, update, frames=range(1, steps-1), blit=False, interval=42)
     
     # save the animation
     
-    ani.save(file, writer='imagemagick', fps=60)
+    ani.save(file, writer='imagemagick', fps=24)
     
     return ani
