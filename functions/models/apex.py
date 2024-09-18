@@ -681,7 +681,7 @@ class Apex(mesa.Agent):
             
             ## remove the prey agent
             
-            gain = a.energy/2
+            gain = a.energy
             
             l = np.random.binomial(1, self.lethality)
             
