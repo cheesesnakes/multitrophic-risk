@@ -321,8 +321,8 @@ class Predator(mesa.Agent):
             
             ## move towards the prey
             
-            x += x_p
-            y += y_p
+            x = x_p
+            y = y_p
             
             ## move the agent
             
@@ -609,8 +609,8 @@ class Apex(mesa.Agent):
             
             ## move towards the prey
             
-            x += x_p
-            y += y_p
+            x = x_p
+            y = y_p
             
             ## move the agent
             
