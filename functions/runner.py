@@ -355,6 +355,9 @@ def plot_age(agent_data=None, steps=100, file='mean_age.png'):
     
     for i in mean_age.AgentType.unique():
         
+        if i == 'Super':
+            continue
+        
         agent_data = mean_age[mean_age.AgentType == i]
         sd = sd_age[sd_age.AgentType == i]
         
