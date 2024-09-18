@@ -41,12 +41,36 @@ kwargs = {
 
 steps = 1000
 
-# run the model
-m = model_run(**kwargs, steps=steps)
+targets = ['prey', 'predator', 'both']
+lethality = ['lethal', 'non-lethal']
 
-# save data
+for target in targets:
+    
+    if target == 'prey':
+        kwargs['super_target'] = 1
+    elif target == 'predator':
+        kwargs['super_target'] = 2
+    else:
+        kwargs['super_target'] = 12
+    
+    for leth in lethality:
+        
+        if leth == 'lethal':
+            
+            kwargs['super_lethality'] = 1
+        
+        else:
+            
+            kwargs['super_lethality'] = 0
 
-model_data = m.count.get_model_vars_dataframe()
-model_data.to_csv(f'data_model_{kwargs['model']}.csv')
-agent_data = m.spatial.get_agent_vars_dataframe()
-agent_data.to_csv(f'data_agents_{kwargs['model']}.csv')
+        print(f"Running model with {target} as target and {leth} super predator")
+        
+        # run the model
+        m = model_run(**kwargs, steps=steps)
+
+        # save data
+
+        model_data = m.count.get_model_vars_dataframe()
+        model_data.to_csv(f'data_model_{kwargs["model"]}_{target}_{leth}.csv')
+        agent_data = m.spatial.get_agent_vars_dataframe()
+        agent_data.to_csv(f'data_agents_{kwargs["model"]}_{target}_{leth}.csv')
