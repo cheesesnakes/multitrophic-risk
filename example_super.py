@@ -48,11 +48,17 @@ for target in targets:
     
     if target == 'prey':
         kwargs['super_target'] = 1
+        kwargs['f_super_risk'] = True
+        kwargs['s_super_risk'] = False
     elif target == 'predator':
         kwargs['super_target'] = 2
+        kwargs['f_super_risk'] = False
+        kwargs['s_super_risk'] = True
     else:
         kwargs['super_target'] = 12
-    
+        kwargs['f_super_risk'] = True
+        kwargs['s_super_risk'] = True
+        
     for leth in lethality:
         
         if leth == 'lethal':
@@ -71,6 +77,10 @@ for target in targets:
         # save data
 
         model_data = m.count.get_model_vars_dataframe()
+        
+        # set name for index column
+        model_data.index.name = 'Step'
         model_data.to_csv(f'data_model_{kwargs["model"]}_{target}_{leth}.csv')
+        
         agent_data = m.spatial.get_agent_vars_dataframe()
         agent_data.to_csv(f'data_agents_{kwargs["model"]}_{target}_{leth}.csv')

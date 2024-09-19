@@ -9,9 +9,9 @@ echo "Chapter 2: Running all scripts"
 # Run all the scripts in the correct order
 
 # run the experiments
-python run_experiment_super.py
-python run_experiment_apex.py
-python run_experiment_lv.py
+#python run_experiment_super.py
+#python run_experiment_apex.py
+#python run_experiment_lv.py
 
 # run analysis script
 
@@ -24,6 +24,8 @@ python example_apex.py
 python plot_apex.py
 python example_lv.py
 python plot_lv.py
+python example_strat.py
+python plot_strat.py
 
 echo "Chapter 2: Done running all scripts"
 

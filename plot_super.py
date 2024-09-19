@@ -2,10 +2,6 @@ from functions.runner import plot_pop, plot_density, plot_space, plot_space_pop,
 import pandas as pd
 
 # load data
-
-model_data = pd.read_csv('data_model_super.csv')
-agent_data = pd.read_csv('data_agents_super.csv')
-
 params = {
     
     # model to run
@@ -46,35 +42,70 @@ params = {
 
 steps = 1000
 
-# plot the number of agents over time
+targets = ['prey', 'predator', 'both']
+lethality = ['lethal', 'non-lethal']
 
-plot_pop(model_data=model_data, params = params, file = 'pop_super.png', steps=steps)
+for target in targets:
+    
+    if target == 'prey':
+        params['super_target'] = 1
+        params['f_super_risk'] = True
+        params['s_super_risk'] = False
+    elif target == 'predator':
+        params['super_target'] = 2
+        params['f_super_risk'] = False
+        params['s_super_risk'] = True
+    else:
+        params['super_target'] = 12
+        params['f_super_risk'] = True
+        params['s_super_risk'] = True
+        
+    for leth in lethality:
+        
+        if leth == 'lethal':
+            
+            params['super_lethality'] = 1
+        
+        else:
+            
+            params['super_lethality'] = 0
 
-# plot the age distribution of agents
+        # load data
+        
+        model_data = pd.read_csv(f'data_model_{params["model"]}_{target}_{leth}.csv')
+        agent_data = pd.read_csv(f'data_agents_{params["model"]}_{target}_{leth}.csv')
+        
+        print(f"Plotting model with {target} as target and {leth} super predator")
+        
+        # plot the number of agents over time
 
-plot_age(agent_data=agent_data, file = 'age_super.png', steps=steps)
+        plot_pop(model_data=model_data, params=params, file=f'pop_super_{target}_{leth}.png', steps=steps)
 
-# plot the energy distribution of agents
+        # plot the age distribution of agents
 
-plot_energy(agent_data=agent_data, file = 'energy_super.png', steps=steps)
+        plot_age(agent_data=agent_data, file=f'age_super_{target}_{leth}.png', steps=steps)
 
-# plot the distance distribution of agents
+        # plot the energy distribution of agents
 
-#plot_dist(agent_data=agent_data, file = 'dist_super.png', steps=steps)
+        plot_energy(agent_data=agent_data, file=f'energy_super_{target}_{leth}.png', steps=steps)
 
-# plot the nearest neighbour distance distribution of agents
+        # plot the distance distribution of agents
 
-plot_nnd(agent_data=agent_data, file = 'nnd_super.png', steps=steps)
+        #plot_dist(agent_data=agent_data, file=f'dist_super_{target}_{leth}.png', steps=steps)
 
-# plot density of agents
+        # plot the nearest neighbour distance distribution of agents
 
-plot_density(spatial_data=agent_data, file = 'density_super.gif', steps=steps)
+        plot_nnd(agent_data=agent_data, file=f'nnd_super_{target}_{leth}.png', steps=steps)
 
-# plot spatial distribution of agents
+        # plot density of agents
 
-plot_space(agent_data=agent_data,file = 'space_super.gif', steps=steps)
+        plot_density(spatial_data=agent_data, file=f'density_super_{target}_{leth}.gif', steps=steps)
 
-# plot spatial distribution of agents with population size
+        # plot spatial distribution of agents
 
-plot_space_pop(agent_data=agent_data, model_data=model_data, params=params,
-             file = 'space_pop_super.gif', steps=steps)
+        plot_space(agent_data=agent_data, file=f'space_super_{target}_{leth}.gif', steps=steps)
+
+        # plot spatial distribution of agents with population size
+
+        plot_space_pop(agent_data=agent_data, model_data=model_data, params=params,
+                   file=f'space_pop_super_{target}_{leth}.gif', steps=steps)

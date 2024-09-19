@@ -11,9 +11,8 @@ params = {
     # model to run
     'model': 'apex',
     'progress': True,
-    'info' : False,    
-    'limit' : 50*50*4,
-    
+    'info' : False,  
+    'limit' : 10000,
     # model parameters
     'width': 50,
     'height': 50,
@@ -21,7 +20,7 @@ params = {
     # number of agents to start with
     'predator': 500,
     'prey': 500,
-    'apex' : 250,
+    'apex' : 100,
     
     ## prey traits
     'prey_info': True,
@@ -29,7 +28,6 @@ params = {
     'f_die': 0.1,
     'f_max': 2500,
     'risk_cost': 0,
-    'f_apex_risk': False,
     
     ## predator traits
     'predator_info': True,
@@ -40,8 +38,10 @@ params = {
     
     ## apex predator traits
     
-    'apex_target': 2,
-    'apex_lethality': 1
+    'apex_info': True,
+    'a_energy': 10,
+    'a_breed': 0.1,
+    'a_lethality': 0.15
 }
 
 steps = 1000
