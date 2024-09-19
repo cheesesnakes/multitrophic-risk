@@ -669,12 +669,21 @@ class Super(mesa.Agent):
         
         ## get the prey at the current pos
         
-        this_cell = self.model.grid.get_cell_list_contents((x,y))
+        neighbours = self.model.grid.get_neighbors((x,y), moore=True, include_center=False)
         
         ## count the number of prey agents
+        if self.target == 'predator':
+            
+            prey = [a for a in neighbours if isinstance(a, Predator)]
         
-        prey = [a for a in this_cell if isinstance(a, Predator)]
-        
+        elif self.target == 'prey':
+            
+            prey = [a for a in neighbours if isinstance(a, Prey)]
+            
+        else:
+            
+            prey = [a for a in neighbours if isinstance(a, Predator) or isinstance(a, Prey)]
+            
         ## choose a random prey agent
         
         if len(prey) > 0:
@@ -845,17 +854,20 @@ class model_1(mesa.Model):
         
     ## run function
     
-    def run_model(self, steps = 100, progress = False, info = False, limit = 10000):
+    def run_model(self, steps = 100, progress = False, info = False, limit = 10000, stop = False):
         
         for i in range(steps):
             
             ## end the model if there are no prey or predator agents
             
                 
-            if self.data_collector(Prey) == 0 or self.data_collector(Predator) + self.data_collector(Prey) > limit:
+            if self.data_collector(Predator) + self.data_collector(Prey) > limit:
                 
                 break
-    
+            
+            elif (stop and self.data_collector(Predator) == 0) or (stop and self.data_collector(Prey) == 0):
+                
+                break
             else:
                 self.step()
                 
