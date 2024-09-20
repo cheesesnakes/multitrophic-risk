@@ -704,8 +704,6 @@ class Super(mesa.Agent):
     
     def step(self):
         
-        self.age += 1
-        
         x,y = self.pos
         
         ## move the agent
@@ -865,7 +863,7 @@ class model_1(mesa.Model):
                 
                 break
             
-            elif (stop and self.data_collector(Predator) == 0) or (stop and self.data_collector(Prey) == 0):
+            elif (self.data_collector(Predator) == 0) or (self.data_collector(Prey) == 0):
                 
                 break
             else:
