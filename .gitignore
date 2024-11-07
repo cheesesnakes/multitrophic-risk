@@ -1,5 +1,5 @@
 __pycache__
-abm_env/
+venv/
 output/
 *.png
 *.csv
