@@ -31,7 +31,7 @@ class Prey(mesa.Agent):
         self.pos = pos
         self.amount = 1
         self.info = kwargs.get('prey_info', False)
-        self.f_breed = kwargs.get('f_breed', 0.5)
+        self.f_breed = kwargs.get('f_breed', 0.2)
         self.f_die = kwargs.get('f_die', 0.1)
         self.f_max = kwargs.get('f_max', self.model.width*self.model.height/2)
         self.risk_cost = kwargs.get('risk_cost', 0.1)

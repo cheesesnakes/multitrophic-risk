@@ -21,7 +21,7 @@ kwargs = {
     
     ## prey traits
     'prey_info': True,
-    'f_breed': 0.5, # max birth rate
+    'f_breed': 0.2, # max birth rate
     'f_die': 0.1,
     'f_max': 2500,
     'risk_cost': 0,
@@ -31,6 +31,7 @@ kwargs = {
     'predator_info': True,
     's_energy': 10,
     's_breed': 0.1,
+    's_die': 0.01,
     's_lethality': 0.5,
     's_super_risk': True,
     

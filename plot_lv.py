@@ -12,11 +12,11 @@ params = {
     'model': 'lv',
     'progress': True,
     'info' : False,    
-    'limit' : 50*50*4,
+    'limit' : 10000,
     
     # model parameters
-    'width': 50,
-    'height': 50,
+    'width': 100,
+    'height': 100,
     
     # number of agents to start with
     'predator': 500,
@@ -24,7 +24,7 @@ params = {
     
     ## prey traits
     'prey_info': True,
-    'f_breed': 0.5, # max birth rate
+    'f_breed': 0.2, # max birth rate
     'f_die': 0.1,
     'f_max': 2500,
     'risk_cost': 0,
@@ -33,6 +33,7 @@ params = {
     'predator_info': True,
     's_energy': 10,
     's_breed': 0.1,
+    's_die': 0.01,
     's_lethality': 0.5,
 }
 
