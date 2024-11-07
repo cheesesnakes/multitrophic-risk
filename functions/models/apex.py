@@ -40,6 +40,7 @@ class Prey(mesa.Agent):
         self.age = 0
         self.lineage = kwargs.get('lineage', self.unique_id)
         self.dist = 0
+        self.steps = kwargs.get('f_steps', 5)
         
         self.kwargs = kwargs
         self.kwargs['lineage'] = self.lineage
@@ -221,13 +222,15 @@ class Prey(mesa.Agent):
         
         ## move the agent
         
-        if self.info:
+        for i in range(self.steps):
             
-            self.risk()
-        
-        else:
+            if self.info:
+                
+                self.risk()
             
-            self.move()
+            else:
+                
+                self.move()
         
         ## calculate distance travelled
         
@@ -263,6 +266,7 @@ class Predator(mesa.Agent):
         self.apex_risk = kwargs.get('s_apex_risk', False)
         self.lineage = kwargs.get('lineage', self.unique_id)
         self.dist = 0
+        self.steps = kwargs.get('s_steps', 10)
         
         self.kwargs = kwargs
         self.kwargs['lineage'] = self.lineage
@@ -495,20 +499,22 @@ class Predator(mesa.Agent):
             self.predator_random_reproduce()
             
             ## move the agent
+            
+            for i in range(self.steps):
 
-            if self.info and self.apex_risk:
+                if self.info and self.apex_risk:
+                    
+                    self.hunt()
+                    
+                    self.predator_risk()
                 
-                self.hunt()
+                elif self.info:
+                    
+                    self.hunt()
                 
-                self.predator_risk()
-            
-            elif self.info:
-                
-                self.hunt()
-            
-            else:
-                
-                self.move()
+                else:
+                    
+                    self.move()
             
             
             ## eat the prey
@@ -551,6 +557,7 @@ class Apex(mesa.Agent):
         self.age = 0
         self.lineage = kwargs.get('lineage', self.unique_id)
         self.dist = 0
+        self.steps = kwargs.get('a_steps', 20)
         
         self.kwargs = kwargs
         self.kwargs['lineage'] = self.lineage
@@ -724,13 +731,15 @@ class Apex(mesa.Agent):
             
             ## move the agent
 
-            if self.info:
+            for i in range(self.steps):
                 
-                self.apex_hunt()
-            
-            else:
+                if self.info:
+                    
+                    self.apex_hunt()
                 
-                self.move()
+                else:
+                    
+                    self.move()
                 
             ## eat the prey
 

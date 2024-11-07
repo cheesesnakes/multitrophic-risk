@@ -9,7 +9,7 @@ params = {
     'progress': True,
     'info' : False,    
     'limit' : 50*50*4,
-    'stope' : True,
+    'stop' : True,
     
     # model parameters
     'width': 100,
@@ -27,6 +27,7 @@ params = {
     'f_max': 2500,
     'risk_cost': 0,
     'f_super_risk': False,
+    'f_steps': 5,
     
     ## predator traits
     'predator_info': True,
@@ -35,13 +36,14 @@ params = {
     's_die': 0.01,
     's_lethality': 0.5,
     's_super_risk': True,
+    's_steps': 10,
     
     ## apex predator traits
     
     'super_target': 2,
-    'super_lethality': 1
+    'super_lethality': 1,
+    'super_steps': 20
 }
-
 
 steps = 1000
 

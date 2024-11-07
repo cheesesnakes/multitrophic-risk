@@ -41,6 +41,7 @@ class Prey(mesa.Agent):
         self.age = 0
         self.lineage = kwargs.get('lineage', self.unique_id)
         self.dist = 0
+        self.steps = kwargs.get('f_steps', 5)
         
         self.kwargs = kwargs
         self.kwargs['lineage'] = self.lineage
@@ -228,13 +229,15 @@ class Prey(mesa.Agent):
         
         ## move the agent
         
-        if self.info:
-            
-            self.risk()
+        for i in range(self.steps):
         
-        else:
+            if self.info:
+                
+                self.risk()
             
-            self.move()
+            else:
+                
+                self.move()
         
         ## calculate distance travelled
         
@@ -270,6 +273,7 @@ class Predator(mesa.Agent):
         self.super_risk = kwargs.get('s_super_risk', False)
         self.lineage = kwargs.get('lineage', self.unique_id)
         self.dist = 0
+        self.steps = kwargs.get('s_steps', 10)
         
         self.kwargs = kwargs
         self.kwargs['lineage'] = self.lineage
@@ -502,20 +506,22 @@ class Predator(mesa.Agent):
             self.predator_random_reproduce()
             
             ## move the agent
+            
+            for i in range(self.steps):
 
-            if self.info and self.super_risk:
+                if self.info and self.super_risk:
+                    
+                    self.hunt()
+                    
+                    self.predator_risk()
                 
-                self.hunt()
+                elif self.info:
+                    
+                    self.hunt()
                 
-                self.predator_risk()
-            
-            elif self.info:
-                
-                self.hunt()
-            
-            else:
-                
-                self.move()
+                else:
+                    
+                    self.move()
             
             
             ## eat the prey
@@ -558,6 +564,7 @@ class Super(mesa.Agent):
         self.lineage = kwargs.get('lineage', self.unique_id)
         self.dist = 0
         self.energy=0
+        self.steps = kwargs.get('super_steps', 20)
         
         self.kwargs = kwargs
         self.kwargs['lineage'] = self.lineage
@@ -708,9 +715,10 @@ class Super(mesa.Agent):
         
         ## move the agent
 
-            
-        self.super_hunt()
-            
+        for i in range(self.steps):
+                
+            self.super_hunt()
+                
                 
         ## eat the prey
 

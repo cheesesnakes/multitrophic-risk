@@ -28,6 +28,7 @@ params = {
     'f_die': 0.1,
     'f_max': 2500,
     'risk_cost': 0,
+    'f_steps': 5,
     
     ## predator traits
     'predator_info': True,
@@ -36,6 +37,7 @@ params = {
     's_die': 0.01,
     's_lethality': 0.5,
     's_apex_risk': True,
+    's_steps': 10,
     
     ## apex predator traits
     
@@ -43,7 +45,8 @@ params = {
     'a_energy': 10,
     'a_breed': 0.1,
     'a_die': 0.001,
-    'a_lethality': 0.15
+    'a_lethality': 0.15,
+    'a_steps': 20,
 }
 
 

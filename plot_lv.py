@@ -28,6 +28,7 @@ params = {
     'f_die': 0.1,
     'f_max': 2500,
     'risk_cost': 0,
+    'f_steps': 5, # number of steps to move
     
     ## predator traits
     'predator_info': True,
@@ -35,9 +36,10 @@ params = {
     's_breed': 0.1,
     's_die': 0.01,
     's_lethality': 0.5,
+    's_steps': 10, # number of steps to move,
 }
 
-steps = 1000
+steps = 100
 
 # plot the number of agents over time
 

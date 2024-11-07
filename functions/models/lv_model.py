@@ -40,6 +40,7 @@ class Prey(mesa.Agent):
         self.age = 0
         self.lineage = kwargs.get('lineage', self.unique_id)
         self.dist = 0
+        self.steps = kwargs.get('f_steps', 5)
         
         self.kwargs = kwargs
         self.kwargs['lineage'] = self.lineage
@@ -221,13 +222,15 @@ class Prey(mesa.Agent):
         
         ## move the agent
         
-        if self.info:
+        for i in range(self.steps):
             
-            self.risk()
+            if self.info:
+            
+                self.risk()
         
-        else:
+            else:
             
-            self.move()
+                self.move()
         
         ## calculate distance travelled
         
@@ -262,6 +265,7 @@ class Predator(mesa.Agent):
         self.amount = 1
         self.lineage = kwargs.get('lineage', self.unique_id)
         self.dist = 0
+        self.steps = kwargs.get('s_steps', 10)
         
         self.kwargs = kwargs
         self.kwargs['lineage'] = self.lineage
@@ -437,13 +441,15 @@ class Predator(mesa.Agent):
             
             ## move the agent
 
-            if self.info:
+            for i in range(self.steps):
                 
-                self.hunt()
-            
-            else:
+                if self.info:
+                    
+                    self.hunt()
                 
-                self.move()
+                else:
+                    
+                    self.move()
                 
             ## eat the prey
 
