@@ -498,3 +498,40 @@ def plot_nnd(agent_data=None, steps=100, file='mean_nnd.png'):
     print('Nearest neighbor distance plot created.')
     
     return fig
+
+# plot distane traveled by agents over time
+
+def plot_distance(agent_data=None, steps=100, file='distance.png'):
+    
+    print('Creating distance plot...')
+    
+    # calculate mean distance for each type of agent
+    
+    distance_data = agent_data.groupby(['UniqueID']).sum().reset_index()
+    
+    print(distance_data)
+    
+    plt.rcParams["axes.prop_cycle"] = plt.cycler("color", plt.cm.tab10.colors)
+    
+    # create plot
+    
+    fig, ax = plt.subplots(figsize=(8, 6))
+    
+    # plot the mean distance of agents over time
+    
+    # boxplot of agent types and distance
+    
+    ax.boxplot([distance_data[distance_data.AgentType == 'Prey']['DistanceTravelled'],
+                distance_data[distance_data.AgentType == 'Predator']['DistanceTravelled']],
+               labels=['Prey', 'Predator'])
+    
+    ax.set_xlabel('Agent Type')
+    ax.set_ylabel('Distance travelled')
+    
+    # save the plot
+    
+    plt.savefig(file)
+    
+    print('DistanceTravelled plot created.')
+    
+    return
