@@ -30,17 +30,21 @@ class Prey(mesa.Agent):
         self.model = model
         self.pos = pos
         self.amount = 1
+        
+        # traits 
         self.info = kwargs.get('prey_info', False)
+        self.f_super_risk = kwargs.get('f_super_risk', False)
+        self.risk_cost = kwargs.get('risk_cost', 0.1)
         self.f_breed = kwargs.get('f_breed', 0.2)
         self.f_die = kwargs.get('f_die', 0.1)
         self.f_max = kwargs.get('f_max', self.model.width*self.model.height/2)
-        self.risk_cost = kwargs.get('risk_cost', 0.1)
-        self.amount = 1
+        self.steps = kwargs.get('f_steps', 5)
+        
+        #state variables
         self.energy = 0 #dummy variable
         self.age = 0
         self.lineage = kwargs.get('lineage', self.unique_id)
         self.dist = 0
-        self.steps = kwargs.get('f_steps', 5)
         
         self.kwargs = kwargs
         self.kwargs['lineage'] = self.lineage
@@ -79,7 +83,7 @@ class Prey(mesa.Agent):
             #print('Prey agent reproduced:', a.unique_id, a.pos)`     
     
     ##Prey information function 
-    
+
     def risk(self):
         
         ## get current pos
@@ -92,7 +96,13 @@ class Prey(mesa.Agent):
         
         ## count the number of predator agents
         
-        predators = [a for a in neighbours if isinstance(a, Predator)]
+        if self.f_super_risk:
+            
+            predators = [a for a in neighbours if isinstance(a, Super) or isinstance(a, Predator)]
+        
+        else:
+        
+            predators = [a for a in neighbours if isinstance(a, Predator)]
         
         ## if there are predators, move away
         
@@ -223,7 +233,7 @@ class Prey(mesa.Agent):
         ## move the agent
         
         for i in range(self.steps):
-            
+        
             if self.info:
                 
                 self.risk()
@@ -256,21 +266,29 @@ class Predator(mesa.Agent):
         
         self.unique_id = unique_id
         self.model = model
-        self.age = 0
         self.pos = pos
-        self.info = kwargs.get('predator_info', False)
-        self.breed = kwargs.get('s_breed', 0.1)
-        self.energy = kwargs.get('s_energy', 10)
-        self.lethality = kwargs.get('s_lethality', 0.5)
         self.amount = 1
+        
+        # traits
+        self.info = kwargs.get('predator_info', False)
+        self.lethality = kwargs.get('s_lethality', 0.5)
+        
+        self.super_risk = kwargs.get('s_super_risk', False)
         self.apex_risk = kwargs.get('s_apex_risk', False)
+        
+        self.breed = kwargs.get('s_breed', 0.1)
+        self.s_die = kwargs.get('s_die', 0.01)
+        self.steps = kwargs.get('s_steps', 10)
+        
+        # state variables
+        self.energy = kwargs.get('s_energy', 10)
+        self.age = 0
         self.lineage = kwargs.get('lineage', self.unique_id)
         self.dist = 0
-        self.steps = kwargs.get('s_steps', 10)
-        self.s_die = kwargs.get('s_die', 0.01)
         
         self.kwargs = kwargs
         self.kwargs['lineage'] = self.lineage
+
     
     ## reproduce function predator
 
@@ -287,7 +305,7 @@ class Predator(mesa.Agent):
             ## create a new predator agent
             
             a = Predator(unique_id=self.model.schedule.get_agent_count(), 
-                        model=self.model, pos=self.pos,
+                        model=self.model, pos=self.pos, 
                         **{k: v for k, v in self.kwargs.items()})
             
             self.model.schedule.add(a)
@@ -351,8 +369,14 @@ class Predator(mesa.Agent):
         
         ## count the number of predator agents
         
+        if self.super_risk:
             
-        predators = [a for a in neighbours if isinstance(a, Apex)]
+            predators = [a for a in neighbours if isinstance(a, Super)]
+        
+        else:
+            
+            predators = [a for a in neighbours if isinstance(a, Apex)]
+            
         
         ## if there are predators, move away
         
@@ -491,11 +515,10 @@ class Predator(mesa.Agent):
         if death == 1:
             
             self.die()
-                      
+                       
     ## step function
     
     def step(self):
-        
         self.age += 1
         
         x,y = self.pos
@@ -513,7 +536,7 @@ class Predator(mesa.Agent):
             
             for i in range(self.steps):
 
-                if self.info and self.apex_risk:
+                if (self.info and self.super_risk) or (self.info and self.apex_risk):
                     
                     self.hunt()
                     
@@ -541,7 +564,7 @@ class Predator(mesa.Agent):
             self.dist += np.sqrt((x - self.pos[0])**2 + (y - self.pos[1])**2)
             
             #print('Predator energy:', self.energy)
-            
+
             ## die
             
             self.random_die()
@@ -564,16 +587,22 @@ class Apex(mesa.Agent):
         self.model = model
         self.age = 0
         self.pos = pos
+        
+        # traits
         self.info = kwargs.get('apex_info', False)
-        self.breed = kwargs.get('a_breed', 0.1)
-        self.energy = kwargs.get('a_energy', 10)
         self.lethality = kwargs.get('a_lethality', 0.15)
+        
+        self.steps = kwargs.get('a_steps', 20)
+        
+        self.breed = kwargs.get('a_breed', 0.1)
+        self.a_die = kwargs.get('a_die', 0.001)
+        self.energy = kwargs.get('a_energy', 10)
+        
+        # state variables
         self.amount = 1
         self.age = 0
         self.lineage = kwargs.get('lineage', self.unique_id)
         self.dist = 0
-        self.steps = kwargs.get('a_steps', 20)
-        self.a_die = kwargs.get('a_die', 0.001)
         
         self.kwargs = kwargs
         self.kwargs['lineage'] = self.lineage
@@ -785,10 +814,204 @@ class Apex(mesa.Agent):
             
             self.random_die()
 
+
+class Super(mesa.Agent):
+    ''' 
+    Super Predator agent class
+    
+    Attributes:
+    - unique_id: int
+    - energy: float, amount of energy the predator has
+    - age: int, age of the predator, determines survival
+    - location: tuple, x,y coordinates of the predator on the grid
+    - predator eats prey, if prey is available
+    '''
+    
+    def __init__(self, model, unique_id, pos, **kwargs):
         
+        self.unique_id = unique_id
+        self.model = model
+        self.age = 0
+        self.pos = pos
+        
+        # traits
+        self.info = True
+        self.lethality = kwargs.get('super_lethality', 1)
+        self.target = kwargs.get('super_target', '2')
+        self.steps = kwargs.get('super_steps', 20)
+        
+        # state variables
+        self.amount = 1
+        self.age = 0
+        self.lineage = kwargs.get('lineage', self.unique_id)
+        self.dist = 0
+        self.energy=0
+        
+        self.kwargs = kwargs
+        self.kwargs['lineage'] = self.lineage
+        
+        if self.target == '1':
+            
+            self.target = 'prey'
+        
+        elif self.target == '2':
+            
+            self.target = 'predator'
+        
+        else:
+            
+            self.target = 'both'
+        
+    #Predator information function
+
+    def super_hunt(self):
+        
+        ## get current pos
+        
+        x, y = self.pos
+        
+        ## get neighbouring prey agents
+        
+        neighbours = self.model.grid.get_neighbors((x,y), moore=True, include_center=False)
+        
+        
+        if self.target == 'predator':
+            
+            prey = [a for a in neighbours if isinstance(a, Predator)]
+        
+        elif self.target == 'prey':
+            
+            prey = [a for a in neighbours if isinstance(a, Prey)]
+            
+        else:
+            
+            prey = [a for a in neighbours if isinstance(a, Predator) or isinstance(a, Prey)]
+            
+        ## choose a random prey agent
+        
+        if len(prey) > 0:
+            
+            a = self.model.random.choice(prey)
+            
+            ## get the prey pos
+            
+            x_p, y_p = a.pos
+            
+            ## move towards the prey
+            
+            x = x_p
+            y = y_p
+            
+            ## move the agent
+            
+            self.model.grid.move_agent(self, (x,y))
+        
+        else:
+            
+            ## if there are no prey, move randomly
+            
+            self.move()
+
+    ## move function
+
+    def move(self):
+        
+        ## get the current position
+        
+        x, y = self.pos
+        
+        ## find an empty cell
+        
+        #empty = self.model.grid.get_neighborhood((x,y), moore=True, include_center=False)
+        
+        ## if there are empty cells, move to a random empty cell
+        
+        #if len(empty) > 0:
+            
+        #    x, y = self.model.random.choice(empty)
+            
+            ## move the agent
+            
+        #    self.model.grid.move_agent(self, (x,y))
+            
+        ## if there are no empty cells, stay in the same position
+        
+        #else:
+            
+        #    self.model.grid.move_agent(self, (x,y))
+        
+        ## random walk
+        
+        x += self.model.random.randint(-1,1)
+        y += self.model.random.randint(-1,1)
+        
+        ## move the agent
+        
+        self.model.grid.move_agent(self, (x,y))        
+    
+    def super_eat(self):
+    
+        ## get the current location
+        
+        x, y = self.pos
+        
+        ## get the prey at the current pos
+        
+        neighbours = self.model.grid.get_neighbors((x,y), moore=True, include_center=False)
+        
+        ## count the number of prey agents
+        if self.target == 'predator':
+            
+            prey = [a for a in neighbours if isinstance(a, Predator)]
+        
+        elif self.target == 'prey':
+            
+            prey = [a for a in neighbours if isinstance(a, Prey)]
+            
+        else:
+            
+            prey = [a for a in neighbours if isinstance(a, Predator) or isinstance(a, Prey)]
+            
+        ## choose a random prey agent
+        
+        if len(prey) > 0:
+            
+            a = self.model.random.choice(prey)
+            
+            ## remove the prey agent
+            
+            l = np.random.binomial(1, self.lethality)
+            
+            if l == 1:
+            
+                self.model.grid.remove_agent(a)
+                
+                self.model.schedule.remove(a)
+                            
+    ## step function
+    
+    def step(self):
+        
+        x,y = self.pos
+        
+        ## move the agent
+
+        for i in range(self.steps):
+                
+            self.super_hunt()
+                
+                
+        ## eat the prey
+
+        self.super_eat()
+        
+        # calculate distance travelled
+            
+        self.dist += np.sqrt((x - self.pos[0])**2 + (y - self.pos[1])**2)
+            
 # Define model class
 
-class model_1(mesa.Model):
+class model(mesa.Model):
     '''
     Define model rules
     - 20x20 grid
@@ -824,7 +1047,8 @@ class model_1(mesa.Model):
         self.count = mesa.DataCollector(
             model_reporters = {'Prey': lambda m: m.data_collector(Prey), 
                            'Predator': lambda m: m.data_collector(Predator),
-                            'Apex': lambda m: m.data_collector(Apex)
+                           'Apex': lambda m: m.data_collector(Apex),
+                            'Super': lambda m: m.data_collector(Super)
                            }
             )
         
@@ -862,7 +1086,7 @@ class model_1(mesa.Model):
     def create_agents(self, **kwargs):    
         ## create prey agents
         
-        for i in range(kwargs.get('prey', 100)):
+        for i in range(kwargs.get('prey', 0)):
             
             x = self.random.randrange(self.width)
             y = self.random.randrange(self.height)
@@ -876,7 +1100,7 @@ class model_1(mesa.Model):
             
             self.grid.place_agent(a, (x,y))
         
-        for i in range(kwargs.get('predator', 10)):
+        for i in range(kwargs.get('predator', 0)):
             
             x = self.random.randrange(self.width)
             y = self.random.randrange(self.height)
@@ -890,12 +1114,27 @@ class model_1(mesa.Model):
             
             self.grid.place_agent(a, (x,y))
         
-        for i in range(kwargs.get('apex', 1)):
+        for i in range(kwargs.get('apex', 0)):
             
             x = self.random.randrange(self.width)
             y = self.random.randrange(self.height)
             
             a = Apex(unique_id=i, model=self, pos=(x,y), 
+                     **{k: v for k, v in kwargs.items()})
+            
+            self.schedule.add(a)
+            
+            ## add the agent to a random grid cell
+            
+            self.grid.place_agent(a, (x,y))
+            
+        
+        for i in range(kwargs.get('super', 0)):
+            
+            x = self.random.randrange(self.width)
+            y = self.random.randrange(self.height)
+            
+            a = Super(unique_id=i, model=self, pos=(x,y), 
                      **{k: v for k, v in kwargs.items()})
             
             self.schedule.add(a)
@@ -940,12 +1179,14 @@ class model_1(mesa.Model):
                     
                     print('Number of prey:', self.data_collector(Prey), 
                           'Number of predators:', self.data_collector(Predator),
-                          'Number of apex predators:', self.data_collector(Apex))
+                          'Number of apex predators:', self.data_collector(Apex),
+                          'Number of super predators:', self.data_collector(Super))
                 
                 if progress:
                     
                     print ('Number of prey:', self.data_collector(Prey), 
                           'Number of predators:', self.data_collector(Predator),
-                          'Number of apex predators:', self.data_collector(Apex),
+                            'Number of apex predators:', self.data_collector(Apex),
+                          'Number of super predators:', self.data_collector(Super),
                           'Step:', i)
             

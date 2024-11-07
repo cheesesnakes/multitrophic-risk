@@ -4,8 +4,8 @@ from functions.runner import model_run
 
 kwargs = {
     
-    # model to run
     'model': 'lv',
+    # model to run
     'progress': True,
     'info' : False,    
     'limit' : 10000,

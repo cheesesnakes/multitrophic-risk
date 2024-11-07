@@ -5,33 +5,17 @@ from matplotlib import animation
 from matplotlib.pyplot import colorbar
 import numpy as np
 import warnings
+from functions.model import model
 
 warnings.filterwarnings("ignore")
 
-def model_run(model = "lv", steps = 50, **kwargs):
-
-    if model == "lv":
-        
-        from functions.models.lv_model import model_1
-        
-    elif model == "super":
-
-        from functions.models.super import model_1
-
-    elif model == "apex":
-
-        from functions.models.apex import model_1
-
-    else:
-
-        raise ValueError("Invalid model. Available models are lv, super and apex.")
-        
+def model_run(steps = 50, **kwargs):
 
     # Run model
 
     print('Running model...')
     
-    m = model_1(**{k: v for k, v in kwargs.items() if k != 'model'})
+    m = model(**{k: v for k, v in kwargs.items() if k != 'model'})
 
     m.run_model(steps, progress=kwargs.get('progress', False), info=kwargs.get('info', False))
 
