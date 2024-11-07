@@ -1,9 +1,7 @@
 # binary search for appropriate parameter space of the model
 
 from functions.runner import model_run
-import numpy as np
 import pandas as pd
-from math import factorial
 import ray
 
 import warnings
@@ -17,98 +15,28 @@ class experiment():
     
     def __init__(self, **kwargs):
 
-        # set default values
-        
-        defaults = {'model': 'lv',
-                    'width': 20, 'height': 20, 
-                    'predator': 10, 'prey': 100, 
-                    'prey_info': False, 'predator_info': False, 
-                    's_energy': 10, 's_breed': 0.01,
-                    'f_breed': 0.01, 'f_die': 0.1,
-                    'steps': 50, 'sample_id': 1, 'rep_id': 1, 'super_target': 2, 'super_lethality': 1,}
-
         # if kwargs is empty, use defaults
-        
-        if not kwargs:
-            
-            kwargs = defaults
         
         self.kwargs = kwargs
         
         # set the parameters
         
-        self.model = kwargs['model']
+        self.model = kwargs.get('model', 'lv')
         
         # grid size
-        self.width = kwargs['width']
-        self.height = kwargs['height']
-        self.f_max = self.width * self.height
+        self.width = kwargs.get('width', 100)
+        self.height = kwargs.get('height', 100)
+        self.f_max = self.width * self.height / 2
         
         # number of agents
-        self.predator = kwargs['predator']
-        self.prey = kwargs['prey']
+        self.predator = kwargs.get('predator', 500)
+        self.prey = kwargs.get('prey', 500)
         
         # model steps
-        self.steps = kwargs['steps']
+        self.steps = kwargs.get('steps', 100)
         
         warnings.filterwarnings("ignore")
         
-    # function: create vector of vaiables for the model
-    
-    def variables(self, vary = ["s_breed", "f_breed"], params = ["s_energy", "s_breed", "f_breed", "f_die"], n = 10):
-        
-        # catch error
-        
-        if len(vary) > len(params):
-            
-            raise ValueError("vary should be a subset of params")
-        
-        # catch wrong parameter names
-        
-        for v in vary:
-            
-            if v not in params:
-                
-                raise ValueError("vary should be a subset of params")        
-
-        # create a list of possible values
-        
-        vars = []
-        
-        for p in params:
-            
-            if p in vary:
-                    
-                if p == "predator_info" or p == "prey_info" or p == "s_super_risk" or p == "f_super_risk" or p == "s_apex_risk":
-                    
-                    t = np.array([True, False])
-                
-                else:
-                
-                    t = np.linspace(0.1, 1, n)
-                    
-                    if p == "s_energy" or p == "a_energy":
-                        
-                        t = t*10
-                
-                vars.append(t)
-            
-            else:
-                
-                t = np.repeat(self.kwargs[p], n)
-                
-                vars.append(t)
-            
-        # create a meshgrid of all combinations
-        mesh = np.meshgrid(*vars)
-        
-        # reshape the meshgrid to the correct shape
-        vars = np.array(mesh).T.reshape(-1, len(params))
-        
-        # return the vector of parameters
-        
-        return vars
-    
     # function: run the model
     
     @ray.remote
@@ -171,41 +99,12 @@ class experiment():
             # update the sample id
             
             self.sample_id += 1
+            
         else:
             
             Exception("v should be one dimensional")
             
         return results
-
-    # replicate the experiment
-    
-    def replicate(self, v, rep = 10, params = []):
-        
-        # results data frame
-        
-        self.data = pd.DataFrame(columns = ['rep_id', 'sample_id', *params, 'Prey', 'Predator', 'step'])
-        
-        rep_id = 1
-        
-        # iterate over the replicates
-        
-        for i in range(rep):
-            
-            # run the experiment
-            
-            res = self.run(v, rep_id = rep_id, params = params)
-            
-            # add the results to the data frame
-            
-            self.data = pd.concat([self.data, res])
-            
-            # write
-            
-            self.data.to_csv(f"{self.model}_results.csv")
-            
-            rep_id += 1
-        
-        return self.data
 
     # parallel processing
 
