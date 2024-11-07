@@ -274,6 +274,7 @@ class Predator(mesa.Agent):
         self.lineage = kwargs.get('lineage', self.unique_id)
         self.dist = 0
         self.steps = kwargs.get('s_steps', 10)
+        self.s_die = kwargs.get('s_die', 0.01)
         
         self.kwargs = kwargs
         self.kwargs['lineage'] = self.lineage
@@ -488,7 +489,17 @@ class Predator(mesa.Agent):
         ## remove the agent from the grid
         
         self.model.grid.remove_agent(self)
-                
+    
+    # random death function
+        
+    def random_die(self):
+        
+        death = np.random.binomial(1, self.s_die)
+        
+        if death == 1:
+            
+            self.die()
+                       
     ## step function
     
     def step(self):
@@ -537,6 +548,10 @@ class Predator(mesa.Agent):
             self.dist += np.sqrt((x - self.pos[0])**2 + (y - self.pos[1])**2)
             
             #print('Predator energy:', self.energy)
+
+            ## die
+            
+            self.random_die()
 
 class Super(mesa.Agent):
     ''' 
