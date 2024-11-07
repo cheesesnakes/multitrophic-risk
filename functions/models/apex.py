@@ -573,6 +573,7 @@ class Apex(mesa.Agent):
         self.lineage = kwargs.get('lineage', self.unique_id)
         self.dist = 0
         self.steps = kwargs.get('a_steps', 20)
+        self.a_die = kwargs.get('a_die', 0.001)
         
         self.kwargs = kwargs
         self.kwargs['lineage'] = self.lineage
@@ -726,7 +727,17 @@ class Apex(mesa.Agent):
         ## remove the agent from the grid
         
         self.model.grid.remove_agent(self)
-                
+    
+    # random death function
+        
+    def random_die(self):
+        
+        death = np.random.binomial(1, self.a_die)
+        
+        if death == 1:
+            
+            self.die()
+                   
     ## step function
     
     def step(self):
@@ -769,6 +780,10 @@ class Apex(mesa.Agent):
             self.dist += np.sqrt((x - self.pos[0])**2 + (y - self.pos[1])**2)
             
             #print('Predator energy:', self.energy)
+            
+            ## die
+            
+            self.random_die()
 
         
 # Define model class
