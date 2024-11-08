@@ -110,7 +110,7 @@ def experiment_1():
 
     # save results
 
-    results.to_csv(f'output/Experiments/{E}_results.csv')
+    results.to_csv(f'output/Experiments/results/{E}_results.csv')
    
     # run model with super predator
     
@@ -136,7 +136,7 @@ def experiment_1():
     
     # save results
     
-    results.to_csv(f'output/Experiments/{E}_results.csv')
+    results.to_csv(f'output/Experiments/results/{E}_results.csv')
     
     print("Experiment 1 complete")
    
@@ -193,7 +193,7 @@ def experiment_2():
 
             # save results
 
-            results.to_csv(f'output/Experiments/{E}_results.csv')
+            results.to_csv(f'output/Experiments/results/{E}_results.csv')
 
 # Experiment 4: Determine effects of predator and prey information
 
@@ -243,7 +243,7 @@ def experiment_3():
     
             # save results
     
-            results.to_csv(f'output/Experiments/{E}_results.csv')
+            results.to_csv(f'output/Experiments/results/{E}_results.csv')
             
 # Experiment 5: Determining the tradeoff between predator lethality and cost of anti-predator behavior
 
@@ -292,7 +292,7 @@ def experiment_4():
     
     # save results
     
-    results.to_csv(f'output/Experiments/{E}_results.csv')
+    results.to_csv(f'output/Experiments/results/{E}_results.csv')
     
     
 # running experiments

@@ -61,14 +61,14 @@ m = model_run(**kwargs, steps=steps)
 model_data = m.count.get_model_vars_dataframe()
 # set name for index column
 model_data.index.name = 'Step'
-model_data.to_csv(f'data_model_{kwargs["model"]}_debug-prey-only.csv')
+model_data.to_csv(f'output/debug/results/data_model_{kwargs["model"]}_debug-prey-only.csv')
 
 agent_data = m.spatial.get_agent_vars_dataframe()
-agent_data.to_csv(f'data_agents_{kwargs["model"]}_debug-prey-only.csv')
+agent_data.to_csv(f'output/debug/results/data_agents_{kwargs["model"]}_debug-prey-only.csv')
 
-plot_pop(model_data=model_data, params = kwargs, file = 'pop_debug-prey-only.png', steps=steps)
-agent_data = pd.read_csv(f'data_agents_{kwargs["model"]}_debug-prey-only.csv')
-plot_space(agent_data=agent_data, file = 'space_debug-prey-only.gif', steps=steps)
+plot_pop(model_data=model_data, params = kwargs, file = 'output/debug/plots/pop_debug-prey-only.png', steps=steps)
+agent_data = pd.read_csv(f'output/debug/results/data_agents_{kwargs["model"]}_debug-prey-only.csv')
+plot_space(agent_data=agent_data, file = 'output/debug/plots/space_debug-prey-only.gif', steps=steps)
 
 # run model with only predators
 
@@ -126,14 +126,14 @@ m = model_run(**kwargs, steps=steps)
 model_data = m.count.get_model_vars_dataframe()
 # set name for index column
 model_data.index.name = 'Step'
-model_data.to_csv(f'data_model_{kwargs["model"]}_debug-predator-only.csv')
+model_data.to_csv(f'output/debug/results/data_model_{kwargs["model"]}_debug-predator-only.csv')
 
 agent_data = m.spatial.get_agent_vars_dataframe()
-agent_data.to_csv(f'data_agents_{kwargs["model"]}_debug-predator-only.csv')
+agent_data.to_csv(f'output/debug/results/data_agents_{kwargs["model"]}_debug-predator-only.csv')
 
-plot_pop(model_data=model_data, params = kwargs, file = 'pop_debug-predator-only.png', steps=steps)
-agent_data = pd.read_csv(f'data_agents_{kwargs["model"]}_debug-predator-only.csv')
-plot_space(agent_data=agent_data, file = 'space_debug-predator-only.gif', steps=steps)
+plot_pop(model_data=model_data, params = kwargs, file = 'output/debug/plots/pop_debug-predator-only.png', steps=steps)
+agent_data = pd.read_csv(f'output/debug/results/data_agents_{kwargs["model"]}_debug-predator-only.csv')
+plot_space(agent_data=agent_data, file = 'output/debug/plots/space_debug-predator-only.gif', steps=steps)
 
 # run model with only apex predators
 
@@ -191,14 +191,14 @@ m = model_run(**kwargs, steps=steps)
 model_data = m.count.get_model_vars_dataframe()
 # set name for index column
 model_data.index.name = 'Step'
-model_data.to_csv(f'data_model_{kwargs["model"]}_debug-apex-only.csv')
+model_data.to_csv(f'output/debug/results/data_model_{kwargs["model"]}_debug-apex-only.csv')
 
 agent_data = m.spatial.get_agent_vars_dataframe()
-agent_data.to_csv(f'data_agents_{kwargs["model"]}_debug-apex-only.csv')
+agent_data.to_csv(f'output/debug/results/data_agents_{kwargs["model"]}_debug-apex-only.csv')
 
-plot_pop(model_data=model_data, params = kwargs, file = 'pop_debug-apex-only.png', steps=steps)
-agent_data = pd.read_csv(f'data_agents_{kwargs["model"]}_debug-apex-only.csv')
-plot_space(agent_data=agent_data, file = 'space_debug-apex-only.gif', steps=steps)
+plot_pop(model_data=model_data, params = kwargs, file = 'output/debug/plots/pop_debug-apex-only.png', steps=steps)
+agent_data = pd.read_csv(f'output/debug/results/data_agents_{kwargs["model"]}_debug-apex-only.csv')
+plot_space(agent_data=agent_data, file = 'output/debug/plots/space_debug-apex-only.gif', steps=steps)
 
 # run model with super only
 
@@ -256,11 +256,11 @@ m = model_run(**kwargs, steps=steps)
 model_data = m.count.get_model_vars_dataframe()
 # set name for index column
 model_data.index.name = 'Step'
-model_data.to_csv(f'data_model_{kwargs["model"]}_debug-super-only.csv')
+model_data.to_csv(f'output/debug/results/data_model_{kwargs["model"]}_debug-super-only.csv')
 
 agent_data = m.spatial.get_agent_vars_dataframe()
-agent_data.to_csv(f'data_agents_{kwargs["model"]}_debug-super-only.csv')
+agent_data.to_csv(f'output/debug/results/data_agents_{kwargs["model"]}_debug-super-only.csv')
 
-plot_pop(model_data=model_data, params = kwargs, file = 'pop_debug-super-only.png', steps=steps)
-agent_data = pd.read_csv(f'data_agents_{kwargs["model"]}_debug-super-only.csv')
-plot_space(agent_data=agent_data, file = 'space_debug-super-only.gif', steps=steps)
+plot_pop(model_data=model_data, params = kwargs, file = 'output/debug/plots/pop_debug-super-only.png', steps=steps)
+agent_data = pd.read_csv(f'output/debug/results/data_agents_{kwargs["model"]}_debug-super-only.csv')
+plot_space(agent_data=agent_data, file = 'output/debug/plots/space_debug-super-only.gif', steps=steps)
