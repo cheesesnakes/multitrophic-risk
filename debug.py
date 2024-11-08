@@ -28,7 +28,7 @@ kwargs = {
     'f_breed': 0.2, # max birth rate
     'f_die': 0.1,
     'f_max': 2500,
-    'risk_cost': 0,
+    'risk_cost': 0.01,
     'f_steps': 5,
     
     ## predator traits
@@ -93,7 +93,7 @@ kwargs = {
     'f_breed': 0.2, # max birth rate
     'f_die': 0.1,
     'f_max': 2500,
-    'risk_cost': 0,
+    'risk_cost': 0.01,
     'f_steps': 5,
     
     ## predator traits
@@ -158,7 +158,7 @@ kwargs = {
     'f_breed': 0.2, # max birth rate
     'f_die': 0.1,
     'f_max': 2500,
-    'risk_cost': 0,
+    'risk_cost': 0.01,
     'f_steps': 5,
     
     ## predator traits
@@ -223,7 +223,7 @@ kwargs = {
     'f_breed': 0.2, # max birth rate
     'f_die': 0.1,
     'f_max': 2500,
-    'risk_cost': 0,
+    'risk_cost': 0.01,
     'f_steps': 5,
     
     ## predator traits
