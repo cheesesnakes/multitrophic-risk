@@ -93,7 +93,7 @@ def run_example(kwargs = kwargs, steps = steps, model = 'lv'):
     model_data = m.count.get_model_vars_dataframe()
     # set name for index column
     model_data.index.name = 'Step'
-    model_data.to_csv(f'output/examples/restuls/data_model_{kwargs["model"]}.csv')
+    model_data.to_csv(f'output/examples/results/data_model_{kwargs["model"]}.csv')
     agent_data = m.spatial.get_agent_vars_dataframe()
     agent_data.to_csv(f'output/examples/results/data_agents_{kwargs["model"]}.csv')
 

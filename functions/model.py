@@ -297,7 +297,13 @@ class Predator(mesa.Agent):
             
         # get probability of reproduction
         
-        reproduce = np.random.binomial(1, self.breed)  
+        if self.breed > 0:
+            
+            reproduce = np.random.binomial(1, self.breed)  
+        
+        else:
+            
+            reproduce = 0
         
         ## check if the energy is enough to reproduce
         
@@ -374,7 +380,7 @@ class Predator(mesa.Agent):
             
             predators = [a for a in neighbours if isinstance(a, Super)]
         
-        else:
+        elif self.apex_risk:
             
             predators = [a for a in neighbours if isinstance(a, Apex)]
             
@@ -394,8 +400,10 @@ class Predator(mesa.Agent):
             ## move away from the predator without jumping over the grid
             
             self.escape(x, y, x_p, y_p)
-
-            self.breed = self.breed - self.risk_cost
+            
+            if self.breed > 0:
+                
+                self.breed = self.breed - self.risk_cost
             
         else:
             
