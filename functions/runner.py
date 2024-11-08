@@ -2,7 +2,6 @@
 
 import matplotlib.pyplot as plt
 from matplotlib import animation
-from matplotlib.pyplot import colorbar
 import numpy as np
 import warnings
 from functions.model import model

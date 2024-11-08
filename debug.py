@@ -1,4 +1,3 @@
-from matplotlib.pylab import plot
 from functions.runner import model_run
 from functions.runner import plot_pop, plot_space
 import pandas as pd
