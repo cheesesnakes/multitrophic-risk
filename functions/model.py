@@ -275,7 +275,8 @@ class Predator(mesa.Agent):
         
         self.super_risk = kwargs.get('s_super_risk', False)
         self.apex_risk = kwargs.get('s_apex_risk', False)
-        
+        self.risk_cost = kwargs.get('risk_cost', 0)
+
         self.breed = kwargs.get('s_breed', 0.1)
         self.s_die = kwargs.get('s_die', 0.01)
         self.steps = kwargs.get('s_steps', 10)
@@ -393,10 +394,16 @@ class Predator(mesa.Agent):
             ## move away from the predator without jumping over the grid
             
             self.escape(x, y, x_p, y_p)
+
+            self.breed = self.breed - self.risk_cost
             
         else:
             
             self.move()
+
+            if self.breed < self.kwargs.get('s_breed', 0.5):
+
+                self.breed = self.breed + self.risk_cost
             
     def escape(self, x, y, x_p, y_p):
         
