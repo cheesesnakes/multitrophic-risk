@@ -137,6 +137,8 @@ def run_example(kwargs = kwargs, steps = steps, model = 'lv'):
 
 if __name__ == '__main__':
     
+    model = argv[1] if len(argv) > 0 else 'lv'
+    
     run_example(kwargs = kwargs, steps = steps, model = argv[1])
     
     print("Done!")

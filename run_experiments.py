@@ -318,6 +318,8 @@ def run(exp = "All"):
     
 if __name__ == '__main__':
     
-    run(exp = argv[1])
+    exp = argv[1] if len(argv) > 0 else "All"
+    
+    run(exp = exp)
     
     print("Done!")
