@@ -78,9 +78,9 @@ for strategy in strategies:
     model_data = m.count.get_model_vars_dataframe()
     # set name for index column
     model_data.index.name = 'Step'
-    model_data.to_csv(f'output/strategies/results/data_model_{kwargs['model']}_{strategy}.csv')
+    model_data.to_csv(f'output/strategies/results/data_model_{kwargs["model"]}_{strategy}.csv')
     agent_data = m.spatial.get_agent_vars_dataframe()
-    agent_data.to_csv(f'output/strategies/results/data_agents_{kwargs['model']}_{strategy}.csv')
+    agent_data.to_csv(f'output/strategies/results/data_agents_{kwargs["model"]}_{strategy}.csv')
         
         # load data
 

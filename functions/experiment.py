@@ -26,7 +26,7 @@ class experiment():
         # grid size
         self.width = kwargs.get('width', 100)
         self.height = kwargs.get('height', 100)
-        self.f_max = self.width * self.height / 2
+        self.f_max = kwargs.get('f_max', 2500) 
         
         # number of agents
         self.predator = kwargs.get('predator', 500)

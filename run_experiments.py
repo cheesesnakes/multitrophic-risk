@@ -10,7 +10,7 @@ from sys import argv
 kwargs = {
     
     # model to run   
-    'limit' : 50*50*4,
+    'limit' : 100000,
     'num_cpus': 30,
     'reps': 10,
     
@@ -57,7 +57,7 @@ kwargs = {
 
     # parameters to vary
 
-    'params': ['s_energy', 'f_breed']}
+    'params': ['s_breed', 'f_breed']}
 
 # create parameter space
 
@@ -251,11 +251,14 @@ def experiment_3():
 def create_space_2():
     
     risk_costs = np.array([0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1])
-    lethality = np.array([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1])
     
-    vars = np.array(np.meshgrid(risk_costs, lethality))
+    s_breed = np.array([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1])
     
-    return vars.reshape(2, -1).T
+    f_breed = np.array([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1])
+    
+    vars = np.array(np.meshgrid(risk_costs, s_breed, f_breed))
+    
+    return vars.reshape(3, -1).T
 
 def experiment_4():
     
@@ -267,7 +270,7 @@ def experiment_4():
     
     results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'step'])
     
-    kwargs['params'] = ['risk_cost', 's_lethality']
+    kwargs['params'] = ['risk_cost', 's_breed', 'f_breed']
     kwargs['model'] = 'lv'
     kwargs['predator'] = 200
     kwargs['prey'] = 200
@@ -310,11 +313,17 @@ def run(exp = "All"):
     elif exp == "3":
         
         experiment_3()
+ 
+    elif exp == "4":
+        
+        experiment_4()
             
     else:
     
         experiment_1()
         experiment_2()
+        experiment_3()
+        experiment_4()
     
 if __name__ == '__main__':
     

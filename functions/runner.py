@@ -16,7 +16,7 @@ def model_run(steps = 50, **kwargs):
     
     m = model(**{k: v for k, v in kwargs.items() if k != 'model'})
 
-    m.run_model(steps, progress=kwargs.get('progress', False), info=kwargs.get('info', False))
+    m.run_model(steps, progress=kwargs.get('progress', False), info=kwargs.get('info', False), limit = kwargs.get('limit', 10000), stop = kwargs.get('stop', False))
 
     print('Model run complete.')
     
