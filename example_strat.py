@@ -83,38 +83,38 @@ for strategy in strategies:
         
         # load data
 
-    model_data = pd.read_csv(f'data_model_{kwargs["model"]}.csv')
-    agent_data = pd.read_csv(f'data_agents_{kwargs["model"]}.csv')
+    model_data = pd.read_csv(f'data_model_{kwargs["model"]}_{strategy}.csv')
+    agent_data = pd.read_csv(f'data_agents_{kwargs["model"]}_{strategy}.csv')
 
     # plot the number of agents over time
 
-    plot_pop(model_data=model_data, params = kwargs, file = f'pop_{kwargs["model"]}.png', steps=steps)
+    plot_pop(model_data=model_data, params = kwargs, file = f'pop_{kwargs["model"]}_{strategy}.png', steps=steps)
 
     # plot the age distribution of agents
 
-    plot_age(agent_data=agent_data, file = f'age_{kwargs["model"]}.png', steps=steps)
+    plot_age(agent_data=agent_data, file = f'age_{kwargs["model"]}_{strategy}.png', steps=steps)
 
     # plot the energy distribution of agents
 
-    plot_energy(agent_data=agent_data, file = f'energy_{kwargs["model"]}.png', steps=steps)
+    plot_energy(agent_data=agent_data, file = f'energy_{kwargs["model"]}_{strategy}.png', steps=steps)
 
     # plot the distance distribution of agents
 
-    #plot_dist(agent_data=agent_data, file = 'dist_{kwargs["model"]}.png', steps=steps)
+    #plot_dist(agent_data=agent_data, file = 'dist_{kwargs["model"]}_{strategy}.png', steps=steps)
 
     # plot the nearest neighbour distance distribution of agents
 
-    plot_nnd(agent_data=agent_data, file = f'nnd_{kwargs["model"]}.png', steps=steps)
+    plot_nnd(agent_data=agent_data, file = f'nnd_{kwargs["model"]}_{strategy}.png', steps=steps)
 
     # plot density of agents
 
-    plot_density(spatial_data=agent_data, file = f'density_{kwargs["model"]}.gif', steps=steps)
+    plot_density(spatial_data=agent_data, file = f'density_{kwargs["model"]}_{strategy}.gif', steps=steps)
 
     # plot spatial distribution of agents
 
-    plot_space(agent_data=agent_data,file = f'space_{kwargs["model"]}.gif', steps=steps)
+    plot_space(agent_data=agent_data,file = f'space_{kwargs["model"]}_{strategy}.gif', steps=steps)
 
     # plot spatial distribution of agents with population size
 
     plot_space_pop(agent_data=agent_data, model_data=model_data, params=kwargs,
-                file = f'space_pop_{kwargs["model"]}.gif', steps=steps)
+                file = f'space_pop_{kwargs["model"]}_{strategy}.gif', steps=steps)
