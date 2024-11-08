@@ -6,26 +6,16 @@ source ./abm_env/bin/activate
 
 echo "Chapter 2: Running all scripts"
 
-# Run all the scripts in the correct order
+# run all scripts
 
-# run the experiments
-#python run_experiment_super.py
-#python run_experiment_apex.py
-#python run_experiment_lv.py
+python debug.py
 
-# run analysis script
-
-cat analysis.R | r
-
-# run the examples
-python example_super.py
-python plot_super.py
-python example_apex.py
-python plot_apex.py
-python example_lv.py
-python plot_lv.py
+python example.py 'lv'
+python example.py 'apex'
+python example.py 'super'
 python example_strat.py
-python plot_strat.py
+
+python run_experiments.py
 
 echo "Chapter 2: Done running all scripts"
 
