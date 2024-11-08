@@ -6,7 +6,7 @@ import pandas as pd
 
 kwargs = {
     
-    'model': 'lv',
+    "model": 'lv',
     # model to run
     'progress': True,
     'info' : False,    
@@ -22,10 +22,10 @@ kwargs = {
     
     ## prey traits
     'prey_info': True,
-    'f_breed': 0.2, # max birth rate
+    'f_breed': 0.5, # max birth rate
     'f_die': 0.1,
     'f_max': 2500,
-    'risk_cost': 0,
+    'risk_cost': 0.01, # 10% of r
     'f_steps': 5, # number of steps to move
     
     ## predator traits
@@ -47,9 +47,9 @@ m = model_run(**kwargs, steps=steps)
 model_data = m.count.get_model_vars_dataframe()
 # set name for index column
 model_data.index.name = 'Step'
-model_data.to_csv(f'data_model_{kwargs['model']}.csv')
+model_data.to_csv(f'data_model_{kwargs["model"]}.csv')
 agent_data = m.spatial.get_agent_vars_dataframe()
-agent_data.to_csv(f'data_agents_{kwargs['model']}.csv')
+agent_data.to_csv(f'data_agents_{kwargs["model"]}.csv')
 
 # load data
 
