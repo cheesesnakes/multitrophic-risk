@@ -2,7 +2,7 @@
 
 # load venv
 
-source ./abm_env/bin/activate
+source ./venv/bin/activate
 
 echo "Chapter 2: Running all scripts"
 
