@@ -49,7 +49,7 @@ kwargs = {
     'super_steps': 80,
 }
 
-steps = 100
+steps = 1000
 
 def  set_params(kwargs = kwargs, model = 'lv'):
     

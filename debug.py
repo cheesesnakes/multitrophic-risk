@@ -5,23 +5,16 @@ import pandas as pd
 
 # using default parameters built into the model
 
-# run model with only prey
-
 kwargs = {
     
     # model to run
-    'model': 'apex',
     'progress': True,
     'info' : False,  
     'limit' : 10000,
+    
     # model parameters
     'width': 100,
     'height': 100,
-    
-    # number of agents to start with
-    'predator': 0,
-    'prey': 500,
-    'apex' : 0,
     
     ## prey traits
     'prey_info': True,
@@ -54,213 +47,71 @@ steps = 1000
 
 # run the model
 
-m = model_run(**kwargs, steps=steps)
-
-# save data
-
-model_data = m.count.get_model_vars_dataframe()
-# set name for index column
-model_data.index.name = 'Step'
-model_data.to_csv(f'output/debug/results/data_model_{kwargs["model"]}_debug-prey-only.csv')
-
-agent_data = m.spatial.get_agent_vars_dataframe()
-agent_data.to_csv(f'output/debug/results/data_agents_{kwargs["model"]}_debug-prey-only.csv')
-
-plot_pop(model_data=model_data, params = kwargs, file = 'output/debug/plots/pop_debug-prey-only.png', steps=steps)
-agent_data = pd.read_csv(f'output/debug/results/data_agents_{kwargs["model"]}_debug-prey-only.csv')
-plot_space(agent_data=agent_data, file = 'output/debug/plots/space_debug-prey-only.gif', steps=steps)
-
-# run model with only predators
-
-kwargs = {
+def run_debug(**kwargs):
     
-    # model to run
-    'model': 'apex',
-    'progress': True,
-    'info' : False,  
-    'limit' : 10000,
-    # model parameters
-    'width': 100,
-    'height': 100,
+    # run model 
     
-    # number of agents to start with
-    'predator': 500,
-    'prey': 0,
-    'apex' : 0,
+    m = model_run(**kwargs, steps=steps)
     
-    ## prey traits
-    'prey_info': True,
-    'f_breed': 0.2, # max birth rate
-    'f_die': 0.1,
-    'f_max': 2500,
-    'risk_cost': 0.01,
-    'f_steps': 5,
+    # save data
     
-    ## predator traits
-    'predator_info': True,
-    's_energy': 10,
-    's_breed': 0.1,
-    's_die': 0.01,
-    's_lethality': 0.5,
-    's_apex_risk': True,
-    's_steps': 10,
+    model_data = m.count.get_model_vars_dataframe()
+    # set name for index column
+    model_data.index.name = 'Step'
+    model_data.to_csv(f'output/debug/results/data_model_{kwargs["model"]}.csv')
     
-    ## apex predator traits
+    agent_data = m.spatial.get_agent_vars_dataframe()
+    agent_data.to_csv(f'output/debug/results/data_agents_{kwargs["model"]}.csv')
     
-    'apex_info': True,
-    'a_energy': 10,
-    'a_breed': 0.1,
-    'a_die': 0.001,
-    'a_lethality': 0.15,
-    'a_steps': 20,
-}
-
-steps = 1000
-
-# run the model
-
-m = model_run(**kwargs, steps=steps)
-
-# save data
-
-model_data = m.count.get_model_vars_dataframe()
-# set name for index column
-model_data.index.name = 'Step'
-model_data.to_csv(f'output/debug/results/data_model_{kwargs["model"]}_debug-predator-only.csv')
-
-agent_data = m.spatial.get_agent_vars_dataframe()
-agent_data.to_csv(f'output/debug/results/data_agents_{kwargs["model"]}_debug-predator-only.csv')
-
-plot_pop(model_data=model_data, params = kwargs, file = 'output/debug/plots/pop_debug-predator-only.png', steps=steps)
-agent_data = pd.read_csv(f'output/debug/results/data_agents_{kwargs["model"]}_debug-predator-only.csv')
-plot_space(agent_data=agent_data, file = 'output/debug/plots/space_debug-predator-only.gif', steps=steps)
-
-# run model with only apex predators
-
-kwargs = {
+    #plot population
     
-    # model to run
-    'model': 'apex',
-    'progress': True,
-    'info' : False,  
-    'limit' : 10000,
-    # model parameters
-    'width': 100,
-    'height': 100,
+    plot_pop(model_data=model_data, params = kwargs, file = f'output/debug/plots/pop_{kwargs["model"]}.png', steps=steps)
     
-    # number of agents to start with
-    'predator': 0,
-    'prey': 0,
-    'apex' : 500,
+    #plot space
     
-    ## prey traits
-    'prey_info': True,
-    'f_breed': 0.2, # max birth rate
-    'f_die': 0.1,
-    'f_max': 2500,
-    'risk_cost': 0.01,
-    'f_steps': 5,
+    agent_data = pd.read_csv(f'output/debug/results/data_agents_{kwargs["model"]}.csv')
     
-    ## predator traits
-    'predator_info': True,
-    's_energy': 10,
-    's_breed': 0.1,
-    's_die': 0.01,
-    's_lethality': 0.5,
-    's_apex_risk': True,
-    's_steps': 10,
+    plot_space(agent_data=agent_data, file = f'output/debug/plots/space_{kwargs["model"]}.gif', steps=steps)
+
+if __name__ == '__main__':
     
-    ## apex predator traits
+    # run model with prey only
     
-    'apex_info': True,
-    'a_energy': 10,
-    'a_breed': 0.1,
-    'a_die': 0.001,
-    'a_lethality': 0.15,
-    'a_steps': 20,
-}
-
-steps = 1000
-
-# run the model
-
-m = model_run(**kwargs, steps=steps)
-
-# save data
-
-model_data = m.count.get_model_vars_dataframe()
-# set name for index column
-model_data.index.name = 'Step'
-model_data.to_csv(f'output/debug/results/data_model_{kwargs["model"]}_debug-apex-only.csv')
-
-agent_data = m.spatial.get_agent_vars_dataframe()
-agent_data.to_csv(f'output/debug/results/data_agents_{kwargs["model"]}_debug-apex-only.csv')
-
-plot_pop(model_data=model_data, params = kwargs, file = 'output/debug/plots/pop_debug-apex-only.png', steps=steps)
-agent_data = pd.read_csv(f'output/debug/results/data_agents_{kwargs["model"]}_debug-apex-only.csv')
-plot_space(agent_data=agent_data, file = 'output/debug/plots/space_debug-apex-only.gif', steps=steps)
-
-# run model with super only
-
-kwargs = {
+    kwargs['model'] = 'debug-prey-only'
+    kwargs['predator'] = 0
+    kwargs['apex'] = 0
+    kwargs['prey'] = 500
+    kwargs['super'] = 0 
     
-    # model to run
-    'model': 'super',
-    'progress': True,
-    'info' : False,  
-    'limit' : 10000,
-    # model parameters
-    'width': 100,
-    'height': 100,
+    run_debug(**kwargs)
     
-    # number of agents to start with
-    'predator': 500,
-    'prey': 0,
-    'apex' : 0,
+    # run model with predator only
     
-    ## prey traits
-    'prey_info': True,
-    'f_breed': 0.2, # max birth rate
-    'f_die': 0.1,
-    'f_max': 2500,
-    'risk_cost': 0.01,
-    'f_steps': 5,
+    kwargs['model'] = 'debug-predator-only'
+    kwargs['predator'] = 500
+    kwargs['apex'] = 0
+    kwargs['prey'] = 0
+    kwargs['super'] = 0
     
-    ## predator traits
-    'predator_info': True,
-    's_energy': 10,
-    's_breed': 0.1,
-    's_die': 0.01,
-    's_lethality': 0.5,
-    's_apex_risk': True,
-    's_steps': 10,
+    run_debug(**kwargs)
     
-    ## apex predator traits
+    # run model with apex only
     
-    'apex_info': True,
-    'a_energy': 10,
-    'a_breed': 0.1,
-    'a_die': 0.001,
-    'a_lethality': 0.15,
-    'a_steps': 20,
-}
-
-steps = 1000
-
-# run the model
-
-m = model_run(**kwargs, steps=steps)
-
-# save data
-
-model_data = m.count.get_model_vars_dataframe()
-# set name for index column
-model_data.index.name = 'Step'
-model_data.to_csv(f'output/debug/results/data_model_{kwargs["model"]}_debug-super-only.csv')
-
-agent_data = m.spatial.get_agent_vars_dataframe()
-agent_data.to_csv(f'output/debug/results/data_agents_{kwargs["model"]}_debug-super-only.csv')
-
-plot_pop(model_data=model_data, params = kwargs, file = 'output/debug/plots/pop_debug-super-only.png', steps=steps)
-agent_data = pd.read_csv(f'output/debug/results/data_agents_{kwargs["model"]}_debug-super-only.csv')
-plot_space(agent_data=agent_data, file = 'output/debug/plots/space_debug-super-only.gif', steps=steps)
+    kwargs['model'] = 'debug-apex-only'
+    kwargs['predator'] = 0
+    kwargs['apex'] = 500
+    kwargs['prey'] = 0  
+    kwargs['super'] = 0
+    
+    run_debug(**kwargs)
+    
+    # run model with super only
+    
+    kwargs['model'] = 'debug-super-only'
+    kwargs['predator'] = 0
+    kwargs['apex'] = 0
+    kwargs['prey'] = 0
+    kwargs['super'] = 500
+    
+    run_debug(**kwargs)
+    
