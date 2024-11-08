@@ -22,18 +22,19 @@ kwargs = {
     ## prey traits
     'prey_info': True,
     'f_breed': 0.2, # max birth rate
-    'f_die': 0.1,
+    'f_die': 0.1, # constant
     'f_max': 2500,
-    'risk_cost': 0,
-    'f_steps': 5, # number of steps to move
-    
+    'risk_cost': 0.01,
+    'f_steps': 20,
+
     ## predator traits
     'predator_info': True,
     's_energy': 10,
-    's_breed': 0.1,
+    's_breed': 0.1, # constant
     's_die': 0.01,
     's_lethality': 0.5,
-    's_steps': 10, # number of steps to move,
+    's_apex_risk': True,
+    's_steps': 40,
 }
 
 steps = 1000
