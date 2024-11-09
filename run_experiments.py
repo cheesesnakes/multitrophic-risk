@@ -11,13 +11,13 @@ kwargs = {
     
     # model to run   
     'limit' : 100000,
-    'num_cpus': 30,
-    'reps': 10,
+    'num_cpus': 40,
+    'reps': 100,
     
     # model parameters
     'width': 50,
     'height': 50,
-    'steps' : 1000,
+    'steps' : 10000,
     'prey' : 200,
     'predator': 200,
     'stop': True,
@@ -63,8 +63,8 @@ kwargs = {
 
 def create_space():
 
-    s_breed = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
-    f_breed = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
+    s_breed = np.array(np.linspace(0, 1, 100))
+    f_breed = np.array(np.linspace(0, 1, 100))
 
     vars = np.array(np.meshgrid(s_breed, f_breed))
 
@@ -204,10 +204,8 @@ def experiment_3():
     print("Running experiment 3: determining the effects of predator and prey information")
     
     # data frame to store results
-    
+        
     results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'step'])
-    
-    kwargs['params'] = [ 'f_breed', 's_breed','prey_info', 'predator_info']
     
     # create parameter space
     
@@ -250,11 +248,11 @@ def experiment_3():
 
 def create_space_2():
     
-    risk_costs = np.array([0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1])
+    risk_costs = np.array(np.linspace(0, 0.1, 100))
     
-    s_breed = np.array([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1])
+    s_breed = np.array(np.linspace(0, 1, 100))
     
-    f_breed = np.array([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1])
+    f_breed = np.array(np.linspace(0, 1, 100))
     
     vars = np.array(np.meshgrid(risk_costs, s_breed, f_breed))
     
@@ -268,12 +266,12 @@ def experiment_4():
     
     # data frame to store results
     
-    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'step'])
-    
     kwargs['params'] = ['risk_cost', 's_breed', 'f_breed']
     kwargs['model'] = 'lv'
     kwargs['predator'] = 200
     kwargs['prey'] = 200
+    
+    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'step'])
     
     # create parameter space
     
