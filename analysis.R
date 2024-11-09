@@ -7,191 +7,195 @@ p_load(dplyr, tidyr, ggplot2, viridis, cowplot, gridExtra, lme4)
 
 # loop through models, skip if file does not exist
 
-super = read.csv("output/super_results.csv")
-apex = read.csv("output/apex_results.csv")
-lv = read.csv("output/lv_results.csv")
+experiment_1 = read.csv("output/experiments/results/Experiment-1_results.csv")
+experiment_2 = read.csv("output/experiments/results/Experiment-2_results.csv")
 
-super$model = "super"
-apex$model = "apex"
-lv$model = "lv"
+# Experiment 1
 
-max_steps = 999
+experiment_1$treatment = c(rep("apex", 1000), rep("super", 1000))
 
-# add missing columns
+# scores 
 
-apex$super_target = NA
-apex$super_lethality = NA
+experiment_1 = experiment_1%>%
+mutate(outcome = ifelse(Prey == 0, "Extinction", 
+                        ifelse(Predator == 0, "Prey Only", "Coexitance")))%>%
+# score 
+mutate(score = ifelse(outcome == "Extinction", -1, 
+                      ifelse(outcome == "Prey Only", 0, 0)))
 
-lv$super_target = NA
-lv$super_lethality = NA
+# Number of simulations that ran to completion
 
-# combine data
+print("Number of simulations that ran to completion")
+print(sum(experiment_1$step == 999))
 
-data = rbind(super, apex, lv)
+# plot N_predator vs N_prey
 
-# summarise data
-
-head(data)
-summary(data)
-
-# add scores
-
-data_scored = data%>%
-mutate(outcome = ifelse(Predator == 0, "Prey Wins", 
-                            ifelse(Prey == 0, "Extinction", 
-                                    "Coexistance")),
-        outcome = ifelse(step == max_steps, outcome, ifelse(outcome == "Coexistance" & Predator > Prey, "Extinction", outcome)),
-        score = ifelse(outcome == "Prey Wins", 0, 
-                        ifelse(outcome == "Extinction", -1, 1)))
-
-
-# relationship between model parameters and outcome
-
-## prameaters: 
-## lv: s_breed, f_breed, f_die, s_energy
-## apex: s_breed, f_breed, f_die, s_energy
-## super: s_breed, f_breed, f_die, s_energy, super_target, super_lethality
-
-# plot mean score by s_breed vs f_breed for each f_die, grid for each s_energy
-
-# lv model
-
-data_scored%>%
-    filter(model == "lv")%>%
-    group_by(s_breed, f_breed, f_die, s_energy)%>%
-    summarise(mean_score = mean(score), sd_score = sd(score), n = n())%>%
-    ggplot(aes(x = s_breed, y = f_breed, fill = mean_score))+
-    geom_tile()+
-    facet_grid(f_die~s_energy)+
+ggplot(experiment_1, aes(x = Predator, y = Prey, col = s_breed))+
+    geom_point(size = 3)+
+    labs(title = "Experiment 1: Predator vs Prey",
+            x = "Predator",
+            y = "Prey",
+            color = "Ratio of beeding rates")+
+    scale_y_continuous(limit = c(0,2500))+
+    scale_x_continuous(limit = c(0,2500))+
+    scale_color_viridis()+
     theme_bw()+
-    scale_fill_viridis(name = "Outcome", 
-    # limits for color scale
-    limits = c(-1, 1)
-    )+
-    theme(legend.position = "top",
-    text = element_text(size =  20),
-    # legend width
-    legend.key.width = unit(2, "cm"),
-    # legend height
-    legend.key.height = unit(0.5, "cm"))+
-    labs(x = "Predator Breeding Rate", y = "Prey Breeding Rate")
-  
-ggsave("output/figures/lv_params.png", width = 10, height = 10, dpi = 300)
+    theme(text = element_text(size = 20),
+    legend.position = "top")+
+    facet_wrap(~treatment)
 
-# apex model
+ggsave("output/experiments/plots/experiment_1_predator-prey.png", width = 10, height = 7)
 
-data_scored%>%
-    filter(model == "apex")%>%
-    group_by(s_breed, f_breed, f_die, s_energy)%>%
-    summarise(mean_score = mean(score), sd_score = sd(score), n = n())%>%
-    ggplot(aes(x = s_breed, y = f_breed, fill = mean_score))+
-    geom_tile()+
-    facet_grid(f_die~s_energy)+
+# plot mean score by treatment for s_breed vs f_breed
+
+experiment_1_mean = experiment_1%>%
+    group_by(treatment, s_breed, f_breed)%>%
+    summarise(mean_score = mean(score))
+
+ggplot(experiment_1_mean, aes(x = s_breed, y = f_breed, fill = mean_score))+
+    geom_tile(col = "black")+
     theme_bw()+
-    scale_fill_viridis(name = "Outcome", limits = c(-1, 1))+
-    theme(legend.position = "top",
-    text = element_text(size =  20),
-    # legend width
-    legend.key.width = unit(2, "cm"),
-    # legend height
-    legend.key.height = unit(0.5, "cm"))+
-    labs(x = "Predator Breeding Rate", y = "Prey Breeding Rate")
+    theme(text = element_text(size = 20),
+    legend.position = "top")+
+    scale_fill_viridis()+
+    scale_x_continuous(breaks = seq(0, 1, 0.1))+
+    scale_y_continuous(breaks = seq(0, 1, 0.1))+
+    labs(title = "Experiment 1: Mean Score by Treatment",
+            x = "s_breed",
+            y = "f_breed")+
+    facet_wrap(~treatment)
 
-ggsave("output/figures/apex_params.png", width = 10, height = 10, dpi = 300)
+ggsave("output/experiments/plots/experiment_1_phase-plot.png", width = 10, height = 6)
 
-# super model
+# plot outcome by treatment
 
-# plot outcomes for super_target and super_lethality
+experiment_1_outcome = experiment_1%>%
+    group_by(treatment, s_breed, f_breed, outcome)%>%
+    summarise(n = n(),
+              p = n/10)%>%
+    ungroup()%>%
+    select(treatment, s_breed, f_breed, outcome, p)%>%
+    complete(treatment, s_breed, f_breed, outcome, fill = list(p = 0))
 
-super_target = c("Prey", "Predator", "Both")
-super_lethality = c("Lethal", "Non-lethal")
+ggplot(experiment_1_outcome, aes(x = s_breed, y = f_breed, fill = p))+
+    geom_tile(col = "black")+
+    theme_bw()+
+    theme(text = element_text(size = 20),
+    legend.position = "top")+
+    # make scale 0-1
+    scale_fill_viridis(limits = c(0,1), breaks = seq(0, 1, 0.5),
+    guide = guide_colorbar(barwidth = 10, barheight = 2))+
+    scale_x_continuous(breaks = seq(0, 0.5, 0.1), expand = c(0, 0))+
+    scale_y_continuous(breaks = seq(0, 1, 0.1), expand = c(0,0))+
+    labs(x = "Predator breeding rate",
+            y = "Prey breeding rate")+
+    facet_grid(treatment~outcome)
 
-super_data_scored = data_scored%>%
-    filter(model == "super")%>%
-    mutate(super_target = ifelse(super_target == 1, "Prey", 
-                                 ifelse(super_target == 2, "Predator", "Both")),
-        super_lethality = ifelse(super_lethality == 1, "Lethal", "Non-lethal"))%>%
-    group_by(s_breed, f_breed, f_die, s_energy, super_target, super_lethality)%>%
-    summarise(mean_score = mean(score), sd_score = sd(score), n = n())
+ggsave("output/experiments/plots/experiment_1_outcome.png", width = 15, height = 12)
 
-# create ggplot grid for each super_target and super_lethality
+# Experiment 2
 
-plots = list()
+experiment_2$lethality = c(rep("Non-lethal", 3000), rep("Lethal", 3000))
 
-for (i in super_target){
-    
-    for (j in super_lethality){
-        
-        plot = super_data_scored%>%
-            filter(super_target == i, super_lethality == j)%>%
-            ggplot(aes(x = s_breed, y = f_breed, fill = mean_score))+
-            geom_tile()+
-            facet_grid(f_die~s_energy)+
-            theme_bw()+
-            scale_fill_viridis(name = "Outcome", limits = c(-1, 1))+
-            theme(legend.position = "top",
-            text = element_text(size =  20),
-            # legend width
-            legend.key.width = unit(2, "cm"),
-            # legend height
-            legend.key.height = unit(0.5, "cm"))+
-            labs(x = "Predator Breeding Rate", y = "Prey Breeding Rate",
-                title = paste("Super Model: Target = ", i, ", Lethality = ", j))+
-            # center title
-            theme(plot.title = element_text(hjust = 0.5))
-        
-        plots[[paste(i, j)]] = plot
-    
-    }
+experiment_2$target = c(rep("Prey", 2000), rep("Predator", 2000), rep("Both", 2000))
 
-}
+# scores
 
-super_plot = grid.arrange(grobs = plots, ncol = 2, nrow = 3)
+experiment_2 = experiment_2%>%
+mutate(outcome = ifelse(Prey == 0, "Extinction", 
+                        ifelse(Predator == 0, "Prey Only", "Coexitance")))%>%
+# score
+mutate(score = ifelse(outcome == "Extinction", -1, 
+                      ifelse(outcome == "Prey Only", 0, 0)))
 
-ggsave(super_plot, file = "output/figures/super_params.png", width = 20, height = 30, dpi = 300)
+# Number of simulations that ran to completion
 
-# analysis of outcomes
+print("Number of simulations that ran to completion")
+print(sum(experiment_2$step == 999))
 
-# do models differ in outcomes?
+# plot N_pred vs N_prey
 
-outcomes = data_scored%>%
-    group_by(model, s_breed, f_breed, f_die, s_energy, super_target, super_lethality, outcome)%>%
-    summarise(n = n())%>%
-    group_by(model, s_breed, f_breed, f_die, s_energy, super_target, super_lethality)%>%
-    mutate(prop = n/sum(n))
+ggplot(experiment_2, aes(x = Predator, y = Prey, col = f_breed/s_breed))+
+    geom_point(size = 3)+
+    labs(title = "Experiment 2: Predator vs Prey",
+            x = "Predator",
+            y = "Prey",
+            color = "Ratio of beeding rates")+
+    scale_y_continuous(limit = c(0,2500))+
+    scale_x_continuous(limit = c(0,2500))+
+    scale_color_viridis()+
+    theme_bw()+
+    theme(text = element_text(size = 20),
+    legend.position = "top")+
+    facet_grid(lethality~target)
 
-head(outcomes)
+ggsave("output/experiments/plots/experiment_2_predator-prey.png", width = 15, height = 12)
 
-# plot outcomes across models
+# plot mean score by treatment for s_breed vs f_breed
 
-model_comp = data_scored%>%
-    filter(super_lethality == 1 | is.na(super_lethality))
+experiment_2_mean = experiment_2%>%
+    group_by(lethality, target, s_breed, f_breed)%>%
+    summarise(mean_score = mean(score))
 
-## generlised linear mixed model
+ggplot(experiment_2_mean, aes(x = s_breed, y = f_breed, fill = mean_score))+
+    geom_tile(col = "black")+
+    theme_bw()+
+    theme(text = element_text(size = 20),
+    legend.position = "top")+
+    scale_fill_viridis()+
+    scale_x_continuous(breaks = seq(0, 1, 0.1))+
+    scale_y_continuous(breaks = seq(0, 1, 0.1))+
+    labs(title = "Experiment 2: Mean Score by Treatment",
+            x = "s_breed",
+            y = "f_breed")+
+    facet_grid(lethality~target)
 
-# fit model
+ggsave("output/experiments/plots/experiment_2_phase-plot.png", width = 15, height = 12)
 
-model = lmer(score ~ model + (1|s_breed) + (1|f_breed) + (1|f_die) + (1|s_energy), data = model_comp)
+# plot outcome by treatment
 
-# summary
+experiment_2_outcome = experiment_2%>%
+    group_by(lethality, target, s_breed, f_breed, outcome)%>%
+    summarise(n = n(),
+              p = n/10)%>%
+    ungroup()%>%
+    select(lethality, target, s_breed, f_breed, outcome, p)%>%
+    complete(lethality, target, s_breed, f_breed, outcome, fill = list(p = 0))
 
-summary(model)
+experiment_2_lethal_outcome = experiment_2_outcome%>%
+    filter(lethality == "Lethal")
 
-# compare lethal and non-lethal super model
+ggplot(experiment_2_lethal_outcome, aes(x = s_breed, y = f_breed, fill = p))+
+    geom_tile(col = "black")+
+    theme_bw()+
+    theme(text = element_text(size = 20),
+    legend.position = "top")+
+    # make scale 0-1
+    scale_fill_viridis(limits = c(0,1), breaks = seq(0, 1, 0.5),
+    guide = guide_colorbar(barwidth = 10, barheight = 2))+
+    scale_x_continuous(breaks = seq(0, 0.5, 0.1), expand = c(0, 0))+
+    scale_y_continuous(breaks = seq(0, 1, 0.1), expand = c(0,0))+
+    labs(x = "Predator breeding rate",
+            y = "Prey breeding rate")+
+    facet_grid(target~outcome)
 
-super = data_scored%>%
-    filter(model == "super")
+ggsave("output/experiments/plots/experiment_2_lethal_outcome.png", width = 15, height = 18)
 
-model = lmer(score ~ super_lethality + (1|super_target) + (1|s_breed) + (1|f_breed) + (1|f_die) + (1|s_energy), data = super)
+experiment_2_non_lethal_outcome = experiment_2_outcome%>%
+    filter(lethality == "Non-lethal")
 
-# summary
+ggplot(experiment_2_non_lethal_outcome, aes(x = s_breed, y = f_breed, fill = p))+
+    geom_tile(col = "black")+
+    theme_bw()+
+    theme(text = element_text(size = 20),
+    legend.position = "top")+
+    # make scale 0-1
+    scale_fill_viridis(limits = c(0,1), breaks = seq(0, 1, 0.5),
+    guide = guide_colorbar(barwidth = 10, barheight = 2))+
+    scale_x_continuous(breaks = seq(0, 0.5, 0.1), expand = c(0, 0))+
+    scale_y_continuous(breaks = seq(0, 1, 0.1), expand = c(0,0))+
+    labs(x = "Predator breeding rate",
+            y = "Prey breeding rate")+
+    facet_grid(target~outcome)
 
-summary(model)
-
-# compare target of super model
-
-model = lmer(score ~ super_target + (1|super_lethality) + (1|s_breed) + (1|f_breed) + (1|f_die) + (1|s_energy), data = super)
-
-# summary
-
-summary(model)
+ggsave("output/experiments/plots/experiment_2_non_lethal_outcome.png", width = 15, height = 18)
