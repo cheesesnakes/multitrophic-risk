@@ -15,7 +15,7 @@ python example.py 'apex'
 python example.py 'super'
 python example_strat.py
 
-#python run_experiments.py
+python run_experiments.py
 
 echo "Chapter 2: Done running all scripts"
 
