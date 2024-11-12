@@ -34,7 +34,6 @@ class Prey(mesa.Agent):
         # traits 
         self.info = kwargs.get('prey_info', False)
         self.f_super_risk = kwargs.get('f_super_risk', False)
-        self.risk_cost = kwargs.get('risk_cost', 0.1)
         self.f_breed = kwargs.get('f_breed', 0.2)
         self.f_die = kwargs.get('f_die', 0.1)
         self.f_max = kwargs.get('f_max', self.model.width*self.model.height/2)
@@ -120,18 +119,13 @@ class Prey(mesa.Agent):
             
             self.escape(x, y, x_p, y_p)
             
-            ## add cost to birth rate
-            
-                
-            self.f_breed = self.f_breed - self.risk_cost
+            self.f_breed = 0
             
         else:
             
             self.move()
             
-            if self.f_breed < self.kwargs.get('f_breed', 0.5): # max birth rate
-            
-                self.f_breed = self.f_breed + self.risk_cost
+            self.f_breed = self.kwargs.get('f_breed', 0.2)
     
     def escape(self, x, y, x_p, y_p):
         
@@ -226,10 +220,6 @@ class Prey(mesa.Agent):
         
         x,y = self.pos
         
-        ## reproduce
-        
-        self.prey_random_reproduce()
-        
         ## move the agent
         
         for i in range(self.steps):
@@ -241,6 +231,10 @@ class Prey(mesa.Agent):
             else:
                 
                 self.move()
+        
+        ## reproduce
+        
+        self.prey_random_reproduce()
         
         ## calculate distance travelled
         
@@ -401,17 +395,13 @@ class Predator(mesa.Agent):
             
             self.escape(x, y, x_p, y_p)
             
-            if self.breed > 0:
-                
-                self.breed = self.breed - self.risk_cost
+            self.breed = 0
             
         else:
             
             self.move()
 
-            if self.breed < self.kwargs.get('s_breed', 0.5):
-
-                self.breed = self.breed + self.risk_cost
+            self.breed = self.kwargs.get('s_breed', 0.1)
             
     def escape(self, x, y, x_p, y_p):
         
@@ -543,10 +533,6 @@ class Predator(mesa.Agent):
             self.die()            
         else:
         
-            ## reproduce
-
-            self.predator_random_reproduce()
-            
             ## move the agent
             
             for i in range(self.steps):
@@ -565,10 +551,14 @@ class Predator(mesa.Agent):
                     
                     self.move()
             
-            
             ## eat the prey
 
             self.predator_eat()
+            
+            ## reproduce
+
+            self.predator_random_reproduce()
+            
             
             ## decrease energy
             
