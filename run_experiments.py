@@ -241,7 +241,79 @@ def experiment_3():
             # save results
     
             results.to_csv(f'output/experiments/results/{E}_results.csv')
+
+# Experiment 5: Effect of staring energy on apex predator and mesopredator
+
+def experiment_4():
     
+    E = "Experiment-4"
+    
+    print("Running experiment 4: effect of starting energy on apex predator and mesopredator")
+    
+    # create parameter space
+   
+    a_energy = np.array(np.linspace(0, 100, 20))
+    s_energy = np.array(np.linspace(0, 100, 20))
+    
+    kwargs['params'] = ['a_energy', 's_energy']
+    
+    # data frame to store results
+        
+    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'step'])
+    
+    print("Number of runs", len(vars)*2)
+    
+    # run experiment for lv model
+    
+    kwargs['model'] = 'lv'
+    kwargs['apex'] = 0
+    kwargs['super'] = 0
+    kwargs['predator'] = 100
+    kwargs['prey'] = 100
+    
+    vars = np.array(np.meshgrid(0, s_energy)).reshape(2, -1).T
+    
+    # create an instance of the experiment
+    
+    exp = experiment(**kwargs)
+    
+    # run the experiment
+    
+    run = exp.parallel(v = vars, rep=kwargs.get('reps', 10), **kwargs)
+    
+    # append results to data frame
+    
+    results = pd.concat([results, run])
+    
+    # save results
+    
+    results.to_csv(f'output/experiments/results/{E}_results.csv')
+    
+    # run experiment for apex predator
+    
+    kwargs['model'] = 'apex'
+    kwargs['apex'] = 100
+    kwargs['super'] = 0
+    kwargs['predator'] = 100
+    kwargs['prey'] = 100
+    
+    vars = np.array(np.meshgrid(a_energy, s_energy)).reshape(2, -1).T
+    
+    # create an instance of the experiment
+    
+    exp = experiment(**kwargs)
+    
+    # run the experiment
+    
+    run = exp.parallel(v = vars, rep=kwargs.get('reps', 10), **kwargs)
+    
+    # append results to data frame
+    
+    results = pd.concat([results, run])
+    
+    # save results
+    
+    results.to_csv(f'output/experiments/results/{E}_results.csv')
     
 # running experiments
 
@@ -258,12 +330,17 @@ def run(exp = "All"):
     elif exp == "3":
         
         experiment_3()
-            
+    
+    elif exp == "4":
+        
+        experiment_4()
+        
     else:
     
         experiment_1()
         experiment_2()
         experiment_3()
+        experiment_4()
     
 if __name__ == '__main__':
     
