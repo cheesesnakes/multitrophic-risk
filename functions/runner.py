@@ -286,8 +286,6 @@ def plot_space_pop(model_data=None, agent_data=None, params = None, steps=100, f
             
             space.set_offsets(space_data[['x', 'y']])
         
-        print(f'Updating frame {frame}')
-        
         model_data_time = model_data[model_data.Step < frame]
         
         for i, line in enumerate(lines):

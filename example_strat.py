@@ -1,5 +1,5 @@
 from functions.runner import model_run
-from functions.runner import plot_pop, plot_density, plot_space, plot_space_pop, plot_age, plot_energy, plot_nnd, plot_distance
+from functions.runner import plot_pop, plot_density, plot_space, plot_space_pop, plot_age, plot_energy
 import pandas as pd
 # set model parameters
 
@@ -98,10 +98,6 @@ for strategy in strategies:
     # plot the energy distribution of agents
 
     plot_energy(agent_data=agent_data, file = f'output/strategies/plots/energy_{kwargs["model"]}_{strategy}.png', steps=steps)
-
-    # plot the nearest neighbour distance distribution of agents
-
-    plot_nnd(agent_data=agent_data, file = f'output/strategies/plots/nnd_{kwargs["model"]}_{strategy}.png', steps=steps)
 
     # plot density of agents
 

@@ -1,6 +1,6 @@
 from sys import argv
 from functions.runner import model_run
-from functions.runner import plot_pop, plot_density, plot_space, plot_space_pop, plot_age, plot_energy, plot_nnd, plot_distance
+from functions.runner import plot_pop, plot_density, plot_space, plot_space_pop, plot_age, plot_energy
 import pandas as pd
 from sys import argv
 
@@ -113,10 +113,6 @@ def run_example(kwargs = kwargs, steps = steps, model = 'lv'):
     # plot the energy distribution of agents
 
     plot_energy(agent_data=agent_data, file = f'output/examples/plots/energy_{kwargs["model"]}.png', steps=steps)
-
-    # plot the nearest neighbour distance distribution of agents
-
-    plot_nnd(agent_data=agent_data, file = f'output/examples/plots/nnd_{kwargs["model"]}.png', steps=steps)
 
     # plot density of agents
 
