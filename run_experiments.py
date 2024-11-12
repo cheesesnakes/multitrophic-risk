@@ -15,9 +15,9 @@ kwargs = {
     'reps': 10,
     
     # model parameters
-    'width': 50,
-    'height': 50,
-    'steps' : 10000,
+    'width': 100,
+    'height': 100,
+    'steps' : 2000,
     'prey' : 200,
     'predator': 200,
     'stop': True,
@@ -27,8 +27,7 @@ kwargs = {
     'f_breed': 0.2, # max birth rate
     'f_die': 0.1, # constant
     'f_max': 2500,
-    'risk_cost': 0.01,
-    'f_steps': 20,
+    'f_steps': 10,
 
     ## predator traits
     'predator_info': True,
@@ -37,7 +36,7 @@ kwargs = {
     's_die': 0.01,
     's_lethality': 0.5,
     's_apex_risk': True,
-    's_steps': 40,
+    's_steps': 10,
 
     ## apex predator traits
 
@@ -46,7 +45,7 @@ kwargs = {
     'a_breed': 0.1, # constant
     'a_die': 0.001,
     'a_lethality': 0.15,
-    'a_steps': 80,
+    'a_steps': 10,
 
     # super predator traits
 
@@ -63,8 +62,8 @@ kwargs = {
 
 def create_space():
 
-    s_breed = np.array(np.linspace(0, 1, 100))
-    f_breed = np.array(np.linspace(0, 1, 100))
+    s_breed = np.array(np.linspace(0, 1, 20))
+    f_breed = np.array(np.linspace(0, 1, 20))
 
     vars = np.array(np.meshgrid(s_breed, f_breed))
 
@@ -242,58 +241,6 @@ def experiment_3():
             # save results
     
             results.to_csv(f'output/experiments/results/{E}_results.csv')
-            
-# Experiment 5: Determining the tradeoff between predator lethality and cost of anti-predator behavior
-
-
-def create_space_2():
-    
-    risk_costs = np.array(np.linspace(0, 0.1, 100))
-    
-    s_breed = np.array(np.linspace(0, 1, 100))
-    
-    f_breed = np.array(np.linspace(0, 1, 100))
-    
-    vars = np.array(np.meshgrid(risk_costs, s_breed, f_breed))
-    
-    return vars.reshape(3, -1).T
-
-def experiment_4():
-    
-    E = "Experiment-4"
-    
-    print("Running experiment 4: determining the tradeoff between predator lethality and cost of anti-predator behavior")
-    
-    # data frame to store results
-    
-    kwargs['params'] = ['risk_cost', 's_breed', 'f_breed']
-    kwargs['model'] = 'lv'
-    kwargs['predator'] = 200
-    kwargs['prey'] = 200
-    
-    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'step'])
-    
-    # create parameter space
-    
-    vars = create_space_2()
-    
-    print("Number of runs", len(vars))
-    
-    # create an instance of the experiment
-    
-    exp = experiment(**kwargs)
-    
-    # run the experiment
-    
-    run = exp.parallel(v = vars, rep=kwargs.get('reps', 10), **kwargs)
-    
-    # append results to data frame
-    
-    results = pd.concat([results, run])
-    
-    # save results
-    
-    results.to_csv(f'output/experiments/results/{E}_results.csv')
     
     
 # running experiments
@@ -311,17 +258,12 @@ def run(exp = "All"):
     elif exp == "3":
         
         experiment_3()
- 
-    elif exp == "4":
-        
-        experiment_4()
             
     else:
     
         experiment_1()
         experiment_2()
         experiment_3()
-        experiment_4()
     
 if __name__ == '__main__':
     
