@@ -51,8 +51,7 @@ kwargs = {
 
     'super_target': 2,
     'super_lethality': 1,
-    'super_steps': 20,
-    'super_steps': 80,
+    'super_steps': 10,
 
     # parameters to vary
 
@@ -261,8 +260,6 @@ def experiment_4():
         
     results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'step'])
     
-    print("Number of runs", len(vars)*2)
-    
     # run experiment for lv model
     
     kwargs['model'] = 'lv'
@@ -273,6 +270,8 @@ def experiment_4():
     
     vars = np.array(np.meshgrid(0, s_energy)).reshape(2, -1).T
     
+    print("Number of runs", len(vars)*2)
+     
     # create an instance of the experiment
     
     exp = experiment(**kwargs)
