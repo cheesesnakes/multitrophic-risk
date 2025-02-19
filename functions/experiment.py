@@ -141,8 +141,6 @@ class experiment():
         for r in res:
             
             self.data = pd.concat([self.data, r], axis = 0)
-        
-        self.data.to_csv(f"{self.model}_results.csv", index = False)
             
         ray.shutdown()
         

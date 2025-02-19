@@ -89,7 +89,7 @@ def experiment_1():
     print("Running model with apex predator")
     
     kwargs['model'] = 'apex'
-    kwargs['apex'] = 100
+    kwargs['apex'] = 250
     kwargs['super'] = 0
 
     # create an instance of the experiment
@@ -291,7 +291,7 @@ def experiment_4():
     # run experiment for apex predator
     
     kwargs['model'] = 'apex'
-    kwargs['apex'] = 100
+    kwargs['apex'] = 250
     kwargs['super'] = 0
     kwargs['predator'] = 100
     kwargs['prey'] = 100

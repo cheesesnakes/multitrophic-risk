@@ -17,20 +17,20 @@ kwargs = {
     
     ## prey traits
     'prey_info': True,
-    'f_breed': 0.2, # max birth rate
+    'f_breed': 0.6, # max birth rate
     'f_die': 0.1, # constant
     'f_max': 2500,
     'risk_cost': 0.01,
-    'f_steps': 20,
+    'f_steps': 10,
 
     ## predator traits
     'predator_info': True,
     's_energy': 10,
-    's_breed': 0.1, # constant
+    's_breed': 0.105, # constant
     's_die': 0.01,
     's_lethality': 0.5,
     's_apex_risk': True,
-    's_steps': 40,
+    's_steps': 10,
 
     ## apex predator traits
 
@@ -39,14 +39,13 @@ kwargs = {
     'a_breed': 0.1, # constant
     'a_die': 0.001,
     'a_lethality': 0.15,
-    'a_steps': 80,
+    'a_steps': 10,
 
     # super predator traits
 
     'super_target': 2,
-    'super_lethality': 1,
-    'super_steps': 20,
-    'super_steps': 80,
+    'super_lethality': 0,
+    'super_steps': 10,
 }
 
 steps = 1000
@@ -58,7 +57,7 @@ def  set_params(kwargs = kwargs, model = 'lv'):
         kwargs['model'] = 'apex'
         kwargs['predator'] = 500
         kwargs['prey'] = 500
-        kwargs['apex'] = 100
+        kwargs['apex'] = 250
     
     elif model == 'super':
         
