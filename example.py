@@ -12,21 +12,21 @@ kwargs = {
     'progress': True,
     'info' : False,    
     'limit' : 10000,
-    'width': 100,
-    'height': 100,
+    'width': 50,
+    'height': 50,
     
     ## prey traits
     'prey_info': True,
     'f_breed': 0.6, # max birth rate
     'f_die': 0.1, # constant
-    'f_max': 2500,
+    'f_max': 400,
     'risk_cost': 0.01,
     'f_steps': 10,
 
     ## predator traits
     'predator_info': True,
     's_energy': 10,
-    's_breed': 0.105, # constant
+    's_breed': 0.15, # constant
     's_die': 0.01,
     's_lethality': 0.5,
     's_apex_risk': True,
@@ -55,7 +55,7 @@ def  set_params(kwargs = kwargs, model = 'lv'):
     if model == 'apex':
         
         kwargs['model'] = 'apex'
-        kwargs['predator'] = 500
+        kwargs['predator'] = 50
         kwargs['prey'] = 500
         kwargs['apex'] = 250
     
@@ -69,7 +69,7 @@ def  set_params(kwargs = kwargs, model = 'lv'):
     else:
         
         kwargs['model'] = 'lv'
-        kwargs['predator'] = 500
+        kwargs['predator'] = 50
         kwargs['prey'] = 500
         
     return kwargs

@@ -26,7 +26,7 @@ kwargs = {
     'prey_info': True,
     'f_breed': 0.2, # max birth rate
     'f_die': 0.1, # constant
-    'f_max': 2500,
+    'f_max': 500,
     'f_steps': 10,
 
     ## predator traits
@@ -89,7 +89,7 @@ def experiment_1():
     print("Running model with apex predator")
     
     kwargs['model'] = 'apex'
-    kwargs['apex'] = 250
+    kwargs['apex'] = 100
     kwargs['super'] = 0
 
     # create an instance of the experiment
