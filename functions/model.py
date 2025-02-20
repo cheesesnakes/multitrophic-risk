@@ -289,7 +289,7 @@ class Predator(mesa.Agent):
         # get probability of reproduction
 
         b_t = self.breed * (
-            1 - (self.energy / self.max_energy)
+            (self.energy / self.max_energy)
         )  # energy dependent birth rate
 
         if b_t > 0:
@@ -468,6 +468,12 @@ class Predator(mesa.Agent):
         ## get the current location
 
         x, y = self.pos
+        
+        ## stop if predator is satiated
+        
+        if self.energy >= self.max_energy:
+            
+            return
 
         ## get the prey at the current pos
 
@@ -545,7 +551,9 @@ class Predator(mesa.Agent):
 
         ## decrease energy
 
-        self.energy -= 1
+        if self.energy > 0:
+    
+            self.energy -= 1
 
         ## calculate distance travelled
 
@@ -601,7 +609,7 @@ class Apex(mesa.Agent):
     def apex_random_reproduce(self):
         # get probability of reproduction
 
-        b_t = self.breed * (1 - (self.energy / self.max_energy))
+        b_t = self.breed * ((self.energy / self.max_energy))
 
         if b_t > 0:
             reproduce = np.random.binomial(1, b_t)
@@ -709,6 +717,12 @@ class Apex(mesa.Agent):
         ## get the current location
 
         x, y = self.pos
+        
+        ## stop if predator is satiated
+        
+        if self.energy >= self.max_energy:
+            
+            return
 
         ## get the prey at the current pos
 
@@ -781,7 +795,9 @@ class Apex(mesa.Agent):
 
         ## decrease energy
 
-        self.energy -= 1
+        if self.energy > 0:
+    
+            self.energy -= 1
 
         # calculate distance travelled
 
