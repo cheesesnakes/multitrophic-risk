@@ -1,7 +1,7 @@
 # load libraries
 
 library(pacman)
-p_load(dplyr, tidyr, ggplot2, viridis, cowplot, gridExtra, lme4)
+p_load(dplyr, tidyr, ggplot2, viridis, cowplot, gridExtra, lme4, RColorBrewer)
 
 
 # loop through models, skip if file does not exist
@@ -13,29 +13,19 @@ experiment_4 <- read.csv("output/experiments/results/Experiment-4_results.csv")
 
 # Experiment 1
 
-depth = 20
-parameters = 2
-replicates = 1
-
-n = (depth ^ parameters) * replicates
+n = length(experiment_1$step) / 2
 
 experiment_1$treatment <- c(rep("apex", n), rep("super", n))
 
 # scores
 
-
 experiment_1 <- experiment_1 %>%
     mutate(
-        outcome = ifelse(Prey == 0, "Extinction",
-            ifelse(Predator == 0, "Prey Only",
-                ifelse(Predator > 0 & Prey > 0 & step == max(step), "Coexistance",
-                    "Extinction"
-                )
-            )
-        )
+        outcome = ifelse(Prey > 0 & Predator > 0 & step == max(step), "Coexistance",
+        ifelse(Prey > Predator, "Prey Only","Extinction"))
     ) %>%
     mutate(score = ifelse(outcome == "Extinction", -1,
-        ifelse(outcome == "Prey Only", 0, 0)
+        ifelse(outcome == "Prey Only", 0, 1)
     ))
 
 # Number of simulations that ran to completion
@@ -48,7 +38,6 @@ print(sum(experiment_1$step == 1999))
 
 experiment_1 %>%
     mutate(treatment = factor(treatment, levels = c("apex", "super"))) %>%
-    filter(Predator > 0, Prey > 0, Predator + Prey < 100000) %>%
     complete(treatment, s_breed, f_breed, fill = list(NA)) %>%
     ggplot(aes(x = Predator, y = Prey, col = f_breed / s_breed)) +
     geom_point(size = 3) +
@@ -60,6 +49,8 @@ experiment_1 %>%
     #    scale_y_continuous(limit = c(0,2500))+
     #    scale_x_continuous(limit = c(0,2500))+
     scale_color_viridis() +
+    scale_y_log10() +
+    scale_x_log10() +
     theme_bw() +
     theme(
         text = element_text(size = 20),
@@ -76,7 +67,7 @@ experiment_1_mean <- experiment_1 %>%
     summarise(mean_score = mean(score)) %>%
     ungroup() %>%
     mutate(phase = ifelse(mean_score > 0, "Coexistence",
-        ifelse(mean_score == 0, "Prey Only", "Extinction")
+        ifelse(mean_score <= 0 & mean_score >= -0.5, "Prey Only", "Extinction")
     ))
 
 ggplot(experiment_1_mean, aes(x = s_breed, y = f_breed, fill = mean_score)) +
@@ -98,9 +89,9 @@ ggplot(experiment_1_mean, aes(x = s_breed, y = f_breed, fill = mean_score)) +
     ) +
     facet_wrap(~treatment)
 
-# Phase plot for each treatment
+ggsave("output/experiments/plots/experiment_1_score-plot.png", width = 12, height = 7)
 
-library(RColorBrewer)
+# Phase plot for each treatment
 
 ggplot(experiment_1_mean, aes(x = s_breed, y = f_breed, fill = phase)) +
     geom_tile() +
@@ -198,18 +189,17 @@ ggsave("output/experiments/plots/experiment_1_outcome.png", width = 18, height =
 
 # Experiment 2
 
-experiment_2$lethality <- c(rep("Non-lethal", 12000), rep("Lethal", 12000))
+n = length(experiment_2$step) / 2
 
-experiment_2$target <- c(rep("Prey", 4000), rep("Predator", 4000), rep("Both", 4000))
+experiment_2$lethality <- c(rep("Non-lethal", n), rep("Lethal", n))
+
+experiment_2$target <- c(rep("Prey", n/3), rep("Predator", n/3), rep("Both", n/3))
 
 # scores
 
 experiment_2 <- experiment_2 %>%
-    mutate(outcome = ifelse(Prey == 0, "Extinction",
-        ifelse(Predator == 0, "Prey Only",
-            ifelse(Predator > 0 & Prey > 0 & step == max(step), "Coexistance", "Extinction")
-        )
-    )) %>%
+    mutate(outcome = ifelse(Prey > 0 & Predator > 0 & step == max(step), "Coexistance",
+        ifelse(Prey > Predator, "Prey Only","Extinction"))) %>%
     # score
     mutate(score = ifelse(outcome == "Extinction", -1,
         ifelse(outcome == "Prey Only", 0, 0)
@@ -223,7 +213,6 @@ print(sum(experiment_2$step == 1999))
 # plot N_pred vs N_prey
 
 experiment_2 %>%
-    filter(Predator > 0, Prey > 0, Predator + Prey < 100000) %>%
     ggplot(aes(x = Predator, y = Prey, col = f_breed / s_breed)) +
     geom_point(size = 3) +
     labs(
@@ -232,6 +221,8 @@ experiment_2 %>%
         color = "Prey:Predator breeding rate"
     ) +
     scale_color_viridis() +
+    scale_y_log10() +
+    scale_x_log10() +
     theme_bw() +
     theme(
         text = element_text(size = 20),
@@ -388,17 +379,17 @@ experiment_2 %>%
 
 # Experiment 3
 
-experiment_3$predator_info <- c(rep("Predator Informed", 4000), rep("Predator Naive", 4000), rep("Predator Informed", 4000), rep("Predator Naive", 4000))
-experiment_3$prey_info <- c(rep("Prey Informed", 8000), rep("Prey Naive", 8000))
+n = length(experiment_3$step)
+
+experiment_3$predator_info <- c(rep("Predator Informed", n/4), rep("Predator Naive", n/4), rep("Predator Informed", n/4), rep("Predator Naive", n/4))
+experiment_3$prey_info <- c(rep("Prey Informed", n/2), rep("Prey Naive", n/2))
 
 # scores
 
 experiment_3 <- experiment_3 %>%
-    mutate(outcome = ifelse(Prey == 0, "Extinction",
-        ifelse(Predator == 0, "Prey Only",
-            ifelse(Predator > 0 & Prey > 0 & step == max(step), "Coexistance", "Extinction")
-        )
-    )) %>%
+    mutate(outcome = ifelse(Prey > 0 & Predator > 0 & step == max(step), "Coexistance",
+        ifelse(Prey > Predator, "Prey Only","Extinction")
+        ))%>%
     # score
     mutate(score = ifelse(outcome == "Extinction", -1,
         ifelse(outcome == "Prey Only", 0, 0)
@@ -412,7 +403,6 @@ print(sum(experiment_3$step == 1999))
 # plot N_pred vs N_prey
 
 experiment_3 %>%
-    filter(Predator > 0, Prey > 0, Predator + Prey < 100000) %>%
     ggplot(aes(x = Predator, y = Prey, col = f_breed / s_breed)) +
     geom_point(size = 3) +
     labs(
@@ -421,6 +411,8 @@ experiment_3 %>%
         color = "Prey:Predator breeding rate"
     ) +
     scale_color_viridis() +
+    scale_y_log10() +
+    scale_x_log10() +
     theme_bw() +
     theme(
         text = element_text(size = 20),
@@ -551,11 +543,8 @@ print(experiment_3_coexitance)
 # scores
 
 experiment_4 <- experiment_4 %>%
-    mutate(outcome = ifelse(Prey == 0, "Extinction",
-        ifelse(Predator == 0, "Prey Only",
-            ifelse(Predator > 0 & Prey > 0 & step == max(step), "Coexistance", "Extinction")
-        )
-    )) %>%
+    mutate(outcome = ifelse(Prey > 0 & Predator > 0 & step == max(step), "Coexistance",
+        ifelse(Prey > Predator, "Prey Only","Extinction"))) %>%
     # score
     mutate(score = ifelse(outcome == "Extinction", -1,
         ifelse(outcome == "Prey Only", 0, 0)
@@ -569,8 +558,7 @@ print(sum(experiment_4$step == 1999))
 # plot N_pred vs N_prey
 
 experiment_4 %>%
-    filter(Predator > 0, Prey > 0, Predator + Prey < 100000) %>%
-    ggplot(aes(x = Predator, y = Prey, col = s_energy / a_energy)) +
+    ggplot(aes(x = Predator, y = Prey, col = s_max / a_max)) +
     geom_point(size = 3) +
     labs(
         x = "Predator",
@@ -578,6 +566,8 @@ experiment_4 %>%
         color = "Prey:Predator breeding rate"
     ) +
     scale_color_viridis() +
+    scale_y_log10() +
+    scale_x_log10() +
     theme_bw() +
     theme(
         text = element_text(size = 20),
@@ -586,17 +576,17 @@ experiment_4 %>%
 
 ggsave("output/experiments/plots/experiment_4_predator-prey.png", width = 7, height = 7)
 
-# plot mean score by treatment for a_energy vs s_energy
+# plot mean score by treatment for a_max vs s_max
 
 experiment_4_mean <- experiment_4 %>%
-    group_by(s_energy, a_energy) %>%
+    group_by(s_max, a_max) %>%
     summarise(mean_score = mean(score)) %>%
     ungroup() %>%
     mutate(phase = ifelse(mean_score > 0, "Coexistence",
         ifelse(mean_score == 0, "Prey Only", "Extinction")
     ))
 
-ggplot(experiment_4_mean, aes(x = s_energy, y = a_energy, fill = mean_score)) +
+ggplot(experiment_4_mean, aes(x = s_max, y = a_max, fill = mean_score)) +
     geom_tile(col = "black") +
     theme_bw() +
     theme(
@@ -610,13 +600,15 @@ ggplot(experiment_4_mean, aes(x = s_energy, y = a_energy, fill = mean_score)) +
     scale_x_continuous(breaks = seq(0, 100, 10)) +
     scale_y_continuous(breaks = seq(0, 100, 10)) +
     labs(
-        x = "s_energy",
-        y = "a_energy"
+        x = "s_max",
+        y = "a_max"
     )
+
+ggsave("output/experiments/plots/experiment_4_score-plot.png", width = 7, height = 7)
 
 # Phase plot for each treatment
 
-ggplot(experiment_4_mean, aes(x = s_energy, y = a_energy, fill = phase)) +
+ggplot(experiment_4_mean, aes(x = s_max, y = a_max, fill = phase)) +
     geom_tile() +
     theme_bw() +
     theme(
@@ -627,8 +619,8 @@ ggplot(experiment_4_mean, aes(x = s_energy, y = a_energy, fill = phase)) +
     scale_x_continuous(breaks = seq(0, 100, 10)) +
     scale_y_continuous(breaks = seq(0, 100, 10)) +
     labs(
-        x = "s_energy",
-        y = "a_energy"
+        x = "s_max",
+        y = "a_max"
     )
 
 ggsave("output/experiments/plots/experiment_4_phase-plot.png", width = 7, height = 7)
@@ -638,20 +630,20 @@ ggsave("output/experiments/plots/experiment_4_phase-plot.png", width = 7, height
 # plot outcome by treatment
 
 experiment_4_outcome <- experiment_4 %>%
-    group_by(s_energy, a_energy, outcome) %>%
+    group_by(s_max, a_max, outcome) %>%
     summarise(
         n = n(),
         p = n / 10
     ) %>%
     ungroup() %>%
-    select(s_energy, a_energy, outcome, p) %>%
-    complete(s_energy, a_energy, outcome, fill = list(p = 0)) %>%
+    select(s_max, a_max, outcome, p) %>%
+    complete(s_max, a_max, outcome, fill = list(p = 0)) %>%
     # set order of outcome
     mutate(outcome = factor(outcome, levels = c("Prey Only", "Coexistance", "Extinction"))) %>%
     mutate(p = ifelse(p > 1, 1, p))
 
 
-ggplot(experiment_4_outcome, aes(x = s_energy, y = a_energy, fill = p)) +
+ggplot(experiment_4_outcome, aes(x = s_max, y = a_max, fill = p)) +
     geom_tile(col = "black") +
     theme_bw() +
     theme(
@@ -666,8 +658,8 @@ ggplot(experiment_4_outcome, aes(x = s_energy, y = a_energy, fill = p)) +
     scale_x_continuous(breaks = seq(0, 100, 10), expand = c(0, 0)) +
     scale_y_continuous(breaks = seq(0, 100, 10), expand = c(0, 0)) +
     labs(
-        x = "Mesopredator Starting Energy",
-        y = "Apex-predator Starting Energy"
+        x = "Mesopredator Starting max",
+        y = "Apex-predator Starting max"
     ) +
     facet_wrap(~outcome)
 
