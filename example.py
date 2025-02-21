@@ -11,41 +11,42 @@ kwargs = {
     # model to run
     'progress': True,
     'info' : False,    
-    'limit' : 10000,
+    'limit' : 100000,
     'width': 50,
     'height': 50,
     
     ## prey traits
     'prey_info': True,
-    'f_breed': 0.6, # max birth rate
+    'f_breed': 0.5, # max birth rate
     'f_die': 0.1, # constant
-    'f_max': 400,
+    'f_max': 10,
     'risk_cost': 0.01,
-    'f_steps': 10,
+    'f_steps': 1,
 
     ## predator traits
     'predator_info': True,
-    's_energy': 10,
+    's_max': 5,
     's_breed': 0.15, # constant
-    's_die': 0.01,
+    's_die': 0.1,
     's_lethality': 0.5,
     's_apex_risk': True,
-    's_steps': 10,
+    's_steps': 1,
 
     ## apex predator traits
 
     'apex_info': True,
-    'a_energy': 10,
-    'a_breed': 0.1, # constant
-    'a_die': 0.001,
+    'a_max': 10,
+    'a_breed': 0.15, # constant
+    'a_die': 0.01,
     'a_lethality': 0.15,
-    'a_steps': 10,
+    'a_steps': 1,
 
     # super predator traits
 
     'super_target': 2,
     'super_lethality': 0,
-    'super_steps': 10,
+    'super_max': 10,
+    'super_steps': 1,
 }
 
 steps = 1000
@@ -55,22 +56,22 @@ def  set_params(kwargs = kwargs, model = 'lv'):
     if model == 'apex':
         
         kwargs['model'] = 'apex'
-        kwargs['predator'] = 50
-        kwargs['prey'] = 500
+        kwargs['predator'] = 500
+        kwargs['prey'] = 1000
         kwargs['apex'] = 250
     
     elif model == 'super':
         
         kwargs['model'] = 'super'
         kwargs['predator'] = 500
-        kwargs['prey'] = 500
-        kwargs['super'] = 50
+        kwargs['prey'] = 1000
+        kwargs['super'] = 250
     
     else:
         
         kwargs['model'] = 'lv'
-        kwargs['predator'] = 50
-        kwargs['prey'] = 500
+        kwargs['predator'] = 500
+        kwargs['prey'] = 1000
         
     return kwargs
     
@@ -104,14 +105,6 @@ def run_example(kwargs = kwargs, steps = steps, model = 'lv'):
     # plot the number of agents over time
 
     plot_pop(model_data=model_data, params = kwargs, file = f'output/examples/plots/pop_{kwargs["model"]}.png', steps=steps)
-
-    # plot the age distribution of agents
-
-    plot_age(agent_data=agent_data, file = f'output/examples/plots/age_{kwargs["model"]}.png', steps=steps)
-
-    # plot the energy distribution of agents
-
-    plot_energy(agent_data=agent_data, file = f'output/examples/plots/energy_{kwargs["model"]}.png', steps=steps)
 
     # plot density of agents
 
