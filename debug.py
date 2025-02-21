@@ -9,7 +9,7 @@ kwargs = {
     # model to run
     'progress': True,
     'info' : False,  
-    'limit' : 10000,
+    'limit' : 100000,
     
     # model parameters
     'width': 100,
@@ -19,27 +19,27 @@ kwargs = {
     'prey_info': True,
     'f_breed': 0.2, # max birth rate
     'f_die': 0.1,
-    'f_max': 2500,
+    'f_max': 10,
     'risk_cost': 0.01,
-    'f_steps': 5,
+    'f_steps': 1,
     
     ## predator traits
     'predator_info': True,
-    's_energy': 10,
-    's_breed': 0.1,
-    's_die': 0.01,
+    's_max': 5,
+    's_breed': 0.15,
+    's_die': 0.1,
     's_lethality': 0.5,
     's_apex_risk': True,
-    's_steps': 10,
+    's_steps': 1,
     
     ## apex predator traits
     
     'apex_info': True,
-    'a_energy': 10,
-    'a_breed': 0.1,
-    'a_die': 0.001,
+    'a_max': 10,
+    'a_breed': 0.25,
+    'a_die': 0.01,
     'a_lethality': 0.15,
-    'a_steps': 20,
+    'a_steps': 1,
 }
 
 steps = 1000
