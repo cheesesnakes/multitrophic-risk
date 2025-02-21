@@ -51,30 +51,35 @@ class Prey(mesa.Agent):
         x, y = self.pos
 
         ## choose a new position
-        
+
         x += np.random.choice([-1, 0, 1])
         y += np.random.choice([-1, 0, 1])
 
         ## move the agent
 
         self.model.grid.move_agent(self, (x, y))
-    
+
     ## escape
-    
+
     def escape(self, x, y, x_p, y_p):
-        
         ## possible moves
-        
-        moves = [(x_p, y_p + 2), (x_p + 1, y_p + 2), (x_p + 2, y_p + 2), (x_p + 2, y_p + 1), (x_p + 2, y_p + 0)]
-        
-        ## choose a move
-        
-        x , y = self.model.random.choice(moves)
-        
+
+        if not x_p == x:
+            a = 2 * x - x_p
+
+        else:
+            a = np.random.choice([x - 1, x + 1])
+
+        if not y_p == y:
+            b = 2 * y - y_p
+
+        else:
+            b = np.random.choice([y - 1, y + 1])
+
         # move
 
-        self.model.grid.move_agent(self, (x, y))
-            
+        self.model.grid.move_agent(self, (a, b))
+
     ##Prey information function
 
     def risk(self):
@@ -112,36 +117,34 @@ class Prey(mesa.Agent):
             ## move away from the predator without jumping over the grid
 
             self.escape(x, y, x_p, y_p)
-            
+
             ## breeding cost
-            
-            self.f_breed = self.f_breed*(1 - self.risk_cost)
-            
+
+            self.f_breed = self.f_breed * (1 - self.risk_cost)
+
         else:
             self.move()
 
             self.f_breed = self.kwargs.get("f_breed", 0.2)
-                
-    
+
     # prey reproduction function
     def prey_random_reproduce(self):
-
         ## get neighbours
-        
+
         x, y = self.pos
-        
+
         neighbours = self.model.grid.get_neighbors(
             (x, y), moore=True, include_center=True
         )
-        
+
         ## count the number of prey agents
-        
+
         prey = [a for a in neighbours if isinstance(a, Prey)]
-        
+
         ## calculate the probability of reproduction
 
         reproduce = np.random.binomial(1, self.f_breed)
-        
+
         if len(prey) < self.f_max and reproduce == 1:
             ## create a new prey agent
 
@@ -155,7 +158,6 @@ class Prey(mesa.Agent):
             self.model.schedule.add(a)
 
             self.model.grid.place_agent(a, self.pos)
-
 
     # deterministic death function
 
@@ -179,7 +181,6 @@ class Prey(mesa.Agent):
     ## step function
 
     def step(self):
-
         ## move the agent
 
         for i in range(self.steps):
@@ -190,12 +191,13 @@ class Prey(mesa.Agent):
                 self.move()
 
         ## reproduce
-        
+
         self.prey_random_reproduce()
-        
+
         ## die
 
         self.random_die()
+
 
 class Predator(mesa.Agent):
     """
@@ -213,7 +215,7 @@ class Predator(mesa.Agent):
         self.unique_id = unique_id
         self.model = model
         self.pos = pos
-       
+
         # traits
         self.info = kwargs.get("predator_info", False)
         self.lethality = kwargs.get("s_lethality", 0.5)
@@ -225,20 +227,20 @@ class Predator(mesa.Agent):
         self.breed = kwargs.get("s_breed", 0.1)
         self.s_die = kwargs.get("s_die", 0.01)
         self.steps = kwargs.get("s_steps", 10)
-        
+
         # state variables
         self.energy = 1
         self.max_energy = kwargs.get("s_max", 1)
-        
+
         self.kwargs = kwargs
-    
+
     ## move function
 
     def move(self):
         ## get the current position
-        
+
         x, y = self.pos
-        
+
         ## random walk
 
         x += self.model.random.randint(-1, 1)
@@ -247,24 +249,29 @@ class Predator(mesa.Agent):
         ## move the agent
 
         self.model.grid.move_agent(self, (x, y))
-    
+
     ## escape
-            
+
     def escape(self, x, y, x_p, y_p):
         ## possible moves
-        
-        moves = [(x_p, y_p + 2), (x_p + 1, y_p + 2), (x_p + 2, y_p + 2), (x_p + 2, y_p + 1), (x_p + 2, y_p + 0)]
-        
-        ## choose a move
-        
-        x , y = self.model.random.choice(moves)
-        
+
+        if not x_p == x:
+            a = 2 * x - x_p
+
+        else:
+            a = np.random.choice([x - 1, x + 1])
+
+        if not y_p == y:
+            b = 2 * y - y_p
+
+        else:
+            b = np.random.choice([y - 1, y + 1])
+
         # move
 
-        self.model.grid.move_agent(self, (x, y))
-            
-    ## hunt 
-    
+        self.model.grid.move_agent(self, (a, b))
+
+    ## hunt
 
     def hunt(self):
         ## get current pos
@@ -298,7 +305,7 @@ class Predator(mesa.Agent):
             ## if there are no prey, move randomly
 
             self.move()
-    
+
     # Predator information function
 
     def predator_risk(self):
@@ -335,20 +342,20 @@ class Predator(mesa.Agent):
 
             self.escape(x, y, x_p, y_p)
 
-            self.breed = self.breed*(1 - self.risk_cost)
+            self.breed = self.breed * (1 - self.risk_cost)
 
         else:
             self.hunt()
 
             self.breed = self.kwargs.get("s_breed", 0.5)
-    
+
     ## eat function
-    
+
     def predator_eat(self):
         ## get the current location
 
         x, y = self.pos
-        
+
         ## get the prey at the current pos
 
         this_cell = self.model.grid.get_cell_list_contents((x, y))
@@ -360,11 +367,10 @@ class Predator(mesa.Agent):
         ## choose a random prey agent until satiated or no prey left
 
         while self.energy < self.max_energy and len(prey) > 0:
-
             a = self.model.random.choice(prey)
-            
+
             ## pop the prey agent
-            
+
             prey.pop(prey.index(a))
 
             ## remove the prey agent
@@ -379,7 +385,7 @@ class Predator(mesa.Agent):
                 ## increase the energy
 
                 self.energy += 1
-  
+
     ## reproduce function predator
 
     def predator_random_reproduce(self):
@@ -408,7 +414,7 @@ class Predator(mesa.Agent):
             # print('Predator agent reproduced:', a.unique_id, a.pos)
 
     # deterministic death function
-    
+
     def die(self):
         ## remove the agent from the schedule
 
@@ -429,7 +435,6 @@ class Predator(mesa.Agent):
     ## step function
 
     def step(self):
-        
         ## move the agent
 
         for i in range(self.steps):
@@ -443,20 +448,20 @@ class Predator(mesa.Agent):
                 self.move()
 
         ## eat the prey
-        
+
         self.predator_eat()
 
-        ## reproduce 
+        ## reproduce
 
         while self.energy > 0:
-    
             self.energy -= 1
-            
+
             self.predator_random_reproduce()
 
         ## die
 
         self.random_die()
+
 
 class Apex(mesa.Agent):
     """
@@ -491,11 +496,10 @@ class Apex(mesa.Agent):
     ## move function
 
     def move(self):
-
         ## get the current position
-        
+
         x, y = self.pos
-        
+
         ## random walk
 
         x += self.model.random.randint(-1, 1)
@@ -506,7 +510,7 @@ class Apex(mesa.Agent):
         self.model.grid.move_agent(self, (x, y))
 
     ## hunt, Predator information function
-    
+
     def apex_hunt(self):
         ## get current pos
 
@@ -539,14 +543,14 @@ class Apex(mesa.Agent):
             ## if there are no prey, move randomly
 
             self.move()
-    
+
     # eat
 
     def apex_eat(self):
         ## get the current location
 
         x, y = self.pos
-        
+
         ## get the prey at the current pos
 
         this_cell = self.model.grid.get_cell_list_contents((x, y))
@@ -562,9 +566,9 @@ class Apex(mesa.Agent):
             a = self.model.random.choice(prey)
 
             ## pop the prey agent
-            
+
             prey.pop(prey.index(a))
-            
+
             ## remove the prey agent
 
             l = np.random.binomial(1, self.lethality)
@@ -577,17 +581,15 @@ class Apex(mesa.Agent):
                 ## increase the energy
 
                 self.energy += 1
-     
+
     ## reproduce function predator
 
     def apex_random_reproduce(self):
-        
         ## get probability of reproduction
-        
+
         reproduce = np.random.binomial(1, self.breed)
-        
+
         if reproduce == 1:
-            
             ## create a new predator agent
 
             a = Apex(
@@ -606,7 +608,7 @@ class Apex(mesa.Agent):
             # print('Predator agent reproduced:', a.unique_id, a.pos)
 
     # die
-    
+
     def die(self):
         ## remove the agent from the schedule
 
@@ -627,7 +629,6 @@ class Apex(mesa.Agent):
     ## step function
 
     def step(self):
-        
         ## move the agent
 
         for i in range(self.steps):
@@ -640,18 +641,18 @@ class Apex(mesa.Agent):
         ## eat the prey
 
         self.apex_eat()
-        
+
         ## reproduce
 
         while self.energy > 0:
-            
             self.apex_random_reproduce()
-            
+
             self.energy -= 1
 
         ## die
 
         self.random_die()
+
 
 class Super(mesa.Agent):
     """
@@ -677,7 +678,7 @@ class Super(mesa.Agent):
         self.steps = kwargs.get("super_steps", 20)
         self.max_energy = kwargs.get("super_max", 10)
         self.energy = 0
-        
+
         self.kwargs = kwargs
 
         if self.target == "1":
@@ -696,7 +697,6 @@ class Super(mesa.Agent):
 
         x, y = self.pos
 
-        
         ## random walk
 
         x += self.model.random.randint(-1, 1)
@@ -705,7 +705,7 @@ class Super(mesa.Agent):
         ## move the agent
 
         self.model.grid.move_agent(self, (x, y))
-        
+
     # Predator information function
 
     def super_hunt(self):
@@ -785,9 +785,9 @@ class Super(mesa.Agent):
             a = self.model.random.choice(prey)
 
             ## pop the prey agent
-            
+
             prey.pop(prey.index(a))
-            
+
             ## remove the prey agent
 
             l = np.random.binomial(1, self.lethality)
@@ -796,9 +796,9 @@ class Super(mesa.Agent):
                 self.model.grid.remove_agent(a)
 
                 self.model.schedule.remove(a)
-                
+
                 ## increase the energy
-                
+
                 self.energy += 1
 
     ## step function
@@ -812,10 +812,11 @@ class Super(mesa.Agent):
         ## eat the prey
 
         self.super_eat()
-        
+
         ## reset energy
-        
+
         self.energy = 0
+
 
 # Define model class
 
@@ -961,7 +962,7 @@ class model(mesa.Model):
     def run_model(self, steps=100, progress=False, info=False, limit=10000, stop=False):
         for i in range(steps):
             ## end the model if there are no prey or predator agents
-            
+
             self.n_Predators = self.data_collector(Predator)
             self.n_Prey = self.data_collector(Prey)
             self.n_Apex = self.data_collector(Apex)
@@ -970,9 +971,7 @@ class model(mesa.Model):
             if self.n_Predators + self.n_Prey > limit:
                 break
 
-            elif (stop and self.n_Predators == 0) or (
-                stop and self.n_Prey == 0
-            ):
+            elif (stop and self.n_Predators == 0) or (stop and self.n_Prey == 0):
                 break
 
             else:
