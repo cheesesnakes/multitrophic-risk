@@ -52,7 +52,7 @@ class Prey(mesa.Agent):
     def prey_random_reproduce(self):
         # get the number of prey agents
 
-        num_prey = self.model.data_collector(Prey)
+        num_prey = self.model.n_Prey
 
         ## calculate the probability of reproduction
 
@@ -274,8 +274,8 @@ class Predator(mesa.Agent):
         self.steps = kwargs.get("s_steps", 10)
 
         # state variables
-        self.max_energy = kwargs.get("s_energy", 10)
-        self.energy = self.max_energy
+        self.energy = kwargs.get("s_energy", 10)
+        self.max_energy = 10
         self.age = 0
         self.lineage = kwargs.get("lineage", self.unique_id)
         self.dist = 0
@@ -288,12 +288,8 @@ class Predator(mesa.Agent):
     def predator_random_reproduce(self):
         # get probability of reproduction
 
-        b_t = self.breed * (
-            (self.energy / self.max_energy)
-        )  # energy dependent birth rate
-
-        if b_t > 0:
-            reproduce = np.random.binomial(1, b_t)
+        if self.energy > 0:
+            reproduce = np.random.binomial(1, self.breed)
 
         else:
             reproduce = 0
@@ -469,12 +465,12 @@ class Predator(mesa.Agent):
 
         x, y = self.pos
         
-        ## stop if predator is satiated
+        ## satiate the predator
         
         if self.energy >= self.max_energy:
             
             return
-
+        
         ## get the prey at the current pos
 
         this_cell = self.model.grid.get_cell_list_contents((x, y))
@@ -501,7 +497,7 @@ class Predator(mesa.Agent):
 
                 ## increase the energy
 
-                self.energy += gain
+                #self.energy += gain
 
     def die(self):
         ## remove the agent from the schedule
@@ -608,11 +604,8 @@ class Apex(mesa.Agent):
 
     def apex_random_reproduce(self):
         # get probability of reproduction
-
-        b_t = self.breed * ((self.energy / self.max_energy))
-
-        if b_t > 0:
-            reproduce = np.random.binomial(1, b_t)
+        if self.energy > 0:
+            reproduce = np.random.binomial(1, self.breed)
 
         else:
             reproduce = 0
@@ -718,12 +711,6 @@ class Apex(mesa.Agent):
 
         x, y = self.pos
         
-        ## stop if predator is satiated
-        
-        if self.energy >= self.max_energy:
-            
-            return
-
         ## get the prey at the current pos
 
         this_cell = self.model.grid.get_cell_list_contents((x, y))
@@ -1027,10 +1014,10 @@ class model(mesa.Model):
 
         self.count = mesa.DataCollector(
             model_reporters={
-                "Prey": lambda m: m.data_collector(Prey),
-                "Predator": lambda m: m.data_collector(Predator),
-                "Apex": lambda m: m.data_collector(Apex),
-                "Super": lambda m: m.data_collector(Super),
+                "Prey": lambda m: m.n_Prey,
+                "Predator": lambda m: m.n_Predator,
+                "Apex": lambda m: m.n_Apex,
+                "Super": lambda m: m.n_Super,
             }
         )
 
@@ -1140,12 +1127,17 @@ class model(mesa.Model):
     def run_model(self, steps=100, progress=False, info=False, limit=10000, stop=False):
         for i in range(steps):
             ## end the model if there are no prey or predator agents
+            
+            self.n_Predators = self.data_collector(Predator)
+            self.n_Prey = self.data_collector(Prey)
+            self.n_Apex = self.data_collector(Apex)
+            self.n_Super = self.data_collector(Super)
 
-            if self.data_collector(Predator) + self.data_collector(Prey) > limit:
+            if self.n_Predators + self.n_Prey > limit:
                 break
 
-            elif (stop and self.data_collector(Predator) == 0) or (
-                stop and self.data_collector(Prey) == 0
+            elif (stop and self.n_Predators == 0) or (
+                stop and self.n_Prey == 0
             ):
                 break
 
@@ -1155,25 +1147,25 @@ class model(mesa.Model):
                 if info:
                     print(
                         "Number of prey:",
-                        self.data_collector(Prey),
+                        self.n_Prey,
                         "Number of predators:",
-                        self.data_collector(Predator),
+                        self.n_Predators,
                         "Number of apex predators:",
-                        self.data_collector(Apex),
+                        self.n_Apex,
                         "Number of super predators:",
-                        self.data_collector(Super),
+                        self.n_Super,
                     )
 
                 if progress:
                     print(
                         "Number of prey:",
-                        self.data_collector(Prey),
+                        self.n_Prey,
                         "Number of predators:",
-                        self.data_collector(Predator),
+                        self.n_Predators,
                         "Number of apex predators:",
-                        self.data_collector(Apex),
+                        self.n_Apex,
                         "Number of super predators:",
-                        self.data_collector(Super),
+                        self.n_Super,
                         "Step:",
                         i,
                     )
