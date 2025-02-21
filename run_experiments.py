@@ -12,46 +12,47 @@ kwargs = {
     # model to run   
     'limit' : 100000,
     'num_cpus': 40,
-    'reps': 10,
+    'reps': 1,
     
     # model parameters
-    'width': 100,
-    'height': 100,
+    'width': 50,
+    'height': 50,
     'steps' : 2000,
-    'prey' : 200,
-    'predator': 200,
+    'prey' : 2000,
+    'predator': 500,
     'stop': True,
 
     ## prey traits
     'prey_info': True,
-    'f_breed': 0.2, # max birth rate
+    'f_breed': 0.6, # max birth rate
     'f_die': 0.1, # constant
-    'f_max': 500,
-    'f_steps': 10,
+    'f_max': 10,
+    'f_steps': 1,
 
     ## predator traits
     'predator_info': True,
-    's_energy': 10,
-    's_breed': 0.1, # constant
-    's_die': 0.01,
+    's_max': 5,
+    's_breed': 0.15, # max birth rate
+    's_die': 0.1,
     's_lethality': 0.5,
     's_apex_risk': True,
-    's_steps': 10,
+    's_steps': 1,
 
     ## apex predator traits
 
     'apex_info': True,
-    'a_energy': 10,
-    'a_breed': 0.1, # constant
-    'a_die': 0.001,
+    'a_max': 10,
+    'a_breed': 0.25, # max birth rate
+    'a_die': 0.01,
     'a_lethality': 0.15,
-    'a_steps': 10,
+    'a_steps': 1,
 
     # super predator traits
 
     'super_target': 2,
     'super_lethality': 1,
-    'super_steps': 10,
+    'super_max': 20,
+    'super_steps': 1,
 
     # parameters to vary
 
@@ -78,7 +79,7 @@ def experiment_1():
     
     # data frame to store results
     
-    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'step'])
+    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex', 'step'])
     
     # create parameter space
     
@@ -89,7 +90,7 @@ def experiment_1():
     print("Running model with apex predator")
     
     kwargs['model'] = 'apex'
-    kwargs['apex'] = 100
+    kwargs['apex'] = 500
     kwargs['super'] = 0
 
     # create an instance of the experiment
@@ -116,7 +117,7 @@ def experiment_1():
     
     kwargs['model'] = 'super'
     kwargs['apex'] = 0
-    kwargs['super'] = 100
+    kwargs['super'] = 500
     
     # create an instance of the experiment
     
@@ -148,7 +149,7 @@ def experiment_2():
     
     # data frame to store results
 
-    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator','step'])
+    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex','step'])
 
     # create parameter space
 
@@ -171,7 +172,7 @@ def experiment_2():
             print(f"Running model with superpredator target {target} and lethality {lethality}")
 
             kwargs['model'] = 'super'
-            kwargs['super'] = 100
+            kwargs['super'] = 500
             kwargs['super_target'] = target
             kwargs['super_lethality'] = lethality
 
@@ -203,7 +204,7 @@ def experiment_3():
     
     # data frame to store results
         
-    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'step'])
+    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex', 'step'])
     
     # create parameter space
     
@@ -258,7 +259,7 @@ def experiment_4():
     
     # data frame to store results
         
-    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'step'])
+    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex', 'step'])
     
     # run experiment for lv model
     

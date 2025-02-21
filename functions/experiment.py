@@ -84,11 +84,11 @@ class experiment():
             
             # get the results and append to the data frame
             
-            res = [rep_id, self.sample_id, *v, sample['Prey'].iloc[-1], sample['Predator'].iloc[-1], sample.index[-1]]
+            res = [rep_id, self.sample_id, *v, sample['Prey'].iloc[-1], sample['Predator'].iloc[-1], sample['Apex'].iloc[-1], sample.index[-1]]
             
             # create a data frame
             
-            res = pd.DataFrame([res], columns = ['rep_id', 'sample_id', *params, 'Prey', 'Predator', 'step'])
+            res = pd.DataFrame([res], columns = ['rep_id', 'sample_id', *params, 'Prey', 'Predator', 'Apex', 'step'])
             
             # append to the results
             
@@ -116,7 +116,7 @@ class experiment():
         
         # results data frame
         
-        self.data = pd.DataFrame(columns = ['rep_id', 'sample_id', *params, 'Prey', 'Predator', 'step'])
+        self.data = pd.DataFrame(columns = ['rep_id', 'sample_id', *params, 'Prey', 'Predator', 'Apex', 'step'])
         
         # iterate over the replicates
         
