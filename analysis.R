@@ -13,7 +13,13 @@ experiment_4 <- read.csv("output/experiments/results/Experiment-4_results.csv")
 
 # Experiment 1
 
-experiment_1$treatment <- c(rep("apex", 4000), rep("super", 4000))
+depth = 20
+parameters = 2
+replicates = 1
+
+n = (depth ^ parameters) * replicates
+
+experiment_1$treatment <- c(rep("apex", n), rep("super", n))
 
 # scores
 
@@ -584,7 +590,11 @@ ggsave("output/experiments/plots/experiment_4_predator-prey.png", width = 7, hei
 
 experiment_4_mean <- experiment_4 %>%
     group_by(s_energy, a_energy) %>%
-    summarise(mean_score = mean(score))
+    summarise(mean_score = mean(score)) %>%
+    ungroup() %>%
+    mutate(phase = ifelse(mean_score > 0, "Coexistence",
+        ifelse(mean_score == 0, "Prey Only", "Extinction")
+    ))
 
 ggplot(experiment_4_mean, aes(x = s_energy, y = a_energy, fill = mean_score)) +
     geom_tile(col = "black") +
@@ -604,7 +614,26 @@ ggplot(experiment_4_mean, aes(x = s_energy, y = a_energy, fill = mean_score)) +
         y = "a_energy"
     )
 
+# Phase plot for each treatment
+
+ggplot(experiment_4_mean, aes(x = s_energy, y = a_energy, fill = phase)) +
+    geom_tile() +
+    theme_bw() +
+    theme(
+        text = element_text(size = 20),
+        legend.position = "top"
+    ) +
+    scale_fill_brewer(palette = "Set1") +
+    scale_x_continuous(breaks = seq(0, 100, 10)) +
+    scale_y_continuous(breaks = seq(0, 100, 10)) +
+    labs(
+        x = "s_energy",
+        y = "a_energy"
+    )
+
 ggsave("output/experiments/plots/experiment_4_phase-plot.png", width = 7, height = 7)
+
+
 
 # plot outcome by treatment
 
