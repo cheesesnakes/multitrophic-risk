@@ -12,8 +12,8 @@ kwargs = {
     'limit' : 10000,
     
     # model parameters
-    'width': 100,
-    'height': 100,
+    'width': 50,
+    'height': 50,
     
     # number of agents to start with
     'predator': 500,
@@ -21,20 +21,19 @@ kwargs = {
     
     ## prey traits
     'prey_info': True,
-    'f_breed': 0.2, # max birth rate
+    'f_breed': 0.6, # max birth rate
     'f_die': 0.1, # constant
-    'f_max': 2500,
+    'f_max': 10,
     'risk_cost': 0.01,
-    'f_steps': 20,
+    'f_steps': 1,
 
     ## predator traits
     'predator_info': True,
-    's_energy': 10,
-    's_breed': 0.1, # constant
-    's_die': 0.01,
+    's_max': 5,
+    's_breed': 0.15, # constant
+    's_die': 0.1,
     's_lethality': 0.5,
-    's_apex_risk': True,
-    's_steps': 40,
+    's_steps': 1,
 }
 
 steps = 1000
@@ -90,14 +89,6 @@ for strategy in strategies:
     # plot the number of agents over time
 
     plot_pop(model_data=model_data, params = kwargs, file = f'output/strategies/plots/pop_{kwargs["model"]}_{strategy}.png', steps=steps)
-
-    # plot the age distribution of agents
-
-    plot_age(agent_data=agent_data, file = f'output/strategies/plots/age_{kwargs["model"]}_{strategy}.png', steps=steps)
-
-    # plot the energy distribution of agents
-
-    plot_energy(agent_data=agent_data, file = f'output/strategies/plots/energy_{kwargs["model"]}_{strategy}.png', steps=steps)
 
     # plot density of agents
 
