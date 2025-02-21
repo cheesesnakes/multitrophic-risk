@@ -12,7 +12,7 @@ kwargs = {
     # model to run   
     'limit' : 100000,
     'num_cpus': 40,
-    'reps': 1,
+    'reps': 10,
     
     # model parameters
     'width': 50,
@@ -62,8 +62,8 @@ kwargs = {
 
 def create_space():
 
-    s_breed = np.array(np.linspace(0, 1, 20))
-    f_breed = np.array(np.linspace(0, 1, 20))
+    s_breed = np.array(np.linspace(0.1, 1, 20))
+    f_breed = np.array(np.linspace(0.1, 1, 20))
 
     vars = np.array(np.meshgrid(s_breed, f_breed))
 
@@ -242,20 +242,20 @@ def experiment_3():
     
             results.to_csv(f'output/experiments/results/{E}_results.csv')
 
-# Experiment 5: Effect of staring energy on apex predator and mesopredator
+# Experiment 5: Effect of handling limits on apex predator and mesopredator
 
 def experiment_4():
     
     E = "Experiment-4"
     
-    print("Running experiment 4: effect of starting energy on apex predator and mesopredator")
+    print("Running experiment 4: effect of handling limit on apex predator and mesopredator")
     
     # create parameter space
    
-    a_energy = np.array(np.linspace(0, 100, 20))
-    s_energy = np.array(np.linspace(0, 100, 20))
+    a_max = np.array(np.linspace(0, 100, 20))
+    s_max = np.array(np.linspace(0, 100, 20))
     
-    kwargs['params'] = ['a_energy', 's_energy']
+    kwargs['params'] = ['a_max', 's_max']
     
     # data frame to store results
         
@@ -269,7 +269,7 @@ def experiment_4():
     kwargs['predator'] = 100
     kwargs['prey'] = 100
     
-    vars = np.array(np.meshgrid(0, s_energy)).reshape(2, -1).T
+    vars = np.array(np.meshgrid(0, s_max)).reshape(2, -1).T
     
     print("Number of runs", len(vars)*2)
      
@@ -297,7 +297,7 @@ def experiment_4():
     kwargs['predator'] = 100
     kwargs['prey'] = 100
     
-    vars = np.array(np.meshgrid(a_energy, s_energy)).reshape(2, -1).T
+    vars = np.array(np.meshgrid(a_max, s_max)).reshape(2, -1).T
     
     # create an instance of the experiment
     
@@ -314,6 +314,88 @@ def experiment_4():
     # save results
     
     results.to_csv(f'output/experiments/results/{E}_results.csv')
+
+# Experiment 6: Varying birth rates of apex predator and mesopredator
+
+def experiment_5():
+    
+    E = "Experiment-5"
+    
+    print("Running experiment 5: varying birth rates of apex predator and mesopredator")
+    
+    # create parameter space
+    
+    a_breed = np.array(np.linspace(0, 1, 20))
+    s_breed = np.array(np.linspace(0, 1, 20))
+    
+    kwargs['params'] = ['a_breed', 's_breed']
+    
+    # data frame to store results
+        
+    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex', 'step'])
+    
+    # run experiment for apex predator
+    
+    kwargs['model'] = 'apex'
+    
+    vars = np.array(np.meshgrid(a_breed, s_breed)).reshape(2, -1).T
+    
+    # create an instance of the experiment
+    
+    exp = experiment(**kwargs)
+    
+    # run the experiment
+    
+    run = exp.parallel(v = vars, rep=kwargs.get('reps', 10), **kwargs)
+    
+    # append results to data frame
+    
+    results = pd.concat([results, run])
+    
+    # save results
+    
+    results.to_csv(f'output/experiments/results/{E}_results.csv')
+
+# Experiment 7: Varying local saturation of prey for lv model
+
+def experiment_6():
+    
+    E = "Experiment-6"
+    
+    print("Running experiment 6: varying local saturation of prey for lv model")
+    
+    # create parameter space
+    
+    f_max = np.array(np.linspace(0, 100, 20))
+    
+    kwargs['params'] = ['f_max']
+    
+    # data frame to store results
+        
+    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex', 'step'])
+    
+    # run experiment for lv model
+    
+    kwargs['model'] = 'lv'
+    
+    vars = "f_max"
+    
+    # create an instance of the experiment
+    
+    exp = experiment(**kwargs)
+    
+    # run the experiment
+    
+    run = exp.parallel(v = vars, rep=kwargs.get('reps', 10), **kwargs)
+    
+    # append results to data frame
+    
+    results = pd.concat([results, run])
+    
+    # save results
+    
+    results.to_csv(f'output/experiments/results/{E}_results.csv')    
+
     
 # running experiments
 
@@ -341,6 +423,9 @@ def run(exp = "All"):
         experiment_2()
         experiment_3()
         experiment_4()
+        experiment_5()
+        experiment_6()
+        
     
 if __name__ == '__main__':
     
