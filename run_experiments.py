@@ -411,6 +411,50 @@ def experiment_6():
         
         results.to_csv(f'output/experiments/results/{E}_results.csv')
 
+# Experiment 8: Varying lethality of mesopredator
+
+def experiment_7():
+    
+    E = "Experiment-7"
+    
+    print("Running experiment 7: varying lethality of mesopredator")
+    
+    # create parameter space
+    
+    s_lethality = np.array(np.linspace(0, 1, depth))
+    
+    kwargs['params'] = ['s_lethality']
+    
+    # data frame to store results
+        
+    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex', 'Super', 'step'])
+    
+    # run experiment for mesopredator
+    
+    kwargs['model'] = 'lv'
+    kwargs['apex'] = 0
+    kwargs['super'] = 0
+    kwargs['predator'] = 500
+    kwargs['prey'] = 2000
+    
+    vars = s_lethality
+    
+    # create an instance of the experiment
+    
+    exp = experiment(**kwargs)
+    
+    # run the experiment
+    
+    run = exp.parallel(v = vars, rep=kwargs.get('reps', 10), **kwargs)
+    
+    # append results to data frame
+    
+    results = pd.concat([results, run])
+    
+    # save results
+    
+    results.to_csv(f'output/experiments/results/{E}_results.csv')
+
 # diagnostic: run only apex, super, and predator agents
 
 def diagnostic():
@@ -458,6 +502,18 @@ def run(exp = "All"):
         
         experiment_4()
     
+    elif exp == "5":
+        
+        experiment_5()
+    
+    elif exp == "6":
+        
+        experiment_6()
+        
+    elif exp == "7":
+        
+        experiment_7()
+        
     elif exp == "debug":
         
         diagnostic()
@@ -470,6 +526,7 @@ def run(exp = "All"):
         experiment_4()
         experiment_5()
         experiment_6()
+        experiment_7()
         diagnostic()
         
     
