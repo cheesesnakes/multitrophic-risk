@@ -11,16 +11,16 @@ kwargs = {
     
     # model to run   
     'limit' : 100000,
-    'num_cpus': 40,
-    'reps': 10,
+    'num_cpus': 50,
+    'reps': 25,
     
     # model parameters
-    'width': 50,
-    'height': 50,
+    'width': 100,
+    'height': 100,
     'steps' : 2000,
     'prey' : 2000,
     'predator': 500,
-    'stop': True,
+    'stop': False,
 
     ## prey traits
     'prey_info': True,
@@ -60,10 +60,12 @@ kwargs = {
 
 # create parameter space
 
+depth = 50
+
 def create_space():
 
-    s_breed = np.array(np.linspace(0.1, 1, 20))
-    f_breed = np.array(np.linspace(0.1, 1, 20))
+    s_breed = np.array(np.linspace(0.1, 1, depth))
+    f_breed = np.array(np.linspace(0.1, 1, depth))
 
     vars = np.array(np.meshgrid(s_breed, f_breed))
 
@@ -79,7 +81,7 @@ def experiment_1():
     
     # data frame to store results
     
-    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex', 'step'])
+    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex', 'Super', 'step'])
     
     # create parameter space
     
@@ -149,7 +151,7 @@ def experiment_2():
     
     # data frame to store results
 
-    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex','step'])
+    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex', 'Super', 'step'])
 
     # create parameter space
 
@@ -204,7 +206,7 @@ def experiment_3():
     
     # data frame to store results
         
-    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex', 'step'])
+    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex', 'Super', 'step'])
     
     # create parameter space
     
@@ -252,24 +254,24 @@ def experiment_4():
     
     # create parameter space
    
-    a_max = np.array(np.linspace(0, 100, 20))
-    s_max = np.array(np.linspace(0, 100, 20))
+    a_max = np.array(np.linspace(0, 100, depth))
+    s_max = np.array(np.linspace(0, 100, depth))
     
     kwargs['params'] = ['a_max', 's_max']
     
     # data frame to store results
         
-    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex', 'step'])
+    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex', 'Super', 'step'])
     
     # run experiment for lv model
     
     kwargs['model'] = 'lv'
     kwargs['apex'] = 0
     kwargs['super'] = 0
-    kwargs['predator'] = 100
-    kwargs['prey'] = 100
+    kwargs['predator'] = 2000
+    kwargs['prey'] = 500
     
-    vars = np.array(np.meshgrid(0, s_max)).reshape(2, -1).T
+    vars = s_max
     
     print("Number of runs", len(vars)*2)
      
@@ -287,17 +289,21 @@ def experiment_4():
     
     # save results
     
-    results.to_csv(f'output/experiments/results/{E}_results.csv')
+    results.to_csv(f'output/experiments/results/{E}_lv_results.csv')
     
     # run experiment for apex predator
     
+    # data frame to store results
+        
+    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex', 'Super', 'step'])
+   
     kwargs['model'] = 'apex'
-    kwargs['apex'] = 250
+    kwargs['apex'] = 500
     kwargs['super'] = 0
-    kwargs['predator'] = 100
-    kwargs['prey'] = 100
+    kwargs['predator'] = 2000
+    kwargs['prey'] = 500
     
-    vars = np.array(np.meshgrid(a_max, s_max)).reshape(2, -1).T
+    vars = a_max
     
     # create an instance of the experiment
     
@@ -313,7 +319,7 @@ def experiment_4():
     
     # save results
     
-    results.to_csv(f'output/experiments/results/{E}_results.csv')
+    results.to_csv(f'output/experiments/results/{E}_apex_results.csv')
 
 # Experiment 6: Varying birth rates of apex predator and mesopredator
 
@@ -321,24 +327,23 @@ def experiment_5():
     
     E = "Experiment-5"
     
-    print("Running experiment 5: varying birth rates of apex predator and mesopredator")
+    print("Running experiment 5: varying birth rates of apex predator")
     
     # create parameter space
     
-    a_breed = np.array(np.linspace(0, 1, 20))
-    s_breed = np.array(np.linspace(0, 1, 20))
+    a_breed = np.array(np.linspace(0.1, 1, depth))
     
-    kwargs['params'] = ['a_breed', 's_breed']
+    kwargs['params'] = ['a_breed']
     
     # data frame to store results
         
-    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex', 'step'])
+    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex', 'Super', 'step'])
     
     # run experiment for apex predator
     
     kwargs['model'] = 'apex'
     
-    vars = np.array(np.meshgrid(a_breed, s_breed)).reshape(2, -1).T
+    vars = a_breed
     
     # create an instance of the experiment
     
@@ -362,40 +367,76 @@ def experiment_6():
     
     E = "Experiment-6"
     
-    print("Running experiment 6: varying local saturation of prey for lv model")
+    print("Running experiment 6: varying lattice size and local saturation of prey for lv model")
     
     # create parameter space
     
-    f_max = np.array(np.linspace(0, 100, 20))
+    L2 = np.array(np.linspace(10, 100, 5))
+    f_max = np.array(np.linspace(0, 100, depth))
     
     kwargs['params'] = ['f_max']
     
     # data frame to store results
         
-    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex', 'step'])
+    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex', 'Super', 'step'])
     
-    # run experiment for lv model
-    
-    kwargs['model'] = 'lv'
-    
-    vars = "f_max"
-    
-    # create an instance of the experiment
-    
-    exp = experiment(**kwargs)
-    
-    # run the experiment
-    
-    run = exp.parallel(v = vars, rep=kwargs.get('reps', 10), **kwargs)
-    
-    # append results to data frame
-    
-    results = pd.concat([results, run])
-    
-    # save results
-    
-    results.to_csv(f'output/experiments/results/{E}_results.csv')    
+    for l in L2:
+        
+        kwargs['width'] = l
+        kwargs['height'] = l
+        
+        # run experiment for lv model
+        
+        kwargs['model'] = 'lv'
+        kwargs['apex'] = 0
+        kwargs['super'] = 0
+        kwargs['predator'] = 0
+        kwargs['prey'] = 500
+        
+        vars = f_max
+        
+        # create an instance of the experiment
+        
+        exp = experiment(**kwargs)
+        
+        # run the experiment
+        
+        run = exp.parallel(v = vars, rep=kwargs.get('reps', 10), **kwargs)
+        
+        # append results to data frame
+        
+        results = pd.concat([results, run])
+        
+        # save results
+        
+        results.to_csv(f'output/experiments/results/{E}_results.csv')
 
+# diagnostic: run only apex, super, and predator agents
+
+def diagnostic():
+    
+    rep = 10
+    
+    # create parameter space
+    
+    agents = ["apex", "super", "predator"]
+    
+    for agent in agents:
+        
+        kwargs['model'] = agent
+        
+        # create an instance of the experiment
+        
+        exp = experiment(**kwargs)
+        
+        # run the experiment
+        
+        run = exp.parallel(v = None, rep=rep, **kwargs)
+        
+        # save results
+        
+        run.to_csv(f'output/experiments/results/debug_{agent}_results.csv')
+        
     
 # running experiments
 
@@ -416,6 +457,10 @@ def run(exp = "All"):
     elif exp == "4":
         
         experiment_4()
+    
+    elif exp == "debug":
+        
+        diagnostic()
         
     else:
     
@@ -425,6 +470,7 @@ def run(exp = "All"):
         experiment_4()
         experiment_5()
         experiment_6()
+        diagnostic()
         
     
 if __name__ == '__main__':

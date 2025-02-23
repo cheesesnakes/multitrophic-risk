@@ -46,7 +46,7 @@ class experiment():
         
         # results data frame
         
-        results = pd.DataFrame(columns = ['rep_id', 'sample_id', *params, 'Prey', 'Predator', 'step'])
+        results = pd.DataFrame(columns = ['rep_id', 'sample_id', *params, 'Prey', 'Predator', 'Apex', 'Super', 'step'])
         
         # sample id
         
@@ -61,14 +61,8 @@ class experiment():
         # set params
         
         kwargs = self.kwargs
-         
-        if len(v.shape) == 1:
-                    
-            # update kwargs.valeus
-            
-            for i, p in enumerate(params):
-                
-                kwargs[p] = v[i]
+        
+        if v.any() == None:
             
             # progress
             
@@ -82,27 +76,81 @@ class experiment():
             
             sample = m.count.get_model_vars_dataframe()
             
+            sample['step'] = sample.index
+            
             # get the results and append to the data frame
             
-            res = [rep_id, self.sample_id, *v, sample['Prey'].iloc[-1], sample['Predator'].iloc[-1], sample['Apex'].iloc[-1], sample.index[-1]]
             
-            # create a data frame
+            sample['rep_id'] = rep_id
+            sample['sample_id'] = self.sample_id
             
-            res = pd.DataFrame([res], columns = ['rep_id', 'sample_id', *params, 'Prey', 'Predator', 'Apex', 'step'])
+            ## append the parameters
+            
+            for p in params:
+                
+                sample[p] = kwargs[p]
+                
             
             # append to the results
             
-            results = pd.concat([results, res], axis = 0)         
+            results = pd.concat([results, sample], axis = 0)
             
             results.to_csv(f"sample.csv", index = False)               
             
             # update the sample id
             
             self.sample_id += 1
-            
+        
         else:
             
-            Exception("v should be one dimensional")
+            if len(v.shape) == 1:
+                        
+                # update kwargs.valeus
+                
+                for i, p in enumerate(params):
+                    
+                    kwargs[p] = v[i]
+                
+                # progress
+                
+                print(f"Running replicate {rep_id}, sample {sample_id}")
+                    
+                # create the model
+                
+                m = model_run(**kwargs)
+                
+                # get the results
+                
+                sample = m.count.get_model_vars_dataframe()
+                
+                sample['step'] = sample.index
+                
+                # get the results and append to the data frame
+                
+                
+                sample['rep_id'] = rep_id
+                sample['sample_id'] = self.sample_id
+                
+                ## append the parameters
+                
+                for p in params:
+                    
+                    sample[p] = kwargs[p]
+                    
+                
+                # append to the results
+                
+                results = pd.concat([results, sample], axis = 0)
+                
+                results.to_csv(f"sample.csv", index = False)               
+                
+                # update the sample id
+                
+                self.sample_id += 1
+                
+            else:
+                
+                Exception("v should be one dimensional")
             
         return results
 
@@ -116,13 +164,18 @@ class experiment():
         
         # results data frame
         
-        self.data = pd.DataFrame(columns = ['rep_id', 'sample_id', *params, 'Prey', 'Predator', 'Apex', 'step'])
+        self.data = pd.DataFrame(columns = ['rep_id', 'sample_id', *params, 'Prey', 'Predator', 'Apex', 'Super', 'step'])
         
         # iterate over the replicates
         
-        print("Number of parameter combinations: ", v.shape[0])
+        if v.any() == None:
+            
+            print("Number of runs: ", rep)
+        
+        else:            
+            print("Number of parameter combinations: ", v.shape[0])
          
-        print("Number of runs: ", v.shape[0]*rep)
+            print("Number of runs: ", v.shape[0]*rep)
         
         # iterate over the replicates
         
@@ -132,9 +185,15 @@ class experiment():
             
             # assign num_cpu tasks at a time
             
-            for j in range(v.shape[0]):
-                        
-                future.append(self.run.remote(self = self, v = v[j,:], rep_id = i+1, sample_id = j, params = params, **kwargs))
+            if not v.any() == None:
+                
+                for j in range(v.shape[0]):
+
+                    future.append(self.run.remote(self = self, v = v[j,:], rep_id = i+1, sample_id = j, params = params, **kwargs))
+            
+            else:
+                
+                future.append(self.run.remote(self = self, v = None, rep_id = i+1, sample_id = 1, params = params, **kwargs))
         
         res = ray.get(future)
             
