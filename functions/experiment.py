@@ -62,7 +62,7 @@ class experiment():
         
         kwargs = self.kwargs
         
-        if v.any() == None:
+        if v is None:
             
             # progress
             
@@ -168,7 +168,7 @@ class experiment():
         
         # iterate over the replicates
         
-        if v.any() == None:
+        if v is None:
             
             print("Number of runs: ", rep)
         
@@ -185,11 +185,17 @@ class experiment():
             
             # assign num_cpu tasks at a time
             
-            if not v.any() == None:
+            if not v is None:
                 
                 for j in range(v.shape[0]):
+                    
+                    if len(v.shape) == 1:
 
-                    future.append(self.run.remote(self = self, v = v[j,:], rep_id = i+1, sample_id = j, params = params, **kwargs))
+                        future.append(self.run.remote(self = self, v = v, rep_id = i+1, sample_id = j, params = params, **kwargs))
+                    
+                    else:
+
+                        future.append(self.run.remote(self = self, v = v[j,:], rep_id = i+1, sample_id = j, params = params, **kwargs))
             
             else:
                 

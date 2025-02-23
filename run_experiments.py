@@ -371,8 +371,8 @@ def experiment_6():
     
     # create parameter space
     
-    L2 = np.array(np.linspace(10, 100, 5))
-    f_max = np.array(np.linspace(0, 100, depth))
+    L2 = [10, 20, 50, 100]
+    f_max = [0, 1, 5, 10, 20, 25, 50, 75, 100]
     
     kwargs['params'] = ['f_max']
     
@@ -382,34 +382,39 @@ def experiment_6():
     
     for l in L2:
         
-        kwargs['width'] = l
-        kwargs['height'] = l
-        
-        # run experiment for lv model
-        
-        kwargs['model'] = 'lv'
-        kwargs['apex'] = 0
-        kwargs['super'] = 0
-        kwargs['predator'] = 0
-        kwargs['prey'] = 500
-        
-        vars = f_max
-        
-        # create an instance of the experiment
-        
-        exp = experiment(**kwargs)
-        
-        # run the experiment
-        
-        run = exp.parallel(v = vars, rep=kwargs.get('reps', 10), **kwargs)
-        
-        # append results to data frame
-        
-        results = pd.concat([results, run])
-        
+        for f in f_max:
+            
+            print(f"Running model with lattice size {l} and local saturation of prey {f}")
+            
+            kwargs['width'] = l
+            kwargs['height'] = l
+            kwargs['f_max'] = f
+            
+            reps = 10
+            
+            # run experiment for lv model
+            
+            kwargs['model'] = 'lv'
+            kwargs['apex'] = 0
+            kwargs['super'] = 0
+            kwargs['predator'] = 0
+            kwargs['prey'] = 2000
+            
+            # create an instance of the experiment
+            
+            exp = experiment(**kwargs)
+            
+            # run the experiment
+            
+            run = exp.parallel(v = None, rep=reps, **kwargs)
+            
+            # append results to data frame
+            
+            results = pd.concat([results, run])
+            
         # save results
         
-        results.to_csv(f'output/experiments/results/{E}_results.csv')
+    results.to_csv(f'output/experiments/results/{E}_results.csv')
 
 # Experiment 8: Varying lethality of mesopredator
 
