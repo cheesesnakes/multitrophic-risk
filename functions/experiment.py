@@ -68,38 +68,6 @@ class experiment():
             
             print(f"Running replicate {rep_id}, sample {sample_id}")
                 
-            # create the model
-            
-            m = model_run(**kwargs)
-            
-            # get the results
-            
-            sample = m.count.get_model_vars_dataframe()
-            
-            sample['step'] = sample.index
-            
-            # get the results and append to the data frame
-            
-            
-            sample['rep_id'] = rep_id
-            sample['sample_id'] = self.sample_id
-            
-            ## append the parameters
-            
-            for p in params:
-                
-                sample[p] = kwargs[p]
-                
-            
-            # append to the results
-            
-            results = pd.concat([results, sample], axis = 0)
-            
-            results.to_csv(f"sample.csv", index = False)               
-            
-            # update the sample id
-            
-            self.sample_id += 1
         
         else:
             
@@ -113,44 +81,52 @@ class experiment():
                 
                 # progress
                 
-                print(f"Running replicate {rep_id}, sample {sample_id}")
-                    
-                # create the model
-                
-                m = model_run(**kwargs)
-                
-                # get the results
-                
-                sample = m.count.get_model_vars_dataframe()
-                
-                sample['step'] = sample.index
-                
-                # get the results and append to the data frame
-                
-                
-                sample['rep_id'] = rep_id
-                sample['sample_id'] = self.sample_id
-                
-                ## append the parameters
-                
-                for p in params:
-                    
-                    sample[p] = kwargs[p]
-                    
-                
-                # append to the results
-                
-                results = pd.concat([results, sample], axis = 0)
-                
-                results.to_csv(f"sample.csv", index = False)               
-                
-                # update the sample id
-                
-                self.sample_id += 1
+                print(f"Running replicate {rep_id}, sample {sample_id}, with {params} = {v}")
                 
             else:
                 
-                Exception("v should be one dimensional")
+                # update kwargs.valeus
+                
+                for p in params:
+                    
+                    kwargs[p] = v
+                
+                # progress
+                
+                print(f"Running replicate {rep_id}, sample {sample_id}, with {params} = {v}")
+                    
+        # create the model
+        
+        m = model_run(**kwargs)
+        
+        # get the results
+        
+        sample = m.count.get_model_vars_dataframe()
+        
+        sample['step'] = sample.index
+        
+        # get the results and append to the data frame
+        
+        
+        sample['rep_id'] = rep_id
+        sample['sample_id'] = self.sample_id
+        
+        ## append the parameters
+        
+        for p in params:
+            
+            sample[p] = kwargs[p]
+            
+        
+        # append to the results
+        
+        results = pd.concat([results, sample], axis = 0)
+        
+        results.to_csv(f"sample.csv", index = False)               
+        
+        # update the sample id
+        
+        self.sample_id += 1
             
         return results
 
@@ -187,14 +163,16 @@ class experiment():
             
             if not v is None:
                 
-                for j in range(v.shape[0]):
+                if len(v.shape) == 1:
                     
-                    if len(v.shape) == 1:
+                    for j in range(len(v)):
 
-                        future.append(self.run.remote(self = self, v = v, rep_id = i+1, sample_id = j, params = params, **kwargs))
+                        future.append(self.run.remote(self = self, v = v[j], rep_id = i+1, sample_id = j, params = params, **kwargs))
                     
-                    else:
+                else:
 
+                    for j in range(v.shape[0]):
+                            
                         future.append(self.run.remote(self = self, v = v[j,:], rep_id = i+1, sample_id = j, params = params, **kwargs))
             
             else:

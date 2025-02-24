@@ -15,9 +15,9 @@ kwargs = {
     'reps': 25,
     
     # model parameters
-    'width': 100,
-    'height': 100,
-    'steps' : 2000,
+    'width': 50,
+    'height': 50,
+    'steps' : 1000,
     'prey' : 2000,
     'predator': 500,
     'stop': False,
@@ -26,7 +26,7 @@ kwargs = {
     'prey_info': True,
     'f_breed': 0.6, # max birth rate
     'f_die': 0.1, # constant
-    'f_max': 10,
+    'f_max': 5,
     'f_steps': 1,
 
     ## predator traits
