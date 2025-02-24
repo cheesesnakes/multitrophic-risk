@@ -372,7 +372,7 @@ def experiment_6():
     # create parameter space
     
     L2 = [10, 20, 50, 100]
-    f_max = [0, 1, 5, 10, 20, 25, 50, 75, 100]
+    f_max = [0, 1, 2, 5, 10, 20, 25, 50]
     
     kwargs['params'] = ['f_max']
     
@@ -412,9 +412,9 @@ def experiment_6():
             
             results = pd.concat([results, run])
             
-        # save results
+            # save results
         
-    results.to_csv(f'output/experiments/results/{E}_results.csv')
+            results.to_csv(f'output/experiments/results/{E}_results.csv')
 
 # Experiment 8: Varying lethality of mesopredator
 
