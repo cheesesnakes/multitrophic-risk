@@ -15,8 +15,8 @@ kwargs = {
     'reps': 25,
     
     # model parameters
-    'width': 50,
-    'height': 50,
+    'width': 100,
+    'height': 100,
     'steps' : 1000,
     'prey' : 2000,
     'predator': 500,
@@ -34,7 +34,7 @@ kwargs = {
     's_max': 5,
     's_breed': 0.15, # max birth rate
     's_die': 0.1,
-    's_lethality': 0.5,
+    's_lethality': 0.6,
     's_apex_risk': True,
     's_steps': 1,
 
@@ -43,7 +43,7 @@ kwargs = {
     'apex_info': True,
     'a_max': 10,
     'a_breed': 0.25, # max birth rate
-    'a_die': 0.01,
+    'a_die': 0.1,
     'a_lethality': 0.15,
     'a_steps': 1,
 
@@ -257,7 +257,7 @@ def experiment_4():
     a_max = np.array(np.linspace(0, 100, depth))
     s_max = np.array(np.linspace(0, 100, depth))
     
-    kwargs['params'] = ['a_max', 's_max']
+    kwargs['params'] = ['s_max']
     
     # data frame to store results
         
@@ -303,6 +303,8 @@ def experiment_4():
     kwargs['predator'] = 2000
     kwargs['prey'] = 500
     
+    kwargs['params'] = ['a_max']
+    
     vars = a_max
     
     # create an instance of the experiment
@@ -342,6 +344,10 @@ def experiment_5():
     # run experiment for apex predator
     
     kwargs['model'] = 'apex'
+    kwargs['apex'] = 500
+    kwargs['super'] = 0
+    kwargs['predator'] = 500
+    kwargs['prey'] = 2000
     
     vars = a_breed
     
@@ -460,6 +466,92 @@ def experiment_7():
     
     results.to_csv(f'output/experiments/results/{E}_results.csv')
 
+# Experiment 9: Varying lethality of apex predator
+
+def experiment_8():
+    
+    E = "Experiment-8"
+    
+    print("Running experiment 8: varying lethality of apex predator")
+    
+    # create parameter space
+    
+    a_lethality = np.array(np.linspace(0, 1, 20))
+    
+    kwargs['params'] = ['a_lethality']
+    
+    # data frame to store results
+        
+    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex', 'Super', 'step'])
+    
+    # run experiment for apex predator
+    
+    kwargs['model'] = 'apex'
+    kwargs['apex'] = 500
+    kwargs['super'] = 0
+    kwargs['predator'] = 500
+    kwargs['prey'] = 2000
+    
+    vars = a_lethality
+    
+    # create an instance of the experiment
+    
+    exp = experiment(**kwargs)
+    
+    # run the experiment
+    
+    run = exp.parallel(v = vars, rep=kwargs.get('reps', 10), **kwargs)
+    
+    # append results to data frame
+    
+    results = pd.concat([results, run])
+    
+    # save results
+    
+    results.to_csv(f'output/experiments/results/{E}_results.csv')
+
+# Experiment 10: varying starting density of agents
+
+def experiment_9():
+    
+    E = "Experiment-9"
+    
+    print("Running experiment 9: varying starting density of agents")
+    
+    # create parameter space
+    
+    prey = np.array([100, 500, 1000, 2000, 5000])
+    predator = np.array([100, 500, 1000, 2000, 5000])
+    apex = np.array([0, 100, 500, 1000, 2000])
+    super = np.array([0, 100, 500, 1000, 2000])
+    
+    reps = 10
+    
+    vars = np.array(np.meshgrid(prey, predator, apex, super)).reshape(4, -1).T
+    
+    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex', 'Super', 'step'])
+    
+    for i in range(vars.shape[0]):
+        
+        kwargs['prey'], kwargs['predator'], kwargs['apex'], kwargs['super'] = vars[i]
+        
+        print(f"Running model with prey {kwargs['prey']}, predator {kwargs['predator']}, apex {kwargs['apex']}, super {kwargs['super']}")
+        
+        # create an instance of the experiment
+        
+        exp = experiment(**kwargs)
+        
+        # run the experiment
+        
+        run = exp.parallel(v = None, rep=reps, **kwargs)
+        
+        # save results
+        
+        results = pd.concat([results, run])
+        
+        results.to_csv(f'output/experiments/results/{E}_results.csv')     
+        
+        
 # diagnostic: run only apex, super, and predator agents
 
 def diagnostic():
@@ -518,10 +610,24 @@ def run(exp = "All"):
     elif exp == "7":
         
         experiment_7()
+    
+    elif exp == "8":
+        
+        experiment_8()
+        
+    elif exp == "9":
+        
+        experiment_9()
         
     elif exp == "debug":
         
+        experiment_4()
+        experiment_5()
+        experiment_7()
+        experiment_8()
+        experiment_9()
         diagnostic()
+        
         
     else:
     
@@ -532,6 +638,8 @@ def run(exp = "All"):
         experiment_5()
         experiment_6()
         experiment_7()
+        experiment_8()
+        experiment_9()
         diagnostic()
         
     
