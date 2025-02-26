@@ -18,7 +18,7 @@ kwargs = {
     'width': 100,
     'height': 100,
     'steps' : 1000,
-    'prey' : 2000,
+    'prey' : 500,
     'predator': 500,
     'stop': False,
 
@@ -119,7 +119,7 @@ def experiment_1():
     
     kwargs['model'] = 'super'
     kwargs['apex'] = 0
-    kwargs['super'] = 500
+    kwargs['super'] = 100
     
     # create an instance of the experiment
     
@@ -174,7 +174,7 @@ def experiment_2():
             print(f"Running model with superpredator target {target} and lethality {lethality}")
 
             kwargs['model'] = 'super'
-            kwargs['super'] = 500
+            kwargs['super'] = 100
             kwargs['super_target'] = target
             kwargs['super_lethality'] = lethality
 
@@ -268,7 +268,7 @@ def experiment_4():
     kwargs['model'] = 'lv'
     kwargs['apex'] = 0
     kwargs['super'] = 0
-    kwargs['predator'] = 2000
+    kwargs['predator'] = 500
     kwargs['prey'] = 500
     
     vars = s_max
@@ -300,7 +300,7 @@ def experiment_4():
     kwargs['model'] = 'apex'
     kwargs['apex'] = 500
     kwargs['super'] = 0
-    kwargs['predator'] = 2000
+    kwargs['predator'] = 500
     kwargs['prey'] = 500
     
     kwargs['params'] = ['a_max']
@@ -347,7 +347,7 @@ def experiment_5():
     kwargs['apex'] = 500
     kwargs['super'] = 0
     kwargs['predator'] = 500
-    kwargs['prey'] = 2000
+    kwargs['prey'] = 500
     
     vars = a_breed
     
@@ -490,7 +490,7 @@ def experiment_8():
     kwargs['apex'] = 500
     kwargs['super'] = 0
     kwargs['predator'] = 500
-    kwargs['prey'] = 2000
+    kwargs['prey'] = 500
     
     vars = a_lethality
     

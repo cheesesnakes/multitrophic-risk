@@ -14,7 +14,7 @@ summary(data)
 
 # representative time series
 
-l <- unique(data$s_lethality)[c(13,26,38,50)]
+l <- unique(data$s_lethality)[c(13, 26, 38, 50)]
 
 reps <- sample(unique(data$rep_id), 5)
 
@@ -66,6 +66,31 @@ plot <- data %>%
 
 ggsave(plot, filename = "output/experiments/plots/predator-time-series_lethality.png", width = 10, height = 10, dpi = 300)
 
+# oscillation diagram
+
+plot <- data %>%
+    filter(s_lethality %in% l) %>%
+    filter(rep_id %in% reps) %>%
+    ggplot(aes(x = Prey, y = Predator)) +
+    geom_point(alpha = 0.25) +
+    geom_point(
+        data = data %>% filter(rep_id == bold & s_lethality %in% l),
+        aes(col = as.factor(s_lethality)), alpha = 1, linewidth = 1
+    ) +
+    scale_color_viridis(discrete = TRUE) +
+    theme_bw() +
+    labs(
+        x = "Prey",
+        y = "Meso predator",
+        color = "Meso predator lethality"
+    ) +
+    theme(
+        legend.position = "none",
+        text = element_text(size = 20)
+    ) +
+    facet_wrap(~s_lethality)
+
+ggsave(plot, filename = "output/experiments/plots/oscillation_lethality.png", width = 10, height = 10, dpi = 300)
 # discard first 400 steps
 
 data <- data %>%
@@ -77,10 +102,14 @@ plot <- data %>%
     ggplot(aes(x = s_lethality, y = Prey)) +
     geom_jitter(alpha = 0.05, color = brewer.pal(9, "Set1")[2]) +
     theme_bw() +
-    labs(x = "Meso predator lethality",
-         y = "Equilibrium prey") +
-    theme(legend.position = "top",
-          text = element_text(size = 20))
+    labs(
+        x = "Meso predator lethality",
+        y = "Equilibrium prey"
+    ) +
+    theme(
+        legend.position = "top",
+        text = element_text(size = 20)
+    )
 
 ggsave(plot, filename = "output/experiments/plots/prey-lethality.png", width = 10, height = 10, dpi = 300)
 
@@ -88,11 +117,15 @@ ggsave(plot, filename = "output/experiments/plots/prey-lethality.png", width = 1
 
 plot <- data %>%
     ggplot(aes(x = s_lethality, y = Predator)) +
-    geom_jitter(alpha = 0.05, color = brewer.pal(9, "Set1")[1]) + #brewer.pal(9, "Set1")[2]) +
+    geom_jitter(alpha = 0.05, color = brewer.pal(9, "Set1")[1]) + # brewer.pal(9, "Set1")[2]) +
     theme_bw() +
-    labs(x = "Meso predator lethality",
-         y = "Equilibrium meso predator") +
-    theme(legend.position = "top",
-          text = element_text(size = 20))
+    labs(
+        x = "Meso predator lethality",
+        y = "Equilibrium meso predator"
+    ) +
+    theme(
+        legend.position = "top",
+        text = element_text(size = 20)
+    )
 
 ggsave(plot, filename = "output/experiments/plots/predator-lethality.png", width = 10, height = 10, dpi = 300)

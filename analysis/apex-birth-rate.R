@@ -13,7 +13,7 @@ head(data)
 
 # representative time series
 
-l <- unique(data$a_breed)[c(0,10,20,30,40,50)]
+l <- unique(data$a_breed)[c(0, 10, 20, 30, 40, 50)]
 
 reps <- sample(unique(data$rep_id), 5)
 
@@ -99,22 +99,30 @@ plot <- data %>%
     ggplot(aes(x = a_breed, y = Prey)) +
     geom_jitter(alpha = 0.05, color = brewer.pal(9, "Set1")[2]) +
     theme_bw() +
-    labs(x = "Apex predator breeding rate",
-             y = "Equilibrium prey") +
-    theme(legend.position = "top",
-          text = element_text(size = 20))
+    labs(
+        x = "Apex predator breeding rate",
+        y = "Equilibrium prey"
+    ) +
+    theme(
+        legend.position = "top",
+        text = element_text(size = 20)
+    )
 
 ggsave(plot, filename = "output/experiments/plots/prey-a_breed.png", width = 10, height = 10, dpi = 300)
 
 # equilibrium meso predator as function of Apex predator breeding rate",
 plot <- data %>%
     ggplot(aes(x = a_breed, y = Predator)) +
-    geom_jitter(alpha = 0.05, color = brewer.pal(9, "Set1")[1]) + #brewer.pal(9, "Set1")[2]) +
+    geom_jitter(alpha = 0.05, color = brewer.pal(9, "Set1")[1]) + # brewer.pal(9, "Set1")[2]) +
     theme_bw() +
-    labs(x = "Apex predator breeding rate",         
-    y = "Equilibrium meso predator") +
-    theme(legend.position = "top",
-          text = element_text(size = 20))
+    labs(
+        x = "Apex predator breeding rate",
+        y = "Equilibrium meso predator"
+    ) +
+    theme(
+        legend.position = "top",
+        text = element_text(size = 20)
+    )
 
 ggsave(plot, filename = "output/experiments/plots/predator-a_breed.png", width = 10, height = 10, dpi = 300)
 
