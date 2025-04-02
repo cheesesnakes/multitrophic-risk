@@ -1,0 +1,16 @@
+[project]
+name = "multitrophic-risk"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "marimo>=0.12.0",
+    "mesa>=3.1.5",
+    "numpy>=2.2.4",
+    "pandas>=2.2.3",
+    "python-lsp-server>=1.12.2",
+    "ray>=2.44.1",
+]
+[tool.marimo.experimental]
+lsp = true
