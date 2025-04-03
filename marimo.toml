@@ -1,9 +1,0 @@
-[ai.open_ai]
-api_key = "ollama" # This is not used, but required
-model = "deepseek-r1:8b" # or another model from `ollama ls`
-base_url = "http://127.0.0.1:11434/v1"
-[completion]
-copilot = "Ollama"
-api_key = "ollama"
-model = "deepseek-r1:8b"
-base_url = "http://127.0.0.1:11434/v1" # or https://your-llm-api-endpoint.com
