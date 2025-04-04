@@ -1,26 +1,14 @@
 # import libraries
 
-from matplotlib.pyplot import step
 import pandas as pd
 import numpy as np
-import seaborn as sns
+from analysis.funcs import summaries, create_space
 
 # constants
 
 reps = 25
 steps = 1000
 parameter_depth = 50
-
-## create parameter space
-
-def create_space():
-
-    s_breed = np.array(np.linspace(0.1, 1, parameter_depth))
-    f_breed = np.array(np.linspace(0.1, 1, parameter_depth))
-
-    vars = np.array(np.meshgrid(s_breed, f_breed))
-
-    return vars.reshape(2, -1).T
 
 # analysis for experiment 1
 
@@ -40,25 +28,7 @@ def analysis_experiment_1():
 
     # summaries
 
-    print("First 5 rows of data")
-    print(data.head())
-    print("\n")
-
-    print("Last 5 rows of data")
-    print(data.tail())
-    print("\n")
-
-    print("Shape of data")
-    print(data.shape)
-    print("\n")
-
-    print("Columns of data")
-    print(data.columns)
-    print("\n")
-
-    print("Summary of data")
-    print(data.describe())
-    print("\n")
+    summaries(data)
 
     # check if data is complete
 
@@ -73,12 +43,13 @@ def analysis_experiment_1():
     if runs == data.shape[0]:
         print("Data is complete")
     else:
-        print("Data is not complete, ", data.shape[0]/runs, "%")
+        print("Data is not complete, ", data.shape[0] / runs, "%")
+
 
 # Experiment 2
 
-def analysis_experiment_2():
 
+def analysis_experiment_2():
     """
     Analysis for experiment 2
     """
@@ -93,25 +64,7 @@ def analysis_experiment_2():
 
     # summaries
 
-    print("First 5 rows of data")
-    print(data.head())
-    print("\n")
-
-    print("Last 5 rows of data")
-    print(data.tail())
-    print("\n")
-
-    print("Shape of data")
-    print(data.shape)
-    print("\n")
-
-    print("Columns of data")
-    print(data.columns)
-    print("\n")
-
-    print("Summary of data")
-    print(data.describe())
-    print("\n")
+    summaries(data)
 
     # check if data is complete
 
@@ -121,16 +74,17 @@ def analysis_experiment_2():
 
     runs = reps * steps * n_params * n_models
     print("Number of runs = ", runs)
-    
+
     if runs == data.shape[0]:
         print("Data is complete")
     else:
-        print("Data is not complete, ", data.shape[0]/runs, "%")
+        print("Data is not complete, ", data.shape[0] / runs, "%")
+
 
 # Experiment 3
 
-def analysis_experiment_3():
 
+def analysis_experiment_3():
     """
     Analysis for experiment 3
     """
@@ -145,25 +99,7 @@ def analysis_experiment_3():
 
     # summaries
 
-    print("First 5 rows of data")
-    print(data.head())
-    print("\n")
-
-    print("Last 5 rows of data")
-    print(data.tail())
-    print("\n")
-
-    print("Shape of data")
-    print(data.shape)
-    print("\n")
-
-    print("Columns of data")
-    print(data.columns)
-    print("\n")
-
-    print("Summary of data")
-    print(data.describe())
-    print("\n")
+    summaries(data)
 
     # check if data is complete
 
@@ -178,13 +114,13 @@ def analysis_experiment_3():
     if runs == data.shape[0]:
         print("Data is complete")
     else:
-        print("Data is not complete, ", data.shape[0]/runs, "%")
+        print("Data is not complete, ", data.shape[0] / runs, "%")
 
 
 # Experiment 4
 
-def analysis_experiment_4():
 
+def analysis_experiment_4():
     """
     Analysis for experiment 4
     """
@@ -205,25 +141,7 @@ def analysis_experiment_4():
 
     # summaries
 
-    print("First 5 rows of data")
-    print(data.head())
-    print("\n")
-
-    print("Last 5 rows of data")
-    print(data.tail())
-    print("\n")
-
-    print("Shape of data")
-    print(data.shape)
-    print("\n")
-
-    print("Columns of data")
-    print(data.columns)
-    print("\n")
-
-    print("Summary of data")
-    print(data.describe())
-    print("\n")
+    summaries(data)
 
     # check if data is complete
 
@@ -237,9 +155,11 @@ def analysis_experiment_4():
     if runs == data.shape[0]:
         print("Data is complete")
     else:
-        print("Data is not complete, ", data.shape[0]/runs, "%")
+        print("Data is not complete, ", data.shape[0] / runs, "%")
+
 
 # Experiment 5
+
 
 def analysis_experiment_5():
     """
@@ -256,25 +176,7 @@ def analysis_experiment_5():
 
     # summaries
 
-    print("First 5 rows of data")
-    print(data.head())
-    print("\n")
-
-    print("Last 5 rows of data")
-    print(data.tail())
-    print("\n")
-
-    print("Shape of data")
-    print(data.shape)
-    print("\n")
-
-    print("Columns of data")
-    print(data.columns)
-    print("\n")
-
-    print("Summary of data")
-    print(data.describe())
-    print("\n")
+    summaries(data)
 
     # check if data is complete
 
@@ -288,9 +190,11 @@ def analysis_experiment_5():
     if runs == data.shape[0]:
         print("Data is complete")
     else:
-        print("Data is not complete, ", data.shape[0]/runs, "%")
+        print("Data is not complete, ", data.shape[0] / runs, "%")
+
 
 # Experiment 6
+
 
 def analysis_experiment_6():
     """
@@ -307,40 +211,23 @@ def analysis_experiment_6():
 
     # summaries
 
-    print("First 5 rows of data")
-    print(data.head())
-    print("\n")
-
-    print("Last 5 rows of data")
-    print(data.tail())
-    print("\n")
-
-    print("Shape of data")
-    print(data.shape)
-    print("\n")
-
-    print("Columns of data")
-    print(data.columns)
-    print("\n")
-
-    print("Summary of data")
-    print(data.describe())
-    print("\n")
+    summaries(data)
 
     # check if data is complete
 
-    n_params = 4*8
+    n_params = 4 * 8
     n_models = 1
     reps = 10
     steps = 2000
-    
+
     runs = reps * steps * n_params * n_models
 
     print("Number of runs = ", runs)
     if runs == data.shape[0]:
         print("Data is complete")
     else:
-        print("Data is not complete, ", data.shape[0]*100/runs, "%")
+        print("Data is not complete, ", data.shape[0] * 100 / runs, "%")
+
 
 # Experiment 7
 def analysis_experiment_7():
@@ -358,25 +245,7 @@ def analysis_experiment_7():
 
     # summaries
 
-    print("First 5 rows of data")
-    print(data.head())
-    print("\n")
-
-    print("Last 5 rows of data")
-    print(data.tail())
-    print("\n")
-
-    print("Shape of data")
-    print(data.shape)
-    print("\n")
-
-    print("Columns of data")
-    print(data.columns)
-    print("\n")
-
-    print("Summary of data")
-    print(data.describe())
-    print("\n")
+    summaries(data)
 
     # check if data is complete
     n_params = 50
@@ -389,12 +258,13 @@ def analysis_experiment_7():
     if runs == data.shape[0]:
         print("Data is complete")
     else:
-        print("Data is not complete, ", data.shape[0]/runs, "%")
+        print("Data is not complete, ", data.shape[0] / runs, "%")
+
 
 # Experiment 8
 
-def analysis_experiment_8():
 
+def analysis_experiment_8():
     """
     Analysis for experiment 8
     """
@@ -409,25 +279,7 @@ def analysis_experiment_8():
 
     # summaries
 
-    print("First 5 rows of data")
-    print(data.head())
-    print("\n")
-
-    print("Last 5 rows of data")
-    print(data.tail())
-    print("\n")
-
-    print("Shape of data")
-    print(data.shape)
-    print("\n")
-
-    print("Columns of data")
-    print(data.columns)
-    print("\n")
-
-    print("Summary of data")
-    print(data.describe())
-    print("\n")
+    summaries(data)
 
     # check if data is complete
     n_params = 20
@@ -438,9 +290,11 @@ def analysis_experiment_8():
     if runs == data.shape[0]:
         print("Data is complete")
     else:
-        print("Data is not complete, ", data.shape[0]/runs, "%")
+        print("Data is not complete, ", data.shape[0] / runs, "%")
+
 
 # Experiment 9
+
 
 def analysis_experiment_9():
     """
@@ -457,36 +311,18 @@ def analysis_experiment_9():
 
     # summaries
 
-    print("First 5 rows of data")
-    print(data.head())
-    print("\n")
-
-    print("Last 5 rows of data")
-    print(data.tail())
-    print("\n")
-
-    print("Shape of data")
-    print(data.shape)
-    print("\n")
-
-    print("Columns of data")
-    print(data.columns)
-    print("\n")
-
-    print("Summary of data")
-    print(data.describe())
-    print("\n")
+    summaries(data)
 
     # check if data is complete
     # create parameter space
-    
+
     prey = np.array([100, 500, 1000, 2000, 5000])
     predator = np.array([100, 500, 1000, 2000, 5000])
     apex = np.array([0, 100, 500, 1000, 2000])
     super = np.array([0, 100, 500, 1000, 2000])
-    
+
     reps = 10
-    
+
     vars = np.array(np.meshgrid(prey, predator, apex, super)).reshape(4, -1).T
 
     n_params = vars.shape[0]
@@ -498,11 +334,11 @@ def analysis_experiment_9():
     if runs == data.shape[0]:
         print("Data is complete")
     else:
-        print("Data is not complete, ", data.shape[0]/runs, "%")
+        print("Data is not complete, ", data.shape[0] / runs, "%")
+
 
 # run the analysis for all experiments
 if __name__ == "__main__":
-
     analysis_experiment_1()
     analysis_experiment_2()
     analysis_experiment_3()
