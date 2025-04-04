@@ -147,12 +147,8 @@ def experiment_2():
     
     E = "Experiment-2"
 
-    print("Running experiment 2: varying the target and lethality of superpredators")
+    print("Running experiment 2: varying the lethality and target of superpredators")
     
-    # data frame to store results
-
-    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex', 'Super', 'step'])
-
     # create parameter space
 
     vars = create_space()
@@ -163,14 +159,21 @@ def experiment_2():
 
     # define tagets
 
-    targets = ["1","2","both"]
+    targets = ["1", "2", "Both"]
 
     print("Number of runs", len(vars)*2*3)
+
+    model = 0
 
     for lethality in lethalities:
 
         for target in targets:
 
+            # data frame to store results
+
+            results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex', 'Super', 'step'])
+
+    
             print(f"Running model with superpredator target {target} and lethality {lethality}")
 
             kwargs['model'] = 'super'
@@ -191,10 +194,12 @@ def experiment_2():
             # append results to data frame
     
             results = pd.concat([results, run])
+            model += 1
 
             # save results
 
-            results.to_csv(f'output/experiments/results/{E}_results.csv')
+            results.to_csv(f'output/experiments/results/{E}_model-{model}_results.csv')
+
 
 # Experiment 4: Determine effects of predator and prey information
 
@@ -203,10 +208,6 @@ def experiment_3():
     E = "Experiment-3"
     
     print("Running experiment 3: determining the effects of predator and prey information")
-    
-    # data frame to store results
-        
-    results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex', 'Super', 'step'])
     
     # create parameter space
     
@@ -217,6 +218,8 @@ def experiment_3():
     
     print("Number of runs", len(vars)*4)
     
+    model = 0
+
     for p_info in prey_info:
         
         for pred_info in predator_info:
@@ -226,6 +229,10 @@ def experiment_3():
             kwargs['prey_info'] = p_info
             kwargs['predator_info'] = pred_info
             
+             # data frame to store results, within loop to reset memory
+        
+            results = pd.DataFrame(columns = ['rep_id', 'sample_id', *kwargs['params'], 'Prey', 'Predator', 'Apex', 'Super', 'step'])
+    
             # create an instance of the experiment
     
             print("Number of runs:", len(vars))
@@ -237,12 +244,14 @@ def experiment_3():
             run = exp.parallel(v = vars, rep=kwargs.get('reps', 10), **kwargs)
     
             # append results to data frame
-    
+
             results = pd.concat([results, run])
-    
+
+            model += 1
+
             # save results
     
-            results.to_csv(f'output/experiments/results/{E}_results.csv')
+            results.to_csv(f'output/experiments/results/{E}_model-{model}_results.csv')
 
 # Experiment 5: Effect of handling limits on apex predator and mesopredator
 
@@ -586,9 +595,8 @@ def run(exp = "All"):
     if exp == "1":
             
         experiment_1()
-            
     elif exp == "2":
-        
+
         experiment_2()
         
     elif exp == "3":
