@@ -5,9 +5,10 @@ description = ""
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "mesa>=3.1.5",
+    "mesa==2.4.0",
     "numpy>=2.2.4",
     "pandas>=2.2.3",
     "ray>=2.44.1",
+    "scipy>=1.15.2",
     "seaborn>=0.13.2",
 ]
