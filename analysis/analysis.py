@@ -1,8 +1,11 @@
 # import libraries
 
 import pandas as pd
+import polars as pl
 import numpy as np
-from analysis.funcs import summaries, create_space
+from funcs import summaries, create_space
+from plots import plot_attractor
+import matplotlib.pyplot as plt
 
 # constants
 
@@ -24,15 +27,13 @@ def analysis_experiment_1():
 
     # load data
 
-    data = pd.read_csv("output/experiments/results/Experiment-1_results.csv")
+    data_path = "output/experiments/results/Experiment-1_results.csv"
 
-    # summaries
+    data = pl.scan_csv(data_path)
 
-    summaries(data)
+    # calculate number of runs
 
-    # check if data is complete
-
-    param_space = create_space()
+    param_space = create_space(parameter_depth)
     n_params = param_space.shape[0]
     n_models = 2
 
@@ -40,10 +41,29 @@ def analysis_experiment_1():
 
     print("Number of runs = ", runs)
 
+    # add model names as columns
+
+    model = ["Apex"] * (runs // 2) + ["Super"] * (runs // 2)
+
+    data = data.with_columns(model=pl.Series(model))
+
+    data = data.collect()
+
+    # summaries
+
+    #    summaries(data)
+
+    # check if data is complete
+
     if runs == data.shape[0]:
         print("Data is complete")
     else:
         print("Data is not complete, ", data.shape[0] / runs, "%")
+
+    # plot attractor
+
+    plot_attractor(data)
+    plt.savefig("output/experiments/plots/Experiment-1_attractor.png")
 
 
 # Experiment 2
@@ -68,7 +88,7 @@ def analysis_experiment_2():
 
     # check if data is complete
 
-    param_space = create_space()
+    param_space = create_space(parameter_depth)
     n_params = param_space.shape[0]
     n_models = 6
 
@@ -103,7 +123,7 @@ def analysis_experiment_3():
 
     # check if data is complete
 
-    param_space = create_space()
+    param_space = create_space(parameter_depth)
     n_params = param_space.shape[0]
     n_models = 4
 
@@ -340,11 +360,3 @@ def analysis_experiment_9():
 # run the analysis for all experiments
 if __name__ == "__main__":
     analysis_experiment_1()
-    analysis_experiment_2()
-    analysis_experiment_3()
-    analysis_experiment_4()
-    analysis_experiment_5()
-    analysis_experiment_6()
-    analysis_experiment_7()
-    analysis_experiment_8()
-    analysis_experiment_9()
