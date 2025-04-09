@@ -3,8 +3,14 @@
 import pandas as pd
 import polars as pl
 import numpy as np
-from funcs import summaries, create_space
-from plots import plot_attractor
+from funcs import classify_model_phase, summaries, create_space
+from plots import (
+    plot_attractor,
+    plot_bifurcation,
+    plot_phase_probability,
+    plot_time_series,
+)
+
 import matplotlib.pyplot as plt
 
 # constants
@@ -26,44 +32,80 @@ def analysis_experiment_1():
     print("\n")
 
     # load data
-
+    print("Loading data...")
     data_path = "output/experiments/results/Experiment-1_results.csv"
-
     data = pl.scan_csv(data_path)
 
     # calculate number of runs
-
+    print("Calculating number of runs...")
     param_space = create_space(parameter_depth)
     n_params = param_space.shape[0]
     n_models = 2
-
     runs = reps * steps * n_params * n_models
-
     print("Number of runs = ", runs)
 
     # add model names as columns
-
+    print("Adding model names...")
     model = ["Apex"] * (runs // 2) + ["Super"] * (runs // 2)
-
     data = data.with_columns(model=pl.Series(model))
-
     data = data.collect()
 
     # summaries
-
-    #    summaries(data)
+    print("Generating summaries...")
+    summaries(data)
 
     # check if data is complete
-
+    print("Checking if data is complete...")
     if runs == data.shape[0]:
         print("Data is complete")
     else:
         print("Data is not complete, ", data.shape[0] / runs, "%")
 
     # plot attractor
-
+    print("Plotting attractor...")
     plot_attractor(data)
     plt.savefig("output/experiments/plots/Experiment-1_attractor.png")
+    print("Attractor plot saved.")
+
+    # classify outcomes
+    print("Classifying outcomes...")
+    phase = classify_model_phase(data)
+
+    # plot phase probability
+    print("Plotting phase probability...")
+    plot_phase_probability(phase)
+    plt.savefig("output/experiments/plots/Experiment-1_phase_probability.png")
+    print("Phase probability plot saved.")
+
+    # bifurcation plot
+    print("Plotting bifurcation plots...")
+    populations = ["Prey", "Predator", "Apex"]
+    variables = ["s_breed", "f_breed"]
+
+    for population in populations:
+        for variable in variables:
+            plot_bifurcation(data, population=population, variable=variable)
+            plt.savefig(
+                f"output/experiments/plots/Experiment-1_{variable}_bifurcation_{population.lower()}.png"
+            )
+            print(f"Saved {variable} bifurcation plot for {population}.")
+
+    # plot timeseries
+    populations = ["Prey", "Predator", "Apex"]
+    models = ["Apex", "Super"]
+
+    for population in populations:
+        for model in models:
+            if population == "Apex" and model == "Super":
+                continue  # Skip plotting apex population for Super model
+            print(f"Plotting timeseries for {population.lower()} in {model} model...")
+            plot_time_series(data=data, population=population, model=model)
+            plt.savefig(
+                f"output/experiments/plots/Experiment-1_{population.lower()}_timeseries_{model.lower()}.png"
+            )
+            print(f"Timeseries plot for {population.lower()} in {model} model saved.")
+
+    print("Analysis for experiment 1 completed.")
 
 
 # Experiment 2
