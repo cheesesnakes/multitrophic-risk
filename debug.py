@@ -2,8 +2,18 @@ from functions.runner import model_run
 from functions.runner import plot_pop, plot_space
 import pandas as pd
 from params import kwargs
+import os
 
 steps = 1000
+
+# check if output directory exists
+
+if not os.path.exists("output/debug"):
+    os.makedirs("output/debug")
+if not os.path.exists("output/debug/results"):
+    os.makedirs("output/debug/results")
+if not os.path.exists("output/debug/plots"):
+    os.makedirs("output/debug/plots")
 
 # run the model
 

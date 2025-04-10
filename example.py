@@ -3,6 +3,15 @@ from functions.runner import model_run
 from functions.runner import plot_pop, plot_density, plot_space, plot_space_pop
 import pandas as pd
 from params import kwargs
+import os
+
+# check if output directory exists
+if not os.path.exists("output/examples"):
+    os.makedirs("output/examples")
+if not os.path.exists("output/examples/results"):
+    os.makedirs("output/examples/results")
+if not os.path.exists("output/examples/plots"):
+    os.makedirs("output/examples/plots")
 
 steps = 1000
 

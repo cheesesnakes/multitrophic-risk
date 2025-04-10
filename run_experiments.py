@@ -3,6 +3,16 @@ import pandas as pd
 import numpy as np
 from sys import argv
 from params import kwargs
+import os
+
+# check if output directory exists, if not create it
+
+if not os.path.exists("output/experiments/results"):
+    os.makedirs("output/experiments/results")
+if not os.path.exists("output/experiments/plots"):
+    os.makedirs("output/experiments/plots")
+if not os.path.exists("output/experiments/figures"):
+    os.makedirs("output/experiments/figures")
 
 # Run the experiment
 
