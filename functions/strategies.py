@@ -41,12 +41,6 @@ def strategy_plots(strategy_info, kwargs):
         # set info parameters
         kwargs.update(info)
 
-        # check if output directory exists
-        if not os.path.exists("output/strategies/results"):
-            os.makedirs("output/strategies/results")
-        if not os.path.exists("output/strategies/plots"):
-            os.makedirs("output/strategies/plots")
-
         # load data
 
         model_data = pd.read_csv(

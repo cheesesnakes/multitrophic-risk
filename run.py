@@ -2,9 +2,9 @@ import sys
 import os
 from configs import configs
 from functions.experiment import run_experiment
-from functions.strategies import run_strategies
-from functions.debug import run_debug
-from functions.example import run_example
+from functions.strategies import run_strategies, plot_strategy
+from functions.debug import run_debug, plot_debug
+from functions.example import run_example, plot_example
 from params import kwargs
 
 
@@ -20,6 +20,7 @@ def main():
     if args[0] == "Debug":
         print("Running model debugging script...")
         run_debug(kwargs)
+        plot_debug(kwargs)
         return
     elif args[0] == "Examples":
         print("Running model examples script...")
@@ -37,10 +38,13 @@ def main():
                 )
                 return
             run_example(kwargs, model=model_name)
+            plot_example(kwargs, model=model_name)
+
         return
     elif args[0] == "Strategies":
         print("Running model strategies examples script...")
         run_strategies(kwargs)
+        plot_strategy(kwargs)
         return
     elif args[0] == "Experiments":
         print("Running model experiments script...")
