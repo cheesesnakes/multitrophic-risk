@@ -29,8 +29,8 @@ data = example_data()
 # attractor plot
 
 
-def plot_attractor(data, grid_size=3):
-    s_breed = data.select("s_breed").unique().sort(by="s_breed", descending=False)
+def plot_attractor(data, grid_size=3, variables=["s_breed", "f_breed"]):
+    s_breed = data.select(variables[0]).unique().sort(by=variables[0], descending=False)
     s_breed = s_breed.to_numpy().T.flatten()
 
     # subset values
@@ -41,19 +41,27 @@ def plot_attractor(data, grid_size=3):
     sample_space = s_breed[samples]
 
     # filter data
-    data = data.filter(
-        pl.col("s_breed").is_in(sample_space) & pl.col("f_breed").is_in(sample_space)
-    )
+
+    for v in variables:
+        data = data.filter(pl.col(v).is_in(sample_space))
 
     # round s_breed and f_breed to 2 decimal places
-    data = data.with_columns(
-        [
-            pl.col("s_breed").round(2),
-            pl.col("f_breed").round(2),
-        ]
-    )
+
+    for v in variables:
+        data = data.with_columns(
+            [
+                pl.col(v).round(2),
+            ]
+        )
 
     # plot
+
+    col = variables[0]
+
+    if len(variables) > 1:
+        row = variables[1]
+    else:
+        row = None
 
     plot = sns.relplot(
         data=data,
@@ -66,8 +74,8 @@ def plot_attractor(data, grid_size=3):
         aspect=1.3,
         alpha=0.5,
         edgecolor="w",
-        col="s_breed",
-        row="f_breed",
+        col=col,
+        row=row,
     )
 
     sns.move_legend(
@@ -81,10 +89,35 @@ def plot_attractor(data, grid_size=3):
         markerscale=2,
     )
 
-    plot.set_titles(
-        row_template=r"$b_{{predator}}$" + "= {row_name}",
-        col_template=r"$b_{{prey}}$" + " = {col_name}",
-    )
+    if variables[0] == "s_breed":
+        plot.set_titles(
+            row_template=r"$b_{{predator}}$" + "= {row_name}",
+            col_template=r"$b_{{prey}}$" + " = {col_name}",
+        )
+    elif variables[0] == "s_max":
+        plot.set_titles(
+            col_template=r"$S_{{predator}}$" + " = {col_name}",
+        )
+    elif variables[0] == "a_max":
+        plot.set_titles(
+            col_template=r"$S_{{apex}}$" + " = {col_name}",
+        )
+    elif variables[0] == "a_breed":
+        plot.set_titles(
+            col_template=r"$b_{{apex}}$" + " = {col_name}",
+        )
+    elif variables[0] == "f_max":
+        plot.set_titles(
+            col_template=r"$K$" + " = {col_name}",
+        )
+    elif variables[0] == "s_lethality":
+        plot.set_titles(
+            col_template=r"$Lethality_{{predator}}$" + " = {col_name}",
+        )
+    elif variables[0] == "a_lethality":
+        plot.set_titles(
+            col_template=r"$Lethality_{{apex}}$" + " = {col_name}",
+        )
 
     return plot
 
@@ -92,7 +125,7 @@ def plot_attractor(data, grid_size=3):
 # plot phase probability
 
 
-def plot_phase_probability(phase_data):
+def plot_phase_probability(phase_data, variables=["s_breed", "f_breed"]):
     """
     Function to plot phase probability as a function of breeding rates.
     """
@@ -105,30 +138,65 @@ def plot_phase_probability(phase_data):
         .cast(pl.Enum(["Prey Only", "Coexistence", "Extinction"]))
     )
 
-    plot = sns.relplot(
-        data=phase_data,
-        x="s_breed",
-        y="f_breed",
-        hue="prob",
-        size="prob",
-        col="phase",
-        row="model",
-        palette="vlag",
-        hue_norm=(-1, 1),
-        edgecolor=".7",
-        height=6,
-        aspect=1,
-        sizes=(1, 20),
-        size_norm=(-0.2, 0.8),
-        legend=False,
-    )
+    if len(variables) > 1:
+        plot = sns.relplot(
+            data=phase_data,
+            x="s_breed",
+            y="f_breed",
+            hue="prob",
+            size="prob",
+            col="phase",
+            row="model",
+            palette="vlag",
+            hue_norm=(-1, 1),
+            edgecolor=".7",
+            height=6,
+            aspect=1,
+            sizes=(1, 20),
+            size_norm=(-0.2, 0.8),
+            legend=False,
+        )
 
-    plot.set_titles(
-        row_template="Model: {row_name}",
-        col_template="Phase: {col_name}",
-    )
+        plot.set_titles(
+            row_template="Model: {row_name}",
+            col_template="Phase: {col_name}",
+        )
 
-    plot.set_axis_labels(x_var=r"$b_{{predator}}$", y_var=r"$b_{{prey}}$")
+        if variables[0] == "s_breed":
+            plot.set_axis_labels(x_var=r"$b_{{predator}}$", y_var=r"$b_{{prey}}$")
+
+    else:
+        plot = sns.relplot(
+            data=phase_data,
+            x=variables[0],
+            y="prob",
+            hue="phase",
+            palette="Set1",
+            hue_norm=(-1, 1),
+            height=6,
+            aspect=1.3,
+            kind="line",
+        )
+
+        # set limits
+        plot.set(ylim=(0, 1.1))
+
+        plot.set_titles(
+            col_template="Phase: {col_name}",
+        )
+
+        if variables[0] == "s_max":
+            plot.set_axis_labels(x_var=r"$S_{{predator}}$", y_var="Probability")
+        elif variables[0] == "a_max":
+            plot.set_axis_labels(x_var=r"$S_{{apex}}$", y_var="Probability")
+        elif variables[0] == "a_breed":
+            plot.set_axis_labels(x_var=r"$b_{{apex}}$", y_var="Probability")
+        elif variables[0] == "f_max":
+            plot.set_axis_labels(x_var=r"$K$", y_var="Probability")
+        elif variables[0] == "s_lethality":
+            plot.set_axis_labels(x_var=r"$Lethality_{{predator}}$", y_var="Probability")
+        elif variables[0] == "a_lethality":
+            plot.set_axis_labels(x_var=r"$Lethality_{{apex}}$", y_var="Probability")
 
     return plot
 
@@ -212,9 +280,27 @@ def plot_bifurcation(data, grid_size=3, population="Prey", variable="s_breed"):
 
         row_label = r"$b_{{predator}}$"
         x_label = r"$b_{{prey}}$"
+    elif variable == "s_max":
+        cat = None
+        x_label = r"$S_{{predator}}$"
+    elif variable == "a_max":
+        cat = None
+        x_label = r"$S_{{apex}}$"
+    elif variable == "a_breed":
+        cat = None
+        x_label = r"$b_{{apex}}$"
+    elif variable == "f_max":
+        cat = None
+        x_label = r"$K$"
+    elif variable == "s_lethality":
+        cat = None
+        x_label = r"$Lethality_{{predator}}$"
+    elif variable == "a_lethality":
+        cat = None
+        x_label = r"$Lethality_{{apex}}$"
 
     else:
-        raise ValueError("Variable must be one of: s_breed, f_breed")
+        raise ValueError("Variable must be one of: s_breed, f_breed, s_max, a_max")
 
     # plot prey
     plot = sns.relplot(
@@ -232,28 +318,23 @@ def plot_bifurcation(data, grid_size=3, population="Prey", variable="s_breed"):
         legend=False,
     )
 
-    if population == "Prey":
+    if cat is not None:
         plot.set_titles(
             row_template=row_label + " = {row_name}",
             col_template="Model: {col_name}",
         )
+    else:
+        plot.set_titles(
+            col_template="Model: {col_name}",
+        )
 
+    if population == "Prey":
         plot.set_axis_labels(x_var=x_label, y_var="Prey")
 
     elif population == "Predator":
-        plot.set_titles(
-            row_template=row_label + " = {row_name}",
-            col_template="Model: {col_name}",
-        )
-
         plot.set_axis_labels(x_var=x_label, y_var="Predator")
 
     elif population == "Apex":
-        plot.set_titles(
-            row_template=row_label + " = {row_name}",
-            col_template="Model: {col_name}",
-        )
-
         plot.set_axis_labels(x_var=x_label, y_var="Apex")
 
     else:
@@ -265,7 +346,9 @@ def plot_bifurcation(data, grid_size=3, population="Prey", variable="s_breed"):
 # time series plotting
 
 
-def plot_time_series(data, population="Prey", model="Apex", grid_size=3):
+def plot_time_series(
+    data, population="Prey", model="Apex", variables=["s_breed", "f_breed"], grid_size=3
+):
     """
     Function to plot time series of population dynamics.
 
@@ -282,7 +365,7 @@ def plot_time_series(data, population="Prey", model="Apex", grid_size=3):
 
     # select variables
 
-    s_breed = data.select("s_breed").unique().sort(by="s_breed", descending=False)
+    s_breed = data.select(variables[0]).unique().sort(by=variables[0], descending=False)
     s_breed = s_breed.to_numpy().T.flatten()
     n = s_breed.shape[0] // grid_size
     samples = range(0, s_breed.shape[0], n)
@@ -294,35 +377,39 @@ def plot_time_series(data, population="Prey", model="Apex", grid_size=3):
 
     # filter DataFrame
 
-    data = data.filter(
-        pl.col("s_breed").is_in(sample_space) & pl.col("f_breed").is_in(sample_space)
-    )
+    for v in variables:
+        data = data.filter(pl.col(v).is_in(sample_space))
 
     data = data.filter(pl.col("rep_id").is_in(ids))
 
     # round s_breed and f_breed to 2 decimal places
 
-    data = data.with_columns(
-        [
-            pl.col("s_breed").round(2),
-            pl.col("f_breed").round(2),
-        ]
-    )
+    for v in variables:
+        data = data.with_columns(
+            [
+                pl.col(v).round(2),
+            ]
+        )
 
     # plot main line
+
+    if len(variables) > 1:
+        row = variables[1]
+    else:
+        row = None
 
     plot = sns.relplot(
         kind="line",
         data=data,
         x="step",
         y=population,
-        hue="s_breed",
+        hue=variables[0],
         palette="Set1",
         height=6,
         aspect=1.3,
         alpha=0.25,
-        col="s_breed",
-        row="f_breed",
+        col=variables[0],
+        row=row,
         legend=False,
         units="rep_id",
         estimator=None,
@@ -333,10 +420,8 @@ def plot_time_series(data, population="Prey", model="Apex", grid_size=3):
     for ax in plot.axes.flat:
         # filter data
 
-        line = data.filter(
-            pl.col("s_breed").is_in(sample_space)
-            & pl.col("f_breed").is_in(sample_space)
-        )
+        for v in variables:
+            line = data.filter(pl.col(v).is_in(sample_space))
 
         line = line.filter(pl.col("rep_id") == 0)
 
@@ -353,14 +438,34 @@ def plot_time_series(data, population="Prey", model="Apex", grid_size=3):
 
     # set titles
 
-    plot.set_titles(
-        row_template=r"$b_{{predator}}$" + " = {row_name}",
-        col_template=r"$b_{{prey}}$" + " = {col_name}",
-    )
+    if variables[0] == "s_breed":
+        plot.set_titles(
+            row_template=r"$b_{{predator}}$" + " = {row_name}",
+            col_template=r"$b_{{prey}}$" + " = {col_name}",
+        )
+    elif variables[0] == "s_max":
+        plot.set_titles(
+            col_template=r"$S_{{predator}}$" + " = {col_name}",
+        )
+    elif variables[0] == "a_max":
+        plot.set_titles(
+            col_template=r"$S_{{apex}}$" + " = {col_name}",
+        )
+    elif variables[0] == "a_breed":
+        plot.set_titles(
+            col_template=r"$b_{{apex}}$" + " = {col_name}",
+        )
+    elif variables[0] == "f_max":
+        plot.set_titles(
+            col_template=r"$K$" + " = {col_name}",
+        )
+    elif variables[0] == "s_lethality":
+        plot.set_titles(
+            col_template=r"$Lethality_{{predator}}$" + " = {col_name}",
+        )
+    elif variables[0] == "a_lethality":
+        plot.set_titles(
+            col_template=r"$Lethality_{{apex}}$" + " = {col_name}",
+        )
 
     return plot
-
-
-# test plotting functions
-
-plot_attractor(data)
