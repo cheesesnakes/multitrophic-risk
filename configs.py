@@ -11,10 +11,17 @@ def create_space():
     return np.array(np.meshgrid(x, x)).reshape(2, -1).T
 
 
-configs = [
-    {
-        "name": "Experiment-1",
+# models configs
+
+configs = {
+    "Experiment-1": {
         "description": "Replacing the apex predator with super predator",
+        "data_path": "output/experiments/results/Experiment-1_results.csv",
+        "status": "skip",
+        "n_models": 2,
+        "populations": ["Prey", "Predator", "Apex"],
+        "variables": ["s_breed", "f_breed"],
+        "models": ["Apex", "Super"],
         "vars": create_space(),
         "models_config": [
             {
@@ -27,9 +34,18 @@ configs = [
             },
         ],
     },
-    {
-        "name": "Experiment-2",
-        "description": "Varying super predator target & lethality",
+    "Experiment-2": {
+        "description": "Varying the target and lethality of superpredators",
+        "data_path": "output/experiments/results/Experiment-2_results.csv",
+        "status": "pending",
+        "n_models": 6,
+        "populations": ["Prey", "Predator"],
+        "variables": ["s_breed", "f_breed"],
+        "models": [
+            f"{leth} -> {t}"
+            for leth in ["Non-lethal", "Lethal"]
+            for t in ["Prey", "Predator", "Both"]
+        ],
         "vars": create_space(),
         "models_config": [
             {
@@ -44,9 +60,19 @@ configs = [
             for t in ["1", "2", "Both"]
         ],
     },
-    {
-        "name": "Experiment-3",
-        "description": "Predator/prey info toggles",
+    "Experiment-3": {
+        "description": "Determining the effects of predator and prey information",
+        "data_path": "output/experiments/results/Experiment-3_results.csv",
+        "status": "pending",
+        "n_models": 4,
+        "populations": ["Prey", "Predator"],
+        "variables": ["s_breed", "f_breed"],
+        "models": [
+            "Both Informed",
+            "Prey Informed",
+            "Predator Informed",
+            "Both Naive",
+        ],
         "vars": create_space(),
         "models_config": [
             {
@@ -62,9 +88,15 @@ configs = [
             for d in [True, False]
         ],
     },
-    {
-        "name": "Experiment-4a",
-        "description": "Handling limits (LV)",
+    "Experiment-4a": {
+        "description": "Effect of handling limit on mesopredator",
+        "data_path": "output/experiments/results/Experiment-4_lv_results.csv",
+        "status": "skip",
+        "n_models": 1,
+        "populations": ["Prey", "Predator"],
+        "variables": ["s_max"],
+        "n_params": 50,
+        "models": ["LV"],
         "vars": space_100,
         "models_config": [
             {
@@ -80,9 +112,15 @@ configs = [
         ],
         "model_prefix": "lv",
     },
-    {
-        "name": "Experiment-4b",
-        "description": "Handling limits (Apex)",
+    "Experiment-4b": {
+        "description": "Effect of handling limit on apex predator",
+        "data_path": "output/experiments/results/Experiment-4_apex_results.csv",
+        "status": "skip",
+        "n_models": 1,
+        "populations": ["Prey", "Predator", "Apex"],
+        "variables": ["a_max"],
+        "n_params": 50,
+        "models": ["Apex"],
         "vars": space_100,
         "models_config": [
             {
@@ -98,9 +136,15 @@ configs = [
         ],
         "model_prefix": "apex",
     },
-    {
-        "name": "Experiment-5",
-        "description": "Apex birth rate",
+    "Experiment-5": {
+        "description": "Varying birth rates of apex predator",
+        "data_path": "output/experiments/results/Experiment-5_results.csv",
+        "status": "skip",
+        "n_models": 1,
+        "n_params": 50,
+        "populations": ["Prey", "Predator", "Apex"],
+        "variables": ["a_breed"],
+        "models": ["Apex"],
         "vars": space,
         "models_config": [
             {
@@ -115,9 +159,17 @@ configs = [
             }
         ],
     },
-    {
-        "name": "Experiment-6",
-        "description": "Lattice size & local saturation",
+    "Experiment-6": {
+        "description": "Varying lattice size and local saturation of prey for LV model",
+        "data_path": "output/experiments/results/Experiment-6_results.csv",
+        "status": "pending",
+        "n_models": 4,
+        "n_params": 8,
+        "populations": ["Prey"],
+        "variables": ["f_max"],
+        "models": [r"L^{2} = 10", r"L^{2} = 20", r"L^{2} = 50", r"L^{2} = 100"],
+        "reps": 10,
+        "steps": 2000,
         "vars": None,
         "append": True,
         "models_config": [
@@ -138,9 +190,15 @@ configs = [
             for f in [0, 1, 2, 5, 10, 20, 25, 50]
         ],
     },
-    {
-        "name": "Experiment-7",
-        "description": "Mesopredator lethality",
+    "Experiment-7": {
+        "description": "Varying lethality of mesopredator",
+        "data_path": "output/experiments/results/Experiment-7_results.csv",
+        "status": "skip",
+        "n_models": 1,
+        "n_params": 50,
+        "populations": ["Prey", "Predator"],
+        "variables": ["s_lethality"],
+        "models": ["LV"],
         "vars": space_lethality,
         "models_config": [
             {
@@ -155,8 +213,7 @@ configs = [
             }
         ],
     },
-    {
-        "name": "Experiment-8",
+    "Experiment-8": {
         "description": "Apex predator lethality",
         "vars": np.linspace(0, 1, 20),
         "models_config": [
@@ -172,9 +229,15 @@ configs = [
             }
         ],
     },
-    {
-        "name": "Experiment-9",
-        "description": "Varying initial densities",
+    "Experiment-9": {
+        "description": "Varying lethality of apex predator",
+        "data_path": "output/experiments/results/Experiment-8_results.csv",
+        "status": "skip",
+        "n_models": 1,
+        "n_params": 20,
+        "populations": ["Prey", "Predator", "Apex"],
+        "variables": ["a_lethality"],
+        "models": ["Apex"],
         "vars": None,
         "append": True,
         "models_config": [
@@ -192,108 +255,5 @@ configs = [
             for a in [0, 100, 500, 1000, 2000]
             for s in [0, 100, 500, 1000, 2000]
         ],
-    },
-]
-
-# configs for analysis.py to be merged with configs later
-
-experiment_configs = {
-    "1": {
-        "description": "Replacing the apex predator with super predator",
-        "data_path": "output/experiments/results/Experiment-1_results.csv",
-        "status": "skip",
-        "n_models": 2,
-        "populations": ["Prey", "Predator", "Apex"],
-        "variables": ["s_breed", "f_breed"],
-        "models": ["Apex", "Super"],
-    },
-    "2": {
-        "description": "Varying the target and lethality of superpredators",
-        "data_path": "output/experiments/results/Experiment-2_results.csv",
-        "status": "pending",
-        "n_models": 6,
-        "populations": ["Prey", "Predator"],
-        "variables": ["s_breed", "f_breed"],
-        "models": [
-            f"{leth} -> {t}"
-            for leth in ["Non-lethal", "Lethal"]
-            for t in ["Prey", "Predator", "Both"]
-        ],
-    },
-    "3": {
-        "description": "Determining the effects of predator and prey information",
-        "data_path": "output/experiments/results/Experiment-3_results.csv",
-        "status": "pending",
-        "n_models": 4,
-        "populations": ["Prey", "Predator"],
-        "variables": ["s_breed", "f_breed"],
-        "models": [
-            "Both Informed",
-            "Prey Informed",
-            "Predator Informed",
-            "Both Naive",
-        ],
-    },
-    "4a": {
-        "description": "Effect of handling limit on mesopredator",
-        "data_path": "output/experiments/results/Experiment-4_lv_results.csv",
-        "status": "skip",
-        "n_models": 1,
-        "populations": ["Prey", "Predator"],
-        "variables": ["s_max"],
-        "n_params": 50,
-        "models": ["LV"],
-    },
-    "4b": {
-        "description": "Effect of handling limit on apex predator",
-        "data_path": "output/experiments/results/Experiment-4_apex_results.csv",
-        "status": "skip",
-        "n_models": 1,
-        "populations": ["Prey", "Predator", "Apex"],
-        "variables": ["a_max"],
-        "n_params": 50,
-        "models": ["Apex"],
-    },
-    "5": {
-        "description": "Varying birth rates of apex predator",
-        "data_path": "output/experiments/results/Experiment-5_results.csv",
-        "status": "skip",
-        "n_models": 1,
-        "n_params": 50,
-        "populations": ["Prey", "Predator", "Apex"],
-        "variables": ["a_breed"],
-        "models": ["Apex"],
-    },
-    "6": {
-        "description": "Varying lattice size and local saturation of prey for LV model",
-        "data_path": "output/experiments/results/Experiment-6_results.csv",
-        "status": "pending",
-        "n_models": 4,
-        "n_params": 8,
-        "populations": ["Prey"],
-        "variables": ["f_max"],
-        "models": [r"L^{2} = 10", r"L^{2} = 20", r"L^{2} = 50", r"L^{2} = 100"],
-        "reps": 10,
-        "steps": 2000,
-    },
-    "7": {
-        "description": "Varying lethality of mesopredator",
-        "data_path": "output/experiments/results/Experiment-7_results.csv",
-        "status": "skip",
-        "n_models": 1,
-        "n_params": 50,
-        "populations": ["Prey", "Predator"],
-        "variables": ["s_lethality"],
-        "models": ["LV"],
-    },
-    "8": {
-        "description": "Varying lethality of apex predator",
-        "data_path": "output/experiments/results/Experiment-8_results.csv",
-        "status": "skip",
-        "n_models": 1,
-        "n_params": 20,
-        "populations": ["Prey", "Predator", "Apex"],
-        "variables": ["a_lethality"],
-        "models": ["Apex"],
     },
 }

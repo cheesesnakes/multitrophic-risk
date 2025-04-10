@@ -64,15 +64,14 @@ def main():
                 run_experiment(cfg, kwargs)
         else:
             experiment_name = "Experiment-" + str(args[1])
-            matches = [cfg for cfg in configs if cfg["name"] == experiment_name]
-            if not matches:
+            if experiment_name not in cfg.keys():
                 print(
                     f"No config found with name '{experiment_name}'. Available names are:"
                 )
-                for cfg in configs:
-                    print(f"  - {cfg['name']}")
+                for cfg in configs.keys():
+                    print(f"  - {cfg}")
             else:
-                run_experiment(matches[0], kwargs)
+                run_experiment(cfg[experiment_name], kwargs)
     else:
         print(
             f"Unknown argument '{args[0]}'. Available options are: Debug, Examples, Strategies, and Experiments"

@@ -1,7 +1,7 @@
 # import libraries
 
 from functions.funcs import analysis, analyse_experiment_9
-from configs import experiment_configs
+from configs import configs
 
 # constants
 
@@ -17,9 +17,9 @@ def main():
     Main function to run the analysis for all experiments.
     """
 
-    for e in experiment_configs.keys():
+    for e in configs.keys():
         # get the experiment config
-        config = experiment_configs[e]
+        config = configs[e]
 
         # skip if experiment is not complete
 
@@ -27,11 +27,16 @@ def main():
             print(f"Experiment {e} is not complete, skipping...")
             continue
 
-        print(f"Experiment {e}: {config['description']}")
+        # skip experiment 9
+        if e == "Experiment-9":
+            print(f"Skipping experiment {e}...")
+            continue
+
+        print(f"{e}: {config['description']}")
         print("==================================")
 
         analysis(
-            experiment=f"Experiment-{e}",
+            experiment=f"{e}",
             data_path=config["data_path"],
             reps=config.get("reps", reps),
             steps=config.get("steps", steps),
