@@ -105,7 +105,6 @@ def plot_space(agent_data=None, steps=100, file="space.gif"):
 
     # define plot parameters
 
-    colors = ["blue", "red", "green"]
     marker = ["o", "^", "s"]
     agent_types = spatial_data.AgentType.unique()
 
