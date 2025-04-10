@@ -24,7 +24,7 @@ def run_example(kwargs, model="lv"):
 
     print(f"Running {model} model")
 
-    m = model_run(**kwargs, steps=kwargs.get("steps", 1000))
+    m = model_run(**kwargs)
 
     # save data
 

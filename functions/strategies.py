@@ -12,15 +12,15 @@ strategy_info = {
 
 
 def run_strategies(kwargs):
-    os.mkdirs("output/strategies/results", exist_ok=True)
-    os.mkdirs("output/strategies/plots", exist_ok=True)
+    os.makedirs("output/strategies/results", exist_ok=True)
+    os.makedirs("output/strategies/plots", exist_ok=True)
 
     for strategy, info in strategy_info.items():
         # set info parameters
         kwargs.update(info)
 
         # run the model
-        m = model_run(**kwargs, steps=kwargs.get("steps", 1000))
+        m = model_run(**kwargs)
 
         # save data
 
@@ -36,7 +36,7 @@ def run_strategies(kwargs):
         )
 
 
-def strategy_plots(strategy_info, kwargs):
+def plot_strategy(strategy_info, kwargs):
     for strategy, info in strategy_info.items():
         # set info parameters
         kwargs.update(info)

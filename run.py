@@ -1,10 +1,6 @@
 import sys
 import os
 from configs import configs
-from functions.experiment import run_experiment
-from functions.strategies import run_strategies, plot_strategy
-from functions.debug import run_debug, plot_debug
-from functions.example import run_example, plot_example
 from params import kwargs
 
 
@@ -19,11 +15,17 @@ def main():
 
     if args[0] == "Debug":
         print("Running model debugging script...")
+
+        from functions.debug import run_debug, plot_debug
+
         run_debug(kwargs)
         plot_debug(kwargs)
+
         return
+
     elif args[0] == "Examples":
         print("Running model examples script...")
+        from functions.example import run_example, plot_example
 
         if len(args) == 1:
             print("No example specified. Running all.")
@@ -43,11 +45,15 @@ def main():
         return
     elif args[0] == "Strategies":
         print("Running model strategies examples script...")
+
+        from functions.strategies import run_strategies, plot_strategy
+
         run_strategies(kwargs)
         plot_strategy(kwargs)
         return
     elif args[0] == "Experiments":
         print("Running model experiments script...")
+        from functions.experiment import run_experiment
 
         os.makedirs("output/experiments/results", exist_ok=True)
         os.makedirs("output/experiments/plots", exist_ok=True)

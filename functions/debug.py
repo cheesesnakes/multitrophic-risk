@@ -13,7 +13,7 @@ scenarios = {
 # run the model
 
 
-def run_debug(**kwargs):
+def run_debug(kwargs):
     # check if output directory exists
 
     os.makedirs("output/debug/results", exist_ok=True)
@@ -25,7 +25,7 @@ def run_debug(**kwargs):
 
         # run model
 
-        m = model_run(**kwargs, steps=kwargs["steps"])
+        m = model_run(**kwargs)
 
         # save data
 
