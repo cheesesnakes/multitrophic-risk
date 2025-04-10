@@ -1,7 +1,7 @@
 # import libraries
 
-from funcs import analysis, analyse_experiment_9
-from config import experiment_configs
+from functions.funcs import analysis, analyse_experiment_9
+from configs import experiment_configs
 
 # constants
 
