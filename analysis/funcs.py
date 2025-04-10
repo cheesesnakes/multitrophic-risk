@@ -1,3 +1,4 @@
+from math import e
 import numpy as np
 import polars as pl
 from plots import (
@@ -7,6 +8,7 @@ from plots import (
     plot_time_series,
 )
 from matplotlib import pyplot as plt
+import seaborn as sns
 
 # summaries
 
@@ -53,7 +55,7 @@ def create_space(parameter_depth=50):
 # classify model phase
 
 
-def classify_model_phase(data, variables=["s_breed", "f_breed"]):
+def classify_model_phase(data, variables=["s_breed", "f_breed"], model=True, reps=25):
     """
     Function to classify model outcome based on simulated data.
 
@@ -80,9 +82,12 @@ def classify_model_phase(data, variables=["s_breed", "f_breed"]):
         .alias("phase"),
     )
 
-    data = data.group_by(["model", "sample_id", *variables, "phase"]).agg(pl.len())
+    if model:
+        data = data.group_by(["model", "sample_id", *variables, "phase"]).agg(pl.len())
+    else:
+        data = data.group_by(["sample_id", *variables, "phase"]).agg(pl.len())
 
-    data = data.with_columns((pl.col("len") / 25).alias("prob"))
+    data = data.with_columns((pl.col("len") / reps).alias("prob"))
 
     return data
 
@@ -98,12 +103,6 @@ def analyse_experiment_9():
     print("Experiment 9: Effect of starting density on model dynamics")
     print("==================================")
 
-    # data
-
-    data = pl.scan_csv("output/experiments/results/Experiment-9_results.csv")
-
-    data = data.collect()
-
     # create parameter space
 
     prey = np.array([100, 500, 1000, 2000, 5000])
@@ -118,6 +117,20 @@ def analyse_experiment_9():
 
     runs = reps * vars.shape[0]
 
+    # data
+
+    data = pl.scan_csv("output/experiments/results/Experiment-9_results.csv")
+
+    # update sample id
+
+    sample_ids = np.array(
+        [[[i] * reps * steps for i in range(0, vars.shape[0])]]
+    ).flatten()
+
+    data = data.drop("sample_id")
+    data = data.with_columns(pl.Series(sample_ids).alias("sample_id"))
+    data = data.collect()
+
     if runs * steps == data.shape[0]:
         print("Data is complete")
     else:
@@ -126,7 +139,114 @@ def analyse_experiment_9():
         print(f"Actual: {data.shape[0]}")
         return
 
+    # create df of vars
+
+    vars_df = pl.DataFrame(
+        {
+            "i_prey": vars[:, 0],
+            "i_predator": vars[:, 1],
+            "i_apex": vars[:, 2],
+            "i_super": vars[:, 3],
+        }
+    ).lazy()
+
+    # add model names as columns
+
+    vars_df = vars_df.with_columns(
+        pl.when((pl.col("i_apex") > 0) & (pl.col("i_super") == 0))
+        .then(pl.lit("Apex"))
+        .otherwise(
+            pl.when((pl.col("i_super") > 0) & (pl.col("i_apex") == 0))
+            .then(pl.lit("Super"))
+            .otherwise(pl.lit("Mixed"))
+        )
+        .alias("model"),
+    )
+
+    # add sample id
+
+    vars_df = vars_df.with_columns(pl.arange(0, vars.shape[0]).alias("sample_id"))
+
     summaries(data)
+
+    # classify model phase
+    print("Classifying model phase...")
+    phase = classify_model_phase(data, variables=[], model=False)
+
+    # add vars to phase
+    phase = phase.join(
+        vars_df.collect(),
+        on="sample_id",
+        how="left",
+    )
+
+    # plot phase probability
+
+    print("Plotting phase probability...")
+
+    # Apex model
+    phase_apex = phase.filter(pl.col("model") == "Apex")
+
+    phase_apex = phase_apex.with_columns(
+        pl.col("phase")
+        .cast(pl.Categorical)
+        .cast(pl.Enum(["Prey Only", "Coexistence", "Extinction"]))
+    )
+
+    plot = sns.relplot(
+        data=phase_apex,
+        x="i_prey",
+        y="i_predator",
+        hue="prob",
+        col="phase",
+        row="i_apex",
+        palette="crest",
+        edgecolor=".5",
+        # hue_norm=plt.Normalize(0, 1),
+        height=6,
+        aspect=1.3,
+        s=500,
+    )
+
+    plot.set_axis_labels(r"$N_{{0}}$", r"$P_{{0}}$")
+    plot.set_titles(
+        col_template="Phase: {col_name}", row_template=r"$A_{{0}}$ = " + "{row_name}"
+    )
+
+    plt.savefig("output/experiments/plots/experiment_9_phase_probability_apex.png")
+
+    # Super model
+    phase_super = phase.filter(pl.col("model") == "Super")
+    phase_super = phase_super.with_columns(
+        pl.col("phase")
+        .cast(pl.Categorical)
+        .cast(pl.Enum(["Prey Only", "Coexistence", "Extinction"]))
+    )
+
+    plot = sns.relplot(
+        data=phase_super,
+        x="i_prey",
+        y="i_predator",
+        hue="prob",
+        col="phase",
+        row="i_super",
+        palette="crest",
+        edgecolor=".5",
+        # hue_norm=plt.Normalize(0, 1),
+        height=6,
+        aspect=1.3,
+        s=500,
+    )
+
+    plot.set_axis_labels(r"$N_{{0}}$", r"$P_{{0}}$")
+    plot.set_titles(
+        col_template="Phase: {col_name}", row_template=r"$S_{{0}}$ = " + "{row_name}"
+    )
+    plt.savefig("output/experiments/plots/experiment_9_phase_probability_super.png")
+
+    plt.close()
+    print("Analysis for experiment 9 completed.")
+    print("\n")
 
 
 # main analysis function

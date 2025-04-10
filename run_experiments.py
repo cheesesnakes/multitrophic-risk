@@ -474,27 +474,26 @@ def experiment_6():
 
     kwargs["params"] = ["f_max"]
 
-    # data frame to store results
-
-    results = pd.DataFrame(
-        columns=[
-            "rep_id",
-            "sample_id",
-            *kwargs["params"],
-            "Prey",
-            "Predator",
-            "Apex",
-            "Super",
-            "step",
-        ]
-    )
-
     for l in L2:  # noqa: E741
         for f in f_max:
             print(
                 f"Running model with lattice size {l} and local saturation of prey {f}"
             )
 
+            # data frame to store results
+
+            results = pd.DataFrame(
+                columns=[
+                    "rep_id",
+                    "sample_id",
+                    *kwargs["params"],
+                    "Prey",
+                    "Predator",
+                    "Apex",
+                    "Super",
+                    "step",
+                ]
+            )
             kwargs["width"] = l
             kwargs["height"] = l
             kwargs["f_max"] = f
@@ -520,6 +519,12 @@ def experiment_6():
             # append results to data frame
 
             results = pd.concat([results, run])
+
+            if os.path.exists(f"output/experiments/results/{E}_results.csv"):
+                saved = pd.read_csv(
+                    f"output/experiments/results/{E}_results.csv", index_col=0
+                )
+                results = pd.concat([saved, results])
 
             # save results
 
@@ -704,6 +709,12 @@ def experiment_9():
         # save results
 
         results = pd.concat([results, run])
+
+        if os.path.exists(f"output/experiments/results/{E}_results.csv"):
+            saved = pd.read_csv(
+                f"output/experiments/results/{E}_results.csv", index_col=0
+            )
+            results = pd.concat([saved, results])
 
         results.to_csv(f"output/experiments/results/{E}_results.csv")
 
