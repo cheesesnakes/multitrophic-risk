@@ -1,4 +1,3 @@
-from math import e
 import numpy as np
 import polars as pl
 from plots import (
