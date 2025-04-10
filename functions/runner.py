@@ -5,6 +5,7 @@ from matplotlib import animation
 import numpy as np
 import warnings
 from functions.model import model
+import seaborn as sns
 
 warnings.filterwarnings("ignore")
 
@@ -35,56 +36,22 @@ def model_run(steps=50, **kwargs):
 def plot_pop(model_data=None, params={}, file="model_pop.png", steps=50):
     print("Creating population plot...")
 
-    # Check if model_data is None or not a DataFrame
-    if model_data is None or not hasattr(model_data, "columns"):
-        raise ValueError(
-            "model_data must be a pandas DataFrame with a 'columns' attribute."
-        )
+    if model_data is None or "columns" not in dir(model_data):
+        raise ValueError("model_data must be a pandas DataFrame.")
 
-    plt.rcParams["axes.prop_cycle"] = plt.cycler("color", plt.cm.tab10.colors)
+    sns.set_theme(style="whitegrid")
+    melted = model_data.melt(id_vars="Step", var_name="AgentType", value_name="Count")
 
-    # create plot
+    plt.figure(figsize=(10, 6))
+    ax = sns.lineplot(data=melted, x="Step", y="Count", hue="AgentType", linewidth=2.0)
 
-    fig, ax = plt.subplots(figsize=(8, 6))
-
-    # plot the number of agents over time
-
-    for i in list(model_data.columns):
-        if i == "Step":
-            continue
-
-        ax.plot(model_data[i], label=i)
-
+    ax.set_xlim(0, steps)
     ax.set_xlabel("Time")
     ax.set_ylabel("Number of agents")
     ax.set_title("Number of agents over time")
-    ax.legend()
-    ax.set_xlim(0, steps)
-
-    # print parameters below the plot
-    if isinstance(params, dict):  # Added check for dict type
-        text = [
-            f"{key} = {params[key]}"
-            for key in params
-            if key != "model" and key != "progress" and key != "info"
-        ]
-        text = ", ".join(text)
-        fig.text(
-            0.5,
-            0.05,
-            text,
-            ha="center",
-            fontsize=10,
-            wrap=True,
-            bbox={"facecolor": "white", "alpha": 0.5, "pad": 10},
-        )
-
-    fig.subplots_adjust(bottom=0.25)
-
-    # save the plot
 
     plt.savefig(file)
-
+    plt.close()
     print("Population plot created.")
 
 
@@ -94,65 +61,42 @@ def plot_pop(model_data=None, params={}, file="model_pop.png", steps=50):
 def plot_space(agent_data=None, steps=100, file="space.gif"):
     print("Creating spatial plot...")
 
-    ## get the spatial data
+    if agent_data is None or "columns" not in dir(agent_data):
+        raise ValueError("agent_data must be a pandas DataFrame.")
 
-    spatial_data = agent_data
+    if steps > agent_data.Step.max():
+        steps = agent_data.Step.max()
 
-    ## convert index to columns
-
-    if steps > spatial_data.Step.max():
-        steps = spatial_data.Step.max()
-
-    # define plot parameters
-
-    marker = ["o", "^", "s"]
-    agent_types = spatial_data.AgentType.unique()
-
-    # create plot
+    agent_types = agent_data.AgentType.unique()
+    marker = ["o", "^", "s", "D", "v", "*"]
 
     fig, ax = plt.subplots(figsize=(8, 8))
-
-    # create list of images
-
-    spaces = [
-        ax.scatter([], [], label=agent, alpha=0.6, s=50, cmap="tab10", marker=marker[i])
+    scatters = [
+        ax.scatter([], [], alpha=0.6, s=50, label=agent, marker=marker[i % len(marker)])
         for i, agent in enumerate(agent_types)
     ]
 
-    ax.set_xlim(0, spatial_data.x.max())
-    ax.set_ylim(0, spatial_data.y.max())
-    # remove ticks and labels
+    ax.set_xlim(0, agent_data.x.max())
+    ax.set_ylim(0, agent_data.y.max())
     ax.set_xticks([])
     ax.set_yticks([])
-    ax.set_xlabel(None)
-    ax.set_ylabel(None)
-    ax.set_title("Spatial distribution of agents")
-    # set legend above the plot
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.05), shadow=True, ncol=3)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.05), ncol=3)
+    ax.set_title("")
 
     def update(frame):
-        for i, space in enumerate(spaces):
-            space_data = spatial_data[
-                (spatial_data.Step == frame)
-                & (spatial_data.AgentType == agent_types[i])
-            ]
-
-            space.set_offsets(space_data[["x", "y"]])
-
-        # set title
+        current_data = agent_data[agent_data.Step == frame]
+        for i, agent in enumerate(agent_types):
+            subset = current_data[current_data.AgentType == agent]
+            scatters[i].set_offsets(subset[["x", "y"]].values)
         ax.set_title(f"Step {frame}")
-        return spaces
+        return scatters
 
     ani = animation.FuncAnimation(
-        fig, update, frames=range(1, steps - 1), blit=False, interval=42
+        fig, update, frames=range(1, steps), interval=42, blit=False
     )
-
-    # save the animation
-
     ani.save(file, writer="imagemagick", fps=24)
-
+    plt.close()
     print("Spatial plot created.")
-
     return ani
 
 
@@ -162,64 +106,40 @@ def plot_space(agent_data=None, steps=100, file="space.gif"):
 def plot_density(spatial_data=None, steps=100, file="density.gif"):
     print("Creating density plot...")
 
-    ## convert index to columns
+    if spatial_data is None or "columns" not in dir(spatial_data):
+        raise ValueError("spatial_data must be a pandas DataFrame.")
 
-    spatial_data.reset_index(inplace=True)
-
+    spatial_data = spatial_data.reset_index(drop=True)
     if steps > spatial_data.Step.max():
         steps = spatial_data.Step.max()
 
-    # loop over types of agents
-
     agent_types = spatial_data.AgentType.unique()
-
-    # create plot
+    grid_shape = (spatial_data.x.max() + 1, spatial_data.y.max() + 1)
 
     fig, axs = plt.subplots(1, len(agent_types), figsize=(len(agent_types) * 5, 5))
-
-    # create list of images
-
+    axs = axs if isinstance(axs, np.ndarray) else [axs]
     ims = []
 
-    for i in range(1, steps, 1):
-        spatial_data_time = spatial_data[spatial_data.Step == i]
-
-        # temporarily store images
-
+    for i in range(1, steps):
         step_images = []
+        current = spatial_data[spatial_data.Step == i]
 
         for j, agent in enumerate(agent_types):
-            grid = np.zeros((spatial_data.x.max() + 1, spatial_data.y.max() + 1))
+            agent_data = current[current.AgentType == agent]
+            grid = np.zeros(grid_shape, dtype=int)
+            np.add.at(grid, (agent_data.x.values, agent_data.y.values), 1)
 
-            spatial_data_agent = spatial_data_time[spatial_data_time.AgentType == agent]
-
-            for index, row in spatial_data_agent.iterrows():
-                x = row["x"]
-                y = row["y"]
-
-                grid[x][y] += 1
-
-            im = fig.axes[j].imshow(grid, interpolation="nearest")
-
-            text = fig.axes[j].text(
+            im = axs[j].imshow(grid.T, interpolation="nearest", origin="lower")
+            text = axs[j].text(
                 1, -2, f"{agent} at Step {i}", fontsize=12, color="black"
             )
-
-            step_images.append(im)
-            step_images.append(text)
-
+            step_images.extend([im, text])
         ims.append(step_images)
 
-    ani = animation.ArtistAnimation(
-        fig, ims, interval=42, blit=False, repeat_delay=1000
-    )
-
-    # save the animation
-
+    ani = animation.ArtistAnimation(fig, ims, interval=42, blit=False)
     ani.save(file, writer="imagemagick", fps=24)
-
+    plt.close()
     print("Density plot created.")
-
     return ani
 
 
@@ -227,133 +147,88 @@ def plot_density(spatial_data=None, steps=100, file="density.gif"):
 
 
 def plot_space_pop(
-    model_data=None, agent_data=None, params=None, steps=100, file="space_pop.png"
+    model_data=None, agent_data=None, params=None, steps=100, file="space_pop.gif"
 ):
     print("Creating spatial and population plot...")
 
-    # Check if model_data is None or not a DataFrame
-    if model_data is None or not hasattr(model_data, "columns"):
-        raise ValueError(
-            "model_data must be a pandas DataFrame with a 'columns' attribute."
-        )
+    if model_data is None or "columns" not in dir(model_data):
+        raise ValueError("model_data must be a pandas DataFrame.")
+    if agent_data is None or "columns" not in dir(agent_data):
+        raise ValueError("agent_data must be a pandas DataFrame.")
 
-    # Check if agent_data is None or not a DataFrame
-    if agent_data is None or not hasattr(agent_data, "columns"):
-        raise ValueError(
-            "agent_data must be a pandas DataFrame with a 'columns' attribute."
-        )
+    if steps > agent_data.Step.max():
+        steps = agent_data.Step.max()
 
-    plt.rcParams["axes.prop_cycle"] = plt.cycler("color", plt.cm.tab10.colors)
-
-    ## get the spatial data
-
-    spatial_data = agent_data
-
-    ## convert index to columns
-
-    if steps > spatial_data.Step.max():
-        steps = spatial_data.Step.max()
-
-    # define plot parameters
-
-    marker = ["o", "^", "s"]
-    agent_types = spatial_data.AgentType.unique()
-
-    # create plot
+    agent_types = agent_data.AgentType.unique()
+    marker = ["o", "^", "s", "D", "v", "*"]
 
     fig = plt.figure(figsize=(12, 6))
-
     gs = fig.add_gridspec(1, 2, width_ratios=[2, 1])
+    ax_pop = fig.add_subplot(gs[0, 0])
+    ax_space = fig.add_subplot(gs[0, 1])
 
-    axs = [fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1])]
-    # create list of images
+    # Static: Population plot
+    lines = [
+        ax_pop.plot([], [], label=agent_type)[0]
+        for agent_type in model_data.columns
+        if agent_type != "Step"
+    ]
+    ax_pop.set_xlim(0, steps)
+    ax_pop.set_ylim(0, model_data.iloc[:, 1:].max().max())
+    ax_pop.set_title("Number of agents over time")
+    ax_pop.set_xlabel("Time")
+    ax_pop.set_ylabel("Number of agents")
+    ax_pop.legend()
 
-    spaces = [
-        axs[1].scatter(
-            [], [], label=agent, alpha=0.6, s=25, cmap="tab10", marker=marker[i]
+    # Static: Space plot
+    scatters = [
+        ax_space.scatter(
+            [], [], alpha=0.6, s=25, label=agent, marker=marker[i % len(marker)]
         )
         for i, agent in enumerate(agent_types)
     ]
+    ax_space.set_xlim(0, agent_data.x.max())
+    ax_space.set_ylim(0, agent_data.y.max())
+    ax_space.set_aspect("equal")
+    ax_space.set_xticks([])
+    ax_space.set_yticks([])
+    ax_space.legend(loc="upper center", bbox_to_anchor=(0.5, -0.05), ncol=3)
 
-    axs[1].set_xlim(0, spatial_data.x.max())
-    axs[1].set_ylim(0, spatial_data.y.max())
-    # set size
-    axs[1].set_aspect("equal")
-    # remove ticks and labels
-    axs[1].set_xticks([])
-    axs[1].set_yticks([])
-    axs[1].set_xlabel(None)
-    axs[1].set_ylabel(None)
-    axs[1].set_title("Spatial distribution of agents")
-    # set legend above the plot
-    axs[1].legend(loc="upper center", bbox_to_anchor=(0.5, -0.05), shadow=True, ncol=3)
-
-    # plot the number of agents over time
-
-    agent_types = model_data.columns
-    # remove Step
-    agent_types = agent_types[1:]
-
-    lines = [
-        axs[0].plot([], [], label=i)[0] for i in list(model_data.columns) if i != "Step"
-    ]
-    axs[0].set_xlabel("Time")
-    axs[0].set_ylabel("Number of agents")
-    axs[0].set_title("Number of agents over time")
-    axs[0].legend()
-    axs[0].set_xlim(0, steps)
-    axs[0].set_ylim(0, model_data[agent_types].max().max())
-
-    # print parameters below the plot
-
-    text = [
-        f"{key} = {params[key]}"
-        for key in params
-        if key != "model" and key != "progress" and key != "info"
-    ]
-    text = ", ".join(text)
-
+    # Parameters text
+    text = ", ".join(
+        f"{key}={val}"
+        for key, val in (params or {}).items()
+        if key not in {"model", "progress", "info"}
+    )
     fig.text(
         0.5,
         0.05,
         text,
         ha="center",
         fontsize=10,
-        wrap=True,
-        bbox={"facecolor": "white", "alpha": 0.5, "pad": 10},
+        bbox=dict(facecolor="white", alpha=0.5, pad=10),
     )
-
     fig.subplots_adjust(bottom=0.25)
 
     def update(frame):
-        for i, space in enumerate(spaces):
-            space_data = spatial_data[
-                (spatial_data.Step == frame)
-                & (spatial_data.AgentType == agent_types[i])
-            ]
+        current_space = agent_data[agent_data.Step == frame]
+        current_model = model_data[model_data.Step < frame]
 
-            space.set_offsets(space_data[["x", "y"]])
-
-        model_data_time = model_data[model_data.Step < frame]
+        for i, agent in enumerate(agent_types):
+            data = current_space[current_space.AgentType == agent]
+            scatters[i].set_offsets(data[["x", "y"]].values)
 
         for i, line in enumerate(lines):
-            line.set_data(range(frame), model_data_time[agent_types[i]])
+            line.set_data(
+                current_model.Step.values, current_model.iloc[:, i + 1].values
+            )
 
-        # set title
+        ax_pop.set_title(f"Step {frame}")
+        ax_space.set_title(f"Step {frame}")
+        return scatters + lines
 
-        axs[0].set_title(f"Step {frame}")
-        axs[1].set_title(f"Step {frame}")
-
-        return spaces + lines
-
-    ani = animation.FuncAnimation(
-        fig, update, frames=range(1, steps - 1), blit=False, interval=42
-    )
-
-    # save the animation
-
+    ani = animation.FuncAnimation(fig, update, frames=range(1, steps), interval=42)
     ani.save(file, writer="imagemagick", fps=24)
-
+    plt.close()
     print("Spatial and population plot created.")
-
     return ani
