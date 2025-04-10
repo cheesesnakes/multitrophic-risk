@@ -73,6 +73,10 @@ def experiment_1():
 
     results.to_csv(f"output/experiments/results/{E}_results.csv")
 
+    # free memory
+    del run
+    del exp
+    del results
     # run model with super predator
 
     print("Running model with super predator")
@@ -80,6 +84,21 @@ def experiment_1():
     kwargs["model"] = "super"
     kwargs["apex"] = 0
     kwargs["super"] = 100
+
+    # data frame to store results
+
+    results = pd.DataFrame(
+        columns=[
+            "rep_id",
+            "sample_id",
+            *kwargs["params"],
+            "Prey",
+            "Predator",
+            "Apex",
+            "Super",
+            "step",
+        ]
+    )
 
     # create an instance of the experiment
 
@@ -98,6 +117,11 @@ def experiment_1():
     # save results
 
     results.to_csv(f"output/experiments/results/{E}_results.csv")
+
+    # free memory
+    del run
+    del exp
+    del results
 
     print("Experiment 1 complete")
 
@@ -171,6 +195,11 @@ def experiment_2():
 
             results.to_csv(f"output/experiments/results/{E}_model-{model}_results.csv")
 
+            # free memory
+            del run
+            del exp
+            del results
+
 
 # Experiment 4: Determine effects of predator and prey information
 
@@ -237,6 +266,11 @@ def experiment_3():
 
             results.to_csv(f"output/experiments/results/{E}_model-{model}_results.csv")
 
+            # free memory
+            del run
+            del exp
+            del results
+
 
 # Experiment 5: Effect of handling limits on apex predator and mesopredator
 
@@ -298,6 +332,11 @@ def experiment_4():
 
     results.to_csv(f"output/experiments/results/{E}_lv_results.csv")
 
+    # free memory
+    del run
+    del exp
+    del results
+
     # run experiment for apex predator
 
     # data frame to store results
@@ -340,6 +379,11 @@ def experiment_4():
     # save results
 
     results.to_csv(f"output/experiments/results/{E}_apex_results.csv")
+
+    # free memory
+    del run
+    del exp
+    del results
 
 
 # Experiment 6: Varying birth rates of apex predator and mesopredator
@@ -396,6 +440,11 @@ def experiment_5():
     # save results
 
     results.to_csv(f"output/experiments/results/{E}_results.csv")
+
+    # free memory
+    del run
+    del exp
+    del results
 
 
 # Experiment 7: Varying local saturation of prey for lv model
@@ -466,6 +515,11 @@ def experiment_6():
 
             results.to_csv(f"output/experiments/results/{E}_results.csv")
 
+            # free memory
+            del run
+            del exp
+            del results
+
 
 # Experiment 8: Varying lethality of mesopredator
 
@@ -521,6 +575,11 @@ def experiment_7():
     # save results
 
     results.to_csv(f"output/experiments/results/{E}_results.csv")
+
+    # free memory
+    del run
+    del exp
+    del results
 
 
 # Experiment 9: Varying lethality of apex predator
@@ -578,6 +637,11 @@ def experiment_8():
 
     results.to_csv(f"output/experiments/results/{E}_results.csv")
 
+    # free memory
+    del run
+    del exp
+    del results
+
 
 # Experiment 10: varying starting density of agents
 
@@ -598,20 +662,21 @@ def experiment_9():
 
     vars = np.array(np.meshgrid(prey, predator, apex, super)).reshape(4, -1).T
 
-    results = pd.DataFrame(
-        columns=[
-            "rep_id",
-            "sample_id",
-            *kwargs["params"],
-            "Prey",
-            "Predator",
-            "Apex",
-            "Super",
-            "step",
-        ]
-    )
-
     for i in range(vars.shape[0]):
+        # data frame to store results
+        results = pd.DataFrame(
+            columns=[
+                "rep_id",
+                "sample_id",
+                *kwargs["params"],
+                "Prey",
+                "Predator",
+                "Apex",
+                "Super",
+                "step",
+            ]
+        )
+
         kwargs["prey"], kwargs["predator"], kwargs["apex"], kwargs["super"] = vars[i]
 
         print(
@@ -631,6 +696,11 @@ def experiment_9():
         results = pd.concat([results, run])
 
         results.to_csv(f"output/experiments/results/{E}_results.csv")
+
+        # free memory
+        del run
+        del exp
+        del results
 
 
 # running experiments
