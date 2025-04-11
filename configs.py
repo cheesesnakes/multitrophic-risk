@@ -18,7 +18,7 @@ configs = {
         "name": "Experiment-1",
         "description": "Replacing the apex predator with super predator",
         "data_path": "output/experiments/results/Experiment-1_results.csv",
-        "status": "complete",
+        "status": "SKIP",
         "append": True,
         "n_models": 2,
         "populations": ["Prey", "Predator", "Apex"],
@@ -227,7 +227,14 @@ configs = {
     "Experiment-8": {
         "name": "Experiment-8",
         "description": "Apex predator lethality",
+        "data_path": "output/experiments/results/Experiment-8_results.csv",
         "status": "complete",
+        "n_models": 1,
+        "n_params": 20,
+        "populations": ["Prey", "Predator", "Apex"],
+        "variables": ["a_lethality"],
+        "models": ["Apex"],
+        "append": True,
         "vars": np.linspace(0, 1, 20),
         "models_config": [
             {

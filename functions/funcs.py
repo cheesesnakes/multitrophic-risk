@@ -100,6 +100,9 @@ def identify_transition(phase_data, variables=["s_breed", "f_breed"], model=True
         variables (list): The variables to classify
         model (bool): Whether to include model in classification
     """
+
+    states = ["Prey Only", "Coexistence", "Extinction"]
+
     if model:
         phase_data = phase_data.pivot(
             index=["model", "sample_id", *variables],
@@ -112,6 +115,12 @@ def identify_transition(phase_data, variables=["s_breed", "f_breed"], model=True
             columns="phase",
             values="prob",
         )
+
+    # complete states
+
+    for state in states:
+        if state not in phase_data.columns:
+            phase_data = phase_data.with_columns(pl.lit(0).alias(state))
 
     phase_data = phase_data.fill_null(0)
 
@@ -169,7 +178,11 @@ def transition_summary(phase_data, variables=["s_breed", "f_breed"], model=True)
         )
 
     # Perform groupby and aggregation
-    summary = phase_data.group_by("phase").agg(*agg_exprs)
+
+    if model:
+        summary = phase_data.group_by(["model", "phase"]).agg(*agg_exprs)
+    else:
+        summary = phase_data.group_by("phase").agg(*agg_exprs)
 
     return summary
 
@@ -426,10 +439,11 @@ def analysis(
         variables=variables,
     )
 
-    phase_summary.to_csv(
+    phase_summary.write_csv(
         f"output/experiments/results/{experiment}_phase_summary.csv",
-        sep=",",
-        header=True,
+        separator=",",
+        include_header=True,
+        quote_style="necessary",
     )
 
     print("Transition summary:")
