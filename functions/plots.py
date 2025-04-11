@@ -1,7 +1,7 @@
 import polars as pl
 import seaborn as sns
 import numpy as np
-
+import matplotlib.pyplot as plt
 # set style
 
 sns.set_theme(style="whitegrid", font_scale=1.5)
@@ -25,6 +25,60 @@ def example_data():
 
 
 data = example_data()
+
+
+def set_plot_titles(plot, variables):
+    if variables[0] == "s_breed":
+        plot.set_titles(
+            row_template=r"$b_{{predator}}$" + "= {row_name}",
+            col_template=r"$b_{{prey}}$" + " = {col_name}",
+        )
+    elif variables[0] == "s_max":
+        plot.set_titles(
+            col_template=r"$S_{{predator}}$" + " = {col_name}",
+        )
+    elif variables[0] == "a_max":
+        plot.set_titles(
+            col_template=r"$S_{{apex}}$" + " = {col_name}",
+        )
+    elif variables[0] == "a_breed":
+        plot.set_titles(
+            col_template=r"$b_{{apex}}$" + " = {col_name}",
+        )
+    elif variables[0] == "f_max":
+        plot.set_titles(
+            col_template=r"$K$" + " = {col_name}",
+        )
+    elif variables[0] == "s_lethality":
+        plot.set_titles(
+            col_template=r"$Lethality_{{predator}}$" + " = {col_name}",
+        )
+    elif variables[0] == "a_lethality":
+        plot.set_titles(
+            col_template=r"$Lethality_{{apex}}$" + " = {col_name}",
+        )
+
+    return plot
+
+
+def set_plot_axis_labels(plot, variables):
+    if variables[0] == "s_breed":
+        plot.set_axis_labels(x_var=r"$b_{{predator}}$", y_var=r"$b_{{prey}}$")
+    elif variables[0] == "s_max":
+        plot.set_axis_labels(x_var=r"$S_{{predator}}$", y_var="Probability")
+    elif variables[0] == "a_max":
+        plot.set_axis_labels(x_var=r"$S_{{apex}}$", y_var="Probability")
+    elif variables[0] == "a_breed":
+        plot.set_axis_labels(x_var=r"$b_{{apex}}$", y_var="Probability")
+    elif variables[0] == "f_max":
+        plot.set_axis_labels(x_var=r"$K$", y_var="Probability")
+    elif variables[0] == "s_lethality":
+        plot.set_axis_labels(x_var=r"$Lethality_{{predator}}$", y_var="Probability")
+    elif variables[0] == "a_lethality":
+        plot.set_axis_labels(x_var=r"$Lethality_{{apex}}$", y_var="Probability")
+
+    return plot
+
 
 # attractor plot
 
@@ -89,35 +143,8 @@ def plot_attractor(data, grid_size=3, variables=["s_breed", "f_breed"]):
         markerscale=2,
     )
 
-    if variables[0] == "s_breed":
-        plot.set_titles(
-            row_template=r"$b_{{predator}}$" + "= {row_name}",
-            col_template=r"$b_{{prey}}$" + " = {col_name}",
-        )
-    elif variables[0] == "s_max":
-        plot.set_titles(
-            col_template=r"$S_{{predator}}$" + " = {col_name}",
-        )
-    elif variables[0] == "a_max":
-        plot.set_titles(
-            col_template=r"$S_{{apex}}$" + " = {col_name}",
-        )
-    elif variables[0] == "a_breed":
-        plot.set_titles(
-            col_template=r"$b_{{apex}}$" + " = {col_name}",
-        )
-    elif variables[0] == "f_max":
-        plot.set_titles(
-            col_template=r"$K$" + " = {col_name}",
-        )
-    elif variables[0] == "s_lethality":
-        plot.set_titles(
-            col_template=r"$Lethality_{{predator}}$" + " = {col_name}",
-        )
-    elif variables[0] == "a_lethality":
-        plot.set_titles(
-            col_template=r"$Lethality_{{apex}}$" + " = {col_name}",
-        )
+    # set titles
+    plot = set_plot_titles(plot, variables)
 
     return plot
 
@@ -152,7 +179,7 @@ def plot_phase_probability(phase_data, variables=["s_breed", "f_breed"]):
             edgecolor=".7",
             height=6,
             aspect=1,
-            sizes=(1, 20),
+            sizes=(1, 50),
             size_norm=(-0.2, 0.8),
             legend=False,
         )
@@ -161,9 +188,6 @@ def plot_phase_probability(phase_data, variables=["s_breed", "f_breed"]):
             row_template="Model: {row_name}",
             col_template="Phase: {col_name}",
         )
-
-        if variables[0] == "s_breed":
-            plot.set_axis_labels(x_var=r"$b_{{predator}}$", y_var=r"$b_{{prey}}$")
 
     else:
         plot = sns.relplot(
@@ -181,22 +205,7 @@ def plot_phase_probability(phase_data, variables=["s_breed", "f_breed"]):
         # set limits
         plot.set(ylim=(0, 1.1))
 
-        plot.set_titles(
-            col_template="Phase: {col_name}",
-        )
-
-        if variables[0] == "s_max":
-            plot.set_axis_labels(x_var=r"$S_{{predator}}$", y_var="Probability")
-        elif variables[0] == "a_max":
-            plot.set_axis_labels(x_var=r"$S_{{apex}}$", y_var="Probability")
-        elif variables[0] == "a_breed":
-            plot.set_axis_labels(x_var=r"$b_{{apex}}$", y_var="Probability")
-        elif variables[0] == "f_max":
-            plot.set_axis_labels(x_var=r"$K$", y_var="Probability")
-        elif variables[0] == "s_lethality":
-            plot.set_axis_labels(x_var=r"$Lethality_{{predator}}$", y_var="Probability")
-        elif variables[0] == "a_lethality":
-            plot.set_axis_labels(x_var=r"$Lethality_{{apex}}$", y_var="Probability")
+    plot = set_plot_axis_labels(plot, variables)
 
     return plot
 
@@ -438,34 +447,70 @@ def plot_time_series(
 
     # set titles
 
-    if variables[0] == "s_breed":
-        plot.set_titles(
-            row_template=r"$b_{{predator}}$" + " = {row_name}",
-            col_template=r"$b_{{prey}}$" + " = {col_name}",
+    plot = set_plot_titles(plot, variables)
+
+    return plot
+
+
+# Plot transition between phases
+
+
+def plot_phase_transition(
+    transition_data, variables=["s_breed", "f_breed"], model=True
+):
+    """
+    Function to plot phase transition between phases as a function of state varible/s.
+    """
+
+    transition_data = transition_data.with_columns(
+        pl.col("phase")
+        .cast(pl.Categorical)
+        .cast(
+            pl.Enum(
+                [
+                    "Prey Only",
+                    "P - C Bistable",
+                    "Coexistence",
+                    "C - E Bistable",
+                    "Extinction",
+                    "P - E Bistable",
+                ]
+            )
         )
-    elif variables[0] == "s_max":
+    )
+    if model:
+        # filter data
+        col = "model"
+    else:
+        col = None
+
+    plot = sns.relplot(
+        data=transition_data,
+        x=variables[0],
+        y=variables[1],
+        hue="phase",
+        palette="Set1",
+        height=6,
+        aspect=1,
+        alpha=0.5,
+        edgecolor="w",
+        legend=True,
+        col=col,
+        s=50,
+        marker="s",
+    )
+
+    if model:
         plot.set_titles(
-            col_template=r"$S_{{predator}}$" + " = {col_name}",
+            col_template="Model: {col_name}",
         )
-    elif variables[0] == "a_max":
-        plot.set_titles(
-            col_template=r"$S_{{apex}}$" + " = {col_name}",
-        )
-    elif variables[0] == "a_breed":
-        plot.set_titles(
-            col_template=r"$b_{{apex}}$" + " = {col_name}",
-        )
-    elif variables[0] == "f_max":
-        plot.set_titles(
-            col_template=r"$K$" + " = {col_name}",
-        )
-    elif variables[0] == "s_lethality":
-        plot.set_titles(
-            col_template=r"$Lethality_{{predator}}$" + " = {col_name}",
-        )
-    elif variables[0] == "a_lethality":
-        plot.set_titles(
-            col_template=r"$Lethality_{{apex}}$" + " = {col_name}",
-        )
+
+    # set titles
+
+    plot = set_plot_axis_labels(plot, variables)
+
+    plt.legend(
+        title="Phase",
+    )
 
     return plot
