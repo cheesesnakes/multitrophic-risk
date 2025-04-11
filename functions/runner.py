@@ -115,11 +115,14 @@ def plot_density(spatial_data=None, steps=100, file="density.gif"):
     agent_types = spatial_data.AgentType.unique()
     grid_shape = (spatial_data.x.max() + 1, spatial_data.y.max() + 1)
 
+    plt.grid(False)
+    plt.axis("off")
+    plt.tight_layout()
+    plt.subplots_adjust(wspace=0.5)
+
     fig, axs = plt.subplots(1, len(agent_types), figsize=(len(agent_types) * 5, 5))
     axs = axs if isinstance(axs, np.ndarray) else [axs]
     ims = []
-
-    plt.grid(False)
 
     for i in range(1, steps):
         step_images = []
