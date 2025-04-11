@@ -32,6 +32,7 @@ def main():
             models = ["lv", "apex", "super"]
             for model in models:
                 run_example(kwargs, model=model)
+                plot_example(kwargs, model=model)
         else:
             for m in range(1, len(args)):
                 model_name = args[m]

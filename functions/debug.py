@@ -42,7 +42,7 @@ def run_debug(kwargs):
         agent_data.to_csv(f"output/debug/results/data_agents_{kwargs['model']}.csv")
 
 
-def plot_debug(**kwargs):
+def plot_debug(kwargs):
     for model, params in scenarios.items():
         kwargs["model"] = model
         kwargs.update(params)

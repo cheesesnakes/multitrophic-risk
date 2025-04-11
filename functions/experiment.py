@@ -230,8 +230,6 @@ def run_experiment(cfg, kwargs):
     print(f"\n{cfg.get('description', '')}")
 
     for i, model_cfg in enumerate(cfg["models_config"]):
-        if i in [0,1]: #remove after running experiment 2
-            continue
         # update parameters
 
         kwargs.update(model_cfg["params"])
@@ -253,20 +251,25 @@ def run_experiment(cfg, kwargs):
 
         results = pd.concat([results, run])
 
-        # file naming
+        if cfg.get("append", False):
+            path = f"output/experiments/results/{cfg['name']}_results.csv"
 
-        prefix = cfg.get(
-            "model_prefix", f"model-{i + 1}" if len(cfg["models_config"]) > 1 else ""
-        )
+            if os.path.exists(path):
+                # load the saved results
+                saved = pd.read_csv(path, index_col=0)
 
-        suffix = f"_{prefix}_results.csv" if prefix else "_results.csv"
+                results = pd.concat([saved, results])
+        else:
+            # file naming
 
-        path = f"output/experiments/results/{cfg['name']}{suffix}"
+            prefix = cfg.get(
+                "model_prefix",
+                f"model-{i + 1}" if len(cfg["models_config"]) > 1 else "",
+            )
 
-        if cfg.get("append", False) and os.path.exists(path):
-            saved = pd.read_csv(path, index_col=0)
+            suffix = f"_{prefix}_results.csv" if prefix else "_results.csv"
 
-            results = pd.concat([saved, results])
+            path = f"output/experiments/results/{cfg['name']}{suffix}"
 
         # save the results
 

@@ -3,7 +3,7 @@
 kwargs = {
     # model to run
     "limit": 100000,
-    "num_cpus": 50,
+    "num_cpus": 10,
     "reps": 25,
     # model parameters
     "width": 100,

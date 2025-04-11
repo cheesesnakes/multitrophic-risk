@@ -23,6 +23,7 @@ def run_strategies(kwargs):
 
         # set info parameters
         kwargs.update(info)
+        kwargs["model"] = strategy
 
         # run the model
         m = model_run(**kwargs)
@@ -41,7 +42,7 @@ def run_strategies(kwargs):
         )
 
 
-def plot_strategy(strategy_info, kwargs):
+def plot_strategy(kwargs):
     for strategy, info in strategy_info.items():
         # set info parameters
         kwargs.update(info)
