@@ -66,7 +66,7 @@ def main():
         else:
             for m in range(1, len(args)):
                 experiment_name = "Experiment-" + str(args[m])
-                if experiment_name not in cfg.keys():
+                if experiment_name not in configs.keys():
                     print(
                         f"No config found with name '{experiment_name}'. Available names are:"
                     )
@@ -74,7 +74,7 @@ def main():
                         print(f"  - {cfg}")
                 else:
                     print(f"Running experiment '{experiment_name}'...")
-                    run_experiment(cfg[experiment_name], kwargs)
+                    run_experiment(configs[experiment_name], kwargs)
     else:
         print(
             f"Unknown argument '{args[0]}'. Available options are: Debug, Examples, Strategies, and Experiments"

@@ -230,6 +230,8 @@ def run_experiment(cfg, kwargs):
     print(f"\n{cfg.get('description', '')}")
 
     for i, model_cfg in enumerate(cfg["models_config"]):
+        if i in [0,1]: #remove after running experiment 2
+            continue
         # update parameters
 
         kwargs.update(model_cfg["params"])
