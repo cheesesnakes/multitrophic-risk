@@ -5,9 +5,9 @@ import os
 
 
 model_params = {
-    "apex": {"model": "apex", "predator": 500, "prey": 1000, "apex": 250},
-    "super": {"model": "super", "predator": 500, "prey": 1000, "super": 250},
-    "lv": {"model": "lv", "predator": 500, "prey": 1000},
+    "apex": {"model": "apex", "predator": 500, "prey": 1000, "apex": 250, "super": 0},
+    "super": {"model": "super", "predator": 500, "prey": 1000, "super": 250, "apex": 0},
+    "lv": {"model": "lv", "predator": 500, "prey": 1000, "apex": 0, "super": 0},
 }
 
 
@@ -86,3 +86,11 @@ def plot_example(kwargs, model="lv"):
         file=f"output/examples/plots/space_pop_{kwargs['model']}.gif",
         steps=kwargs.get("steps", 1000),
     )
+
+
+if __name__ == "__main__":
+    # plot the results
+    from params import kwargs
+
+    for model in ["apex", "super", "lv"]:
+        plot_example(kwargs, model=model)

@@ -119,6 +119,8 @@ def plot_density(spatial_data=None, steps=100, file="density.gif"):
     axs = axs if isinstance(axs, np.ndarray) else [axs]
     ims = []
 
+    plt.grid(False)
+
     for i in range(1, steps):
         step_images = []
         current = spatial_data[spatial_data.Step == i]
@@ -129,8 +131,9 @@ def plot_density(spatial_data=None, steps=100, file="density.gif"):
             np.add.at(grid, (agent_data.x.values, agent_data.y.values), 1)
 
             im = axs[j].imshow(grid.T, interpolation="nearest", origin="lower")
+
             text = axs[j].text(
-                1, -2, f"{agent} at Step {i}", fontsize=12, color="black"
+                30, 105, f"{agent} at Step {i}", fontsize=12, color="black"
             )
             step_images.extend([im, text])
         ims.append(step_images)
