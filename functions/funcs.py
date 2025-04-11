@@ -254,6 +254,7 @@ def analyse_experiment_9():
 def analysis(
     experiment="Experiment-1",
     data_path="output/experiments/results/Experiment-1_results.csv",
+    multiple=False,
     reps=25,
     steps=1000,
     parameter_depth=50,
@@ -268,7 +269,16 @@ def analysis(
 
     # load data
     print("Loading data...")
-    data = pl.scan_csv(data_path)
+
+    if multiple:
+        data_paths = [
+            f"output/experiments/results/{experiment}_model-{i}_results.csv"
+            for i in range(1, n_models + 1)
+        ]
+
+        data = pl.concat([pl.scan_csv(path) for path in data_paths])
+    else:
+        data = pl.scan_csv(data_path)
 
     # calculate number of runs
     print("Calculating number of runs...")

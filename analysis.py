@@ -38,6 +38,7 @@ def main():
         analysis(
             experiment=f"{e}",
             data_path=config["data_path"],
+            multiple=config.get("append", False),
             reps=config.get("reps", reps),
             steps=config.get("steps", steps),
             parameter_depth=config.get("parameter_depth", parameter_depth),
