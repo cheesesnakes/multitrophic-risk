@@ -959,7 +959,7 @@ class model(mesa.Model):
 
     ## run function
 
-    def run_model(self, steps=100, progress=False, info=False, limit=10000, stop=False):
+    def run_model(self, steps=100, progress=False, limit=10000, stop=False):
         for i in range(steps):
             ## end the model if there are no prey or predator agents
 
@@ -976,18 +976,6 @@ class model(mesa.Model):
 
             else:
                 self.step()
-
-                if info:
-                    print(
-                        "Number of prey:",
-                        self.n_Prey,
-                        "Number of predators:",
-                        self.n_Predators,
-                        "Number of apex predators:",
-                        self.n_Apex,
-                        "Number of super predators:",
-                        self.n_Super,
-                    )
 
                 if progress:
                     print(

@@ -19,6 +19,10 @@ def run_debug(kwargs):
     os.makedirs("output/debug/results", exist_ok=True)
     os.makedirs("output/debug/plots", exist_ok=True)
 
+    # set loggin
+
+    kwargs["progress"] = True
+
     for model, params in scenarios.items():
         kwargs["model"] = model
         kwargs.update(params)

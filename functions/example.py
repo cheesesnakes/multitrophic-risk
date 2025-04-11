@@ -20,6 +20,10 @@ def run_example(kwargs, model="lv"):
 
     kwargs.update(model_params[model])
 
+    # set logging
+
+    kwargs["progress"] = True
+
     # run the model
 
     print(f"Running {model} model")

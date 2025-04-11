@@ -71,6 +71,7 @@ def main():
                 for cfg in configs.keys():
                     print(f"  - {cfg}")
             else:
+                print(f"Running experiment '{experiment_name}'...")
                 run_experiment(cfg[experiment_name], kwargs)
     else:
         print(

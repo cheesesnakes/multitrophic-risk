@@ -71,35 +71,22 @@ class experiment:
 
         kwargs = self.kwargs
 
-        if v is None:
-            # progress
+        log = f"Running {kwargs['experiment']} model: {kwargs['model']}, replicate: {rep_id}, sample: {sample_id}"
 
-            print(f"Running replicate {rep_id}, sample {sample_id}")
+        print(log)
 
-        else:
+        if v is not None:
             if len(v.shape) == 1:
                 # update kwargs.valeus
 
                 for i, p in enumerate(params):
                     kwargs[p] = v[i]
 
-                # progress
-
-                print(
-                    f"Running replicate {rep_id}, sample {sample_id}, with {params} = {v}"
-                )
-
             else:
                 # update kwargs.valeus
 
                 for p in params:
                     kwargs[p] = v
-
-                # progress
-
-                print(
-                    f"Running replicate {rep_id}, sample {sample_id}, with {params} = {v}"
-                )
 
         # create the model
 
@@ -240,30 +227,51 @@ def create_results_df(params):
 
 
 def run_experiment(cfg, kwargs):
-    print(f"\n{cfg['name']}: {cfg.get('description', '')}")
+    print(f"\n{cfg.get('description', '')}")
 
     for i, model_cfg in enumerate(cfg["models_config"]):
+        # update parameters
+
         kwargs.update(model_cfg["params"])
+
+        if len(cfg["models_config"]) > 1:
+            kwargs["model"] = str(i + 1)
+
+        kwargs["experiment"] = cfg["name"]
+
+        # run the experiment
+
         results = create_results_df(kwargs["params"])
+
         reps = kwargs.get("reps", 10)
+
         exp = experiment(**kwargs)
 
         run = exp.parallel(v=cfg.get("vars", None), rep=reps, **kwargs)
+
         results = pd.concat([results, run])
+
+        # file naming
 
         prefix = cfg.get(
             "model_prefix", f"model-{i + 1}" if len(cfg["models_config"]) > 1 else ""
         )
+
         suffix = f"_{prefix}_results.csv" if prefix else "_results.csv"
+
         path = f"output/experiments/results/{cfg['name']}{suffix}"
 
         if cfg.get("append", False) and os.path.exists(path):
             saved = pd.read_csv(path, index_col=0)
+
             results = pd.concat([saved, results])
+
+        # save the results
 
         results.to_csv(path)
 
         # free memory
+
         del results
         del exp
         del run

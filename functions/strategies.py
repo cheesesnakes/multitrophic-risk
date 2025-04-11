@@ -16,6 +16,11 @@ def run_strategies(kwargs):
     os.makedirs("output/strategies/plots", exist_ok=True)
 
     for strategy, info in strategy_info.items():
+        # logging
+
+        print(f"Running strategy: {strategy}")
+        kwargs["progress"] = True
+
         # set info parameters
         kwargs.update(info)
 

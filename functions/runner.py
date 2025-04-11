@@ -20,7 +20,6 @@ def model_run(steps=50, **kwargs):
     m.run_model(
         steps,
         progress=kwargs.get("progress", False),
-        info=kwargs.get("info", False),
         limit=kwargs.get("limit", 10000),
         stop=kwargs.get("stop", False),
     )
