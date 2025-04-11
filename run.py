@@ -33,14 +33,15 @@ def main():
             for model in models:
                 run_example(kwargs, model=model)
         else:
-            model_name = args[1]
-            if model_name not in ["lv", "apex", "super"]:
-                print(
-                    f"Unknown model '{model_name}'. Available models are: lv, apex, and super"
-                )
-                return
-            run_example(kwargs, model=model_name)
-            plot_example(kwargs, model=model_name)
+            for m in range(1, len(args)):
+                model_name = args[m]
+                if model_name not in ["lv", "apex", "super"]:
+                    print(
+                        f"Unknown model '{model_name}'. Available models are: lv, apex, and super"
+                    )
+                    return
+                run_example(kwargs, model=model_name)
+                plot_example(kwargs, model=model_name)
 
         return
     elif args[0] == "Strategies":
@@ -63,16 +64,17 @@ def main():
             for cfg in configs:
                 run_experiment(cfg, kwargs)
         else:
-            experiment_name = "Experiment-" + str(args[1])
-            if experiment_name not in cfg.keys():
-                print(
-                    f"No config found with name '{experiment_name}'. Available names are:"
-                )
-                for cfg in configs.keys():
-                    print(f"  - {cfg}")
-            else:
-                print(f"Running experiment '{experiment_name}'...")
-                run_experiment(cfg[experiment_name], kwargs)
+            for m in range(1, len(args)):
+                experiment_name = "Experiment-" + str(args[m])
+                if experiment_name not in cfg.keys():
+                    print(
+                        f"No config found with name '{experiment_name}'. Available names are:"
+                    )
+                    for cfg in configs.keys():
+                        print(f"  - {cfg}")
+                else:
+                    print(f"Running experiment '{experiment_name}'...")
+                    run_experiment(cfg[experiment_name], kwargs)
     else:
         print(
             f"Unknown argument '{args[0]}'. Available options are: Debug, Examples, Strategies, and Experiments"
