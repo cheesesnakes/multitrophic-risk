@@ -49,11 +49,9 @@ def plot_strategy(kwargs):
 
         # load data
 
-        model_data = pd.read_csv(
-            f"output/strategies/results/data_model_{kwargs['model']}_{strategy}.csv"
-        )
+        model_data = pd.read_csv(f"output/strategies/results/data_model_{strategy}.csv")
         agent_data = pd.read_csv(
-            f"output/strategies/results/data_agents_{kwargs['model']}_{strategy}.csv"
+            f"output/strategies/results/data_agents_{strategy}.csv"
         )
 
         # plot the number of agents over time
@@ -61,7 +59,7 @@ def plot_strategy(kwargs):
         plot_pop(
             model_data=model_data,
             params=kwargs,
-            file=f"output/strategies/plots/pop_{kwargs['model']}_{strategy}.png",
+            file=f"output/strategies/plots/pop_{strategy}.png",
             steps=kwargs.get("steps", 1000),
         )
 
@@ -69,7 +67,7 @@ def plot_strategy(kwargs):
 
         plot_density(
             spatial_data=agent_data,
-            file=f"output/strategies/plots/density_{kwargs['model']}_{strategy}.gif",
+            file=f"output/strategies/plots/density_{strategy}.gif",
             steps=kwargs.get("steps", 1000),
         )
 
@@ -77,7 +75,7 @@ def plot_strategy(kwargs):
 
         plot_space(
             agent_data=agent_data,
-            file=f"output/strategies/plots/space_{kwargs['model']}_{strategy}.gif",
+            file=f"output/strategies/plots/space_{strategy}.gif",
             steps=kwargs.get("steps", 1000),
         )
 
@@ -87,6 +85,12 @@ def plot_strategy(kwargs):
             agent_data=agent_data,
             model_data=model_data,
             params=kwargs,
-            file=f"output/strategies/plots/space_pop_{kwargs['model']}_{strategy}.gif",
+            file=f"output/strategies/plots/space_pop_{strategy}.gif",
             steps=kwargs.get("steps", 1000),
         )
+
+
+if __name__ == "__main__":
+    from params import kwargs
+
+    plot_strategy(kwargs)
