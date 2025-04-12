@@ -1,3 +1,4 @@
+from pickle import TRUE
 import polars as pl
 import seaborn as sns
 import numpy as np
@@ -196,6 +197,7 @@ def plot_phase_probability(phase_data, variables=["s_breed", "f_breed"]):
             y="prob",
             hue="phase",
             palette="Set1",
+            col="model",
             hue_norm=(-1, 1),
             height=6,
             aspect=1.3,
@@ -494,7 +496,7 @@ def plot_phase_transition(
         aspect=1,
         alpha=0.5,
         edgecolor="w",
-        legend=True,
+        legend=TRUE,
         col=col,
         s=50,
         marker="s",
@@ -513,4 +515,31 @@ def plot_phase_transition(
         title="Phase",
     )
 
+    return plot
+
+
+# plot max prey based on latice size
+
+
+def plot_max_prey(data):
+    data = data.filter(pl.col("step") > 600)
+
+    plot = sns.relplot(
+        data,
+        x="L2",
+        y="Prey",
+        hue="f_max",
+        alpha=0.5,
+        edgecolor="w",
+        legend=TRUE,
+        s=50,
+        height=6,
+        aspect=1,
+    )
+
+    plot.set_axis_labels(x_var=r"$L^{2}$")
+
+    plt.legend(
+        title=r"$K$",
+    )
     return plot

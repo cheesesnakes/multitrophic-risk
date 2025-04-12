@@ -3,6 +3,7 @@ import polars as pl
 from functions.plots import (
     plot_attractor,
     plot_bifurcation,
+    plot_max_prey,
     plot_phase_probability,
     plot_phase_transition,
     plot_time_series,
@@ -266,7 +267,7 @@ def analyse_experiment_9():
 
     # classify model phase
     print("Classifying model phase...")
-    phase = classify_model_phase(data, variables=[], model=False)
+    phase = classify_model_phase(data, variables=[], model=False, reps=10)
 
     # add vars to phase
     phase = phase.join(
@@ -279,6 +280,29 @@ def analyse_experiment_9():
 
     print("Plotting phase probability...")
 
+    def plot_9(data, cat="i_apex"):
+        plot = sns.relplot(
+            data=data,
+            x="i_prey",
+            y="i_predator",
+            hue="prob",
+            col="phase",
+            row=cat,
+            edgecolor=".5",
+            size="prob",
+            sizes=(100, 500),
+            size_norm=(0, 1),
+            hue_norm=(0, 1),
+            palette=sns.color_palette("viridis", as_cmap=True),
+            height=6,
+            aspect=1.3,
+            s=500,
+        )
+
+        plot.set_axis_labels(r"$N_{{0}}$", r"$P_{{0}}$")
+
+        return plot
+
     # Apex model
     phase_apex = phase.filter(pl.col("model") == "Apex")
 
@@ -288,27 +312,14 @@ def analyse_experiment_9():
         .cast(pl.Enum(["Prey Only", "Coexistence", "Extinction"]))
     )
 
-    plot = sns.relplot(
-        data=phase_apex,
-        x="i_prey",
-        y="i_predator",
-        hue="prob",
-        col="phase",
-        row="i_apex",
-        palette="crest",
-        edgecolor=".5",
-        # hue_norm=plt.Normalize(0, 1),
-        height=6,
-        aspect=1.3,
-        s=500,
-    )
+    plot = plot_9(phase_apex)
 
-    plot.set_axis_labels(r"$N_{{0}}$", r"$P_{{0}}$")
     plot.set_titles(
-        col_template="Phase: {col_name}", row_template=r"$A_{{0}}$ = " + "{row_name}"
+        col_template="Phase: {col_name}",
+        row_template=r"$A_{{0}}$ = " + "{row_name}",
     )
 
-    plt.savefig("output/experiments/plots/experiment_9_phase_probability_apex.png")
+    plt.savefig("output/experiments/plots/Experiment-9_phase_probability_apex.png")
 
     # Super model
     phase_super = phase.filter(pl.col("model") == "Super")
@@ -318,26 +329,11 @@ def analyse_experiment_9():
         .cast(pl.Enum(["Prey Only", "Coexistence", "Extinction"]))
     )
 
-    plot = sns.relplot(
-        data=phase_super,
-        x="i_prey",
-        y="i_predator",
-        hue="prob",
-        col="phase",
-        row="i_super",
-        palette="crest",
-        edgecolor=".5",
-        # hue_norm=plt.Normalize(0, 1),
-        height=6,
-        aspect=1.3,
-        s=500,
-    )
-
-    plot.set_axis_labels(r"$N_{{0}}$", r"$P_{{0}}$")
+    plot = plot_9(phase_super, cat="i_super")
     plot.set_titles(
         col_template="Phase: {col_name}", row_template=r"$S_{{0}}$ = " + "{row_name}"
     )
-    plt.savefig("output/experiments/plots/experiment_9_phase_probability_super.png")
+    plt.savefig("output/experiments/plots/Experiment-9_phase_probability_super.png")
 
     plt.close()
     print("Analysis for experiment 9 completed.")
@@ -376,6 +372,8 @@ def analysis(
     else:
         data = pl.scan_csv(data_path)
 
+    data = data.collect()
+
     # calculate number of runs
     print("Calculating number of runs...")
 
@@ -386,22 +384,47 @@ def analysis(
     runs = reps * steps * n_params * n_models
     print("Number of runs = ", runs)
 
-    # add model names as columns
-    print("Adding model names...")
-    model = [m for m in models for _ in range(runs // n_models)]
-    data = data.with_columns(model=pl.Series(model))
-    data = data.collect()
-
     # summaries
     print("Generating summaries...")
     summaries(data)
+
+    # add model names as columns
+    print("Adding model names...")
+    model = [m for m in models for _ in range(runs // n_models)]
 
     # check if data is complete
     print("Checking if data is complete...")
     if runs == data.shape[0]:
         print("Data is complete")
     else:
-        print("Data is not complete, ", data.shape[0] / runs, "%")
+        print("Data is not complete, ", data.shape[0] * 100 / runs, "%")
+        model = model[: data.shape[0]]
+
+    data = data.with_columns(model=pl.Series(model))
+
+    # plot for experiment 6
+
+    if experiment == "Experiment-6":
+        # L2 as a variable based on model
+
+        data = data.with_columns(
+            pl.when(pl.col("model") == "$L^{2}$ = 10")
+            .then(10)
+            .when(pl.col("model") == "$L^{2}$ = 20")
+            .then(20)
+            .when(pl.col("model") == "$L^{2}$ = 50")
+            .then(50)
+            .when(pl.col("model") == "$L^{2}$ = 100")
+            .then(100)
+            .alias("L2")
+        )
+
+        print(data.head())
+
+        plot_max_prey(data)
+
+        plt.savefig("output/experiments/plots/Experiment-6_max-prey.png")
+
         return
 
     # plot attractor
