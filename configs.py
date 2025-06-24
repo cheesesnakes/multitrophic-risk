@@ -69,7 +69,7 @@ configs = {
         "description": "Determining the effects of predator and prey information",
         "data_path": "output/experiments/results/Experiment-3_results.csv",
         "status": "complete",
-        "append": True,
+        "append": False,
         "n_models": 4,
         "populations": ["Prey", "Predator"],
         "variables": ["s_breed", "f_breed"],
