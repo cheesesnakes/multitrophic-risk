@@ -407,15 +407,17 @@ def analysis(
         data = data.with_columns(
             pl.col("model")
             .cast(pl.Categorical)
-            .cat.set_order(
-                [
-                    "Lethal -> Prey",
-                    "Lethal -> Predator",
-                    "Lethal -> Both",
-                    "Non-lethal -> Prey",
-                    "Non-lethal -> Predator",
-                    "Non-lethal -> Both",
-                ]
+            .cast(
+                pl.Enum(
+                    [
+                        "Lethal -> Prey",
+                        "Lethal -> Predator",
+                        "Lethal -> Both",
+                        "Non-lethal -> Prey",
+                        "Non-lethal -> Predator",
+                        "Non-lethal -> Both",
+                    ]
+                )
             )
         )
 

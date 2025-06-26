@@ -489,6 +489,16 @@ def plot_phase_transition(
     else:
         col = None
 
+    # set col_wrap if unique models are more than 2
+
+    if (
+        model
+        and transition_data.select(pl.col("model").n_unique()).to_numpy()[0][0] > 2
+    ):
+        col_wrap = 3
+    else:
+        col_wrap = 2
+
     plot = sns.relplot(
         data=transition_data,
         x=variables[0],
@@ -503,7 +513,7 @@ def plot_phase_transition(
         col=col,
         s=25,
         marker="o",
-        col_wrap=3,
+        col_wrap=col_wrap,
     )
 
     if model:
@@ -511,7 +521,7 @@ def plot_phase_transition(
             col_template="Model: {col_name}",
         )
 
-    plt.add_legend(title="Phase")
+    # plt.add_legend(title="Phase")
 
     # set titles
 
