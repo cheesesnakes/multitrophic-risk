@@ -402,6 +402,23 @@ def analysis(
 
     data = data.with_columns(model=pl.Series(model))
 
+    # Set order for models in experiment 2
+    if experiment == "Experiment-2":
+        data = data.with_columns(
+            pl.col("model")
+            .cast(pl.Categorical)
+            .cat.set_order(
+                [
+                    "Lethal -> Prey",
+                    "Lethal -> Predator",
+                    "Lethal -> Both",
+                    "Non-lethal -> Prey",
+                    "Non-lethal -> Predator",
+                    "Non-lethal -> Both",
+                ]
+            )
+        )
+
     # plot for experiment 6
 
     if experiment == "Experiment-6":

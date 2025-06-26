@@ -186,6 +186,7 @@ def plot_phase_probability(phase_data, variables=["s_breed", "f_breed"]):
             sizes=(1, 50),
             size_norm=(-0.2, 0.8),
             legend=False,
+            col_wrap=3,
         )
 
         plot.set_titles(
@@ -502,6 +503,7 @@ def plot_phase_transition(
         col=col,
         s=25,
         marker="o",
+        col_wrap=3,
     )
 
     if model:
