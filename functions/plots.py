@@ -1,4 +1,3 @@
-from pickle import TRUE
 import polars as pl
 import seaborn as sns
 import numpy as np
@@ -166,16 +165,20 @@ def plot_phase_probability(phase_data, variables=["s_breed", "f_breed"]):
         .cast(pl.Enum(["Prey Only", "Coexistence", "Extinction"]))
     )
 
+    # Set probability as float
+
+    phase_data = phase_data.with_columns(pl.col("prob").cast(pl.Float64))
+
     if len(variables) > 1:
         plot = sns.relplot(
             data=phase_data,
             x="s_breed",
             y="f_breed",
-            hue="prob",
+            hue="phase",
+            alpha=0.5,
             size="prob",
-            col="phase",
-            row="model",
-            palette="vlag",
+            col="model",
+            palette="pastel",
             hue_norm=(-1, 1),
             edgecolor=".7",
             height=6,
@@ -186,7 +189,6 @@ def plot_phase_probability(phase_data, variables=["s_breed", "f_breed"]):
         )
 
         plot.set_titles(
-            row_template="Model: {row_name}",
             col_template="Phase: {col_name}",
         )
 
@@ -496,10 +498,10 @@ def plot_phase_transition(
         aspect=1,
         alpha=0.5,
         edgecolor="w",
-        legend=TRUE,
+        legend=True,
         col=col,
-        s=50,
-        marker="s",
+        s=25,
+        marker="o",
     )
 
     if model:
@@ -507,13 +509,11 @@ def plot_phase_transition(
             col_template="Model: {col_name}",
         )
 
+    plt.add_legend(title="Phase")
+
     # set titles
 
     plot = set_plot_axis_labels(plot, variables)
-
-    plt.legend(
-        title="Phase",
-    )
 
     return plot
 
@@ -531,7 +531,7 @@ def plot_max_prey(data):
         hue="f_max",
         alpha=0.5,
         edgecolor="w",
-        legend=TRUE,
+        legend=True,
         s=50,
         height=6,
         aspect=1,

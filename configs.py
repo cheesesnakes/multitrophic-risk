@@ -68,7 +68,7 @@ configs = {
         "name": "Experiment-3",
         "description": "Determining the effects of predator and prey information",
         "data_path": "output/experiments/results/Experiment-3_results.csv",
-        "status": "complete",
+        "status": "running",
         "append": False,
         "n_models": 4,
         "populations": ["Prey", "Predator"],
