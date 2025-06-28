@@ -1,6 +1,6 @@
 # import libraries
 
-from functions.funcs import analysis, analyse_experiment_9
+from functions.analysis_funcs import analysis, analyse_experiment_9
 from configs import configs
 
 # constants

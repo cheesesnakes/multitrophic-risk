@@ -10,6 +10,7 @@ from functions.plots import (
 )
 from matplotlib import pyplot as plt
 import seaborn as sns
+from signals import make_outcomes, plot_signals
 
 # summaries
 
@@ -446,6 +447,23 @@ def analysis(
 
         return
 
+    # make outcomes
+    print("Making outcomes dataframe...")
+
+    outcomes = make_outcomes(data=data, variables=variables, Experiment=experiment)
+
+    print("Outcomes made.")
+
+    # plot outcomes
+
+    print("Plotting outcomes...")
+
+    plot_signals(
+        data=outcomes,
+        vars=variables,
+        Experiment=experiment,
+    )
+
     # plot attractor
     print("Plotting attractor...")
     plot_attractor(data, variables=variables, grid_size=3)
@@ -459,6 +477,12 @@ def analysis(
         variables=variables,
     )
 
+    phase.write_csv(
+        f"output/experiments/outcomes/{experiment}_phase.csv",
+        separator=",",
+        include_header=True,
+        quote_style="necessary",
+    )
     # plot phase probability
     print("Plotting phase probability...")
     plot_phase_probability(
@@ -482,7 +506,7 @@ def analysis(
     )
 
     phase_summary.write_csv(
-        f"output/experiments/results/{experiment}_phase_summary.csv",
+        f"output/experiments/outcomes/{experiment}_phase_summary.csv",
         separator=",",
         include_header=True,
         quote_style="necessary",
