@@ -10,7 +10,7 @@ from functions.plots import (
 )
 from matplotlib import pyplot as plt
 import seaborn as sns
-from signals import make_outcomes, plot_signals
+from functions.signals import make_outcomes, plot_signals
 
 # summaries
 
