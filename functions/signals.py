@@ -32,7 +32,7 @@ def calculate_periodicity(data):
     populations = ["Predator", "Prey", "Apex", "Super"]
 
     # Calculate periods for each group and column
-    avg_period = data.group_by(["rep_id", "sample_id"]).agg(
+    avg_period = data.group_by(["model", "rep_id", "sample_id"]).agg(
         pl.col(pop)
         .map_batches(periods, return_dtype=pl.Float64)
         .first()
@@ -105,9 +105,9 @@ def calculate_amplitude(data):
         return pl.Series(amplitudes).mean()
 
     # Calculate amplitude for each group and column
-    populations = ["Predator", "Prey", "Apex", "Super"]
+    populations = ["Predator", "Prey", "Apex"]
 
-    avg_amplitude = data.group_by(["rep_id", "sample_id"]).agg(
+    avg_amplitude = data.group_by(["model", "rep_id", "sample_id"]).agg(
         pl.col(pop)
         .map_batches(amplitude, return_dtype=pl.Float64)
         .first()
@@ -144,7 +144,7 @@ def calculate_phase_shift(data):
         return 1 - abs(max_lag / 600)
 
     phase_shift = (
-        data.group_by(["rep_id", "sample_id"])
+        data.group_by(["model", "rep_id", "sample_id"])
         .agg(
             pl.struct(pl.col("Prey"), pl.col("Predator"))
             .map_batches(
@@ -178,7 +178,7 @@ def make_outcomes(data, variables=None, Experiment="Experiment-1"):
 
     # Group by rep_id and sample_id
 
-    vars = data.group_by(["sample_id"]).agg(
+    vars = data.group_by(["model", "sample_id"]).agg(
         pl.col(var).unique().first() for var in variables
     )
 
@@ -199,19 +199,19 @@ def make_outcomes(data, variables=None, Experiment="Experiment-1"):
     outcomes = avg_period.join(
         avg_amplitude.select(
             [
+                "model",
                 "rep_id",
                 "sample_id",
                 "Predator_Amplitude",
                 "Prey_Amplitude",
                 "Apex_Amplitude",
-                "Super_Amplitude",
             ]
         ),
-        on=["rep_id", "sample_id"],
+        on=["model", "rep_id", "sample_id"],
         how="inner",
     ).join(
-        phase_shift.select(["rep_id", "sample_id", "Phase_Shift"]),
-        on=["rep_id", "sample_id"],
+        phase_shift.select(["model", "rep_id", "sample_id", "Phase_Shift"]),
+        on=["model", "rep_id", "sample_id"],
         how="inner",
     )
 
@@ -236,59 +236,124 @@ def plot_signals(data, vars, Experiment="Experiment-1"):
     Plot the phase shift of predator and prey populations against s_lethality.
     """
 
-    def plot(outcome):
-        if len(vars) == 0:
-            print("No variables to plot.")
-            return
-        elif len(vars) == 1:
-            var = vars[0]
+    def marginal_plot(data, outcome):
+        pop = ["Predator", "Prey"]
+
+        for var in vars:
             sns.set_theme(style="whitegrid")
+            plt.figure(figsize=(12, 6))
+            if outcome != "Phase_Shift":
+                var_data = (
+                    data.unpivot(
+                        index=["model", "rep_id", "sample_id", var],
+                        on=[f"{p}_{outcome}" for p in pop],
+                        variable_name="Population",
+                        value_name=outcome,
+                    )
+                    .group_by(["model", "rep_id", "Population", var])
+                    .agg(pl.col(outcome).mean().alias(outcome))
+                )
+
+                var_data = var_data.with_columns(
+                    pl.col("Population")
+                    .str.replace(f"_{outcome}", "", literal=True)
+                    .alias("Population")
+                )
+
+                p = sns.relplot(
+                    data=var_data,
+                    x=var,
+                    y=f"{outcome}",
+                    kind="line",
+                    col="model",
+                    hue="Population",
+                )
+
+            else:
+                var_data = data.group_by(["model", "rep_id", var]).agg(
+                    pl.col(f"{outcome}").mean().alias(outcome)
+                )
+
+                p = sns.relplot(
+                    data=var_data, x=var, y=outcome, kind="line", col="model"
+                )
+
+            p.set_titles(col_template="Model: {col_name}")
+            label = r"$b_{predator}$" if var == "s_breed" else r"$b_{prey}$"
+            p.set_axis_labels(label, f"{outcome}")
+            plt.savefig(f"output/experiments/plots/{Experiment}_{outcome}_{var}.png")
+            plt.close()
+
+    def joint_plot(data, outcome):
+        if vars is None or len(vars) == 0 or len(vars) > 2:
+            raise ValueError("vars must be a list of one or two variables.")
+        pop = ["Predator", "Prey"]
+
+        sns.set_theme(style="whitegrid")
+        if outcome != "Phase_Shift":
+            data = data.group_by(["model"] + vars).agg(
+                pl.col(f"{p}_{outcome}").mean().alias(f"{p}_{outcome}") for p in pop
+            )
+            data = data.unpivot(
+                index=["model"] + vars,
+                on=[f"{p}_{outcome}" for p in pop],
+                variable_name="Population",
+                value_name=outcome,
+            )
+            data = data.with_columns(
+                pl.col("Population")
+                .str.replace(f"_{outcome}", "", literal=True)
+                .alias("Population")
+            )
+
+            plt.figure(figsize=(12, 12))
+        else:
+            data = data.group_by(["model"] + vars).agg(
+                pl.col(f"{outcome}").mean().alias(outcome)
+            )
+
             plt.figure(figsize=(12, 6))
 
-            if outcome != "Phase_Shift":
-                for pop in ["Predator", "Prey", "Apex", "Super"]:
-                    sns.lineplot(
-                        data=data,
-                        x=var,
-                        y=f"{pop}_{outcome}",
-                        label=pop,
-                    )
-                plt.legend()
-            else:
-                sns.lineplot(
-                    data=data,
-                    x=var,
-                    y=outcome,
-                )
-            plt.xlabel(f"{var}")
-            plt.ylabel(f"{outcome}")
-        elif len(vars) > 1:
-            sns.set_theme(style="whitegrid")
-            plt.figure(figsize=(12, 6))
-            for var in vars:
-                if outcome != "Phase_Shift":
-                    for pop in ["Predator", "Prey", "Apex", "Super"]:
-                        sns.lineplot(
-                            data=data,
-                            x=var,
-                            y=f"{pop}_{outcome}",
-                            label=pop,
-                        )
-                else:
-                    sns.lineplot(
-                        data=data,
-                        x=var,
-                        y=outcome,
-                    )
-            plt.xlabel(f"{var}")
-            plt.ylabel(f"{outcome}")
+        scale = {
+            "Periodicity": (-1, 50),
+            "Amplitude": (0, 0.15),
+            "Phase_Shift": (0, 1),
+        }
+
+        p = sns.relplot(
+            data=data,
+            x=vars[0],
+            y=vars[1],
+            row="Population" if outcome != "Phase_Shift" else None,
+            col="model",
+            kind="scatter",
+            hue=outcome,
+            size=outcome,
+            sizes=(5, 50),
+            size_norm=scale[outcome],
+            edgecolor=".7",
+            hue_norm=scale[outcome],
+            palette="vlag",
+        )
+        p.set_titles(
+            col_template="Model: {col_name}", row_template="Population: {row_name}"
+        )
+
+        labels = [
+            r"$b_{predator}$" if var == "s_breed" else r"$b_{prey}$" for var in vars
+        ]
+        p.set_axis_labels(labels[0], labels[1])
+        plt.savefig(f"output/experiments/plots/{Experiment}_{outcome}_joint.png")
+        plt.close()
 
     outcomes = ["Periodicity", "Amplitude", "Phase_Shift"]
 
     for outcome in outcomes:
-        plot(outcome)
-        plt.savefig(f"output/experiments/plots/{Experiment}_{outcome}.png")
-        plt.close()
+        if vars is None or len(vars) == 0 or len(vars) > 2:
+            raise ValueError("vars must be a list of one or two variables.")
+        marginal_plot(data, outcome)
+        if len(vars) == 2:
+            joint_plot(data, outcome)
 
 
 if __name__ == "__main__":
