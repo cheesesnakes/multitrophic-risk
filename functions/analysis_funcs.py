@@ -1,5 +1,6 @@
 import numpy as np
 import polars as pl
+import os
 from functions.plots import (
     plot_attractor,
     plot_bifurcation,
@@ -360,6 +361,14 @@ def analysis(
     print("Begin analysis...")
     print("\n")
 
+    # Check folders
+
+    if not os.path.exists("output/experiments/outcomes/"):
+        os.makedirs("output/experiments/outcomes/")
+
+    if not os.path.exists("output/experiments/plots/"):
+        os.makedirs("output/experiments/plots/")
+
     # load data
     print("Loading data...")
 
@@ -425,6 +434,9 @@ def analysis(
     # plot for experiment 6
 
     if experiment == "Experiment-6":
+        if os.path.exists("output/experiments/plots/Experiment-6_max-prey.png"):
+            print("Max prey plot already exists, skipping...")
+            return
         # L2 as a variable based on model
 
         data = data.with_columns(
@@ -448,107 +460,137 @@ def analysis(
         return
 
     # make outcomes
-    print("Making outcomes dataframe...")
 
-    outcomes = make_outcomes(data=data, variables=variables, Experiment=experiment)
+    if not os.path.exists(f"output/experiments/outcomes/{experiment}_outcomes.csv"):
+        print("Making outcomes dataframe...")
 
-    print("Outcomes made.")
+        outcomes = make_outcomes(data=data, variables=variables, Experiment=experiment)
+
+        print("Outcomes made.")
 
     # plot outcomes
 
-    print("Plotting outcomes...")
+    if not os.path.exists(
+        f"output/experiments/plots/{experiment}_Phase_Shift_joint.png"
+    ):
+        outcomes = pl.read_csv(f"output/experiments/outcomes/{experiment}_outcomes.csv")
 
-    plot_signals(
-        data=outcomes,
-        vars=variables,
-        Experiment=experiment,
-    )
+        print("Plotting outcomes...")
+
+        plot_signals(
+            data=outcomes,
+            vars=variables,
+            Experiment=experiment,
+        )
 
     # plot attractor
-    print("Plotting attractor...")
-    plot_attractor(data, variables=variables, grid_size=3)
-    plt.savefig(f"output/experiments/plots/{experiment}_attractor.png")
-    print("Attractor plot saved.")
+    if not os.path.exists(f"output/experiments/plots/{experiment}_attractor.png"):
+        print("Plotting attractor...")
+        plot_attractor(data, variables=variables, grid_size=3)
+        plt.savefig(f"output/experiments/plots/{experiment}_attractor.png")
+        print("Attractor plot saved.")
 
     # classify outcomes
-    print("Classifying outcomes...")
-    phase = classify_model_phase(
-        data,
-        variables=variables,
-    )
+    if not os.path.exists(f"output/experiments/outcomes/{experiment}_phase.csv"):
+        print("Classifying outcomes...")
+        phase = classify_model_phase(
+            data,
+            variables=variables,
+        )
 
-    phase.write_csv(
-        f"output/experiments/outcomes/{experiment}_phase.csv",
-        separator=",",
-        include_header=True,
-        quote_style="necessary",
-    )
+        phase.write_csv(
+            f"output/experiments/outcomes/{experiment}_phase.csv",
+            separator=",",
+            include_header=True,
+            quote_style="necessary",
+        )
+
     # plot phase probability
-    print("Plotting phase probability...")
-    plot_phase_probability(
-        phase,
-        variables=variables,
-    )
-    plt.savefig(f"output/experiments/plots/{experiment}_phase_probability.png")
-    print("Phase probability plot saved.")
+    if not os.path.exists(
+        f"output/experiments/plots/{experiment}_phase_probability.png"
+    ):
+        phase = pl.read_csv(f"output/experiments/outcomes/{experiment}_phase.csv")
+
+        print("Plotting phase probability...")
+        plot_phase_probability(
+            phase,
+            variables=variables,
+        )
+        plt.savefig(f"output/experiments/plots/{experiment}_phase_probability.png")
+        print("Phase probability plot saved.")
 
     # transition analysis
+    if not os.path.exists(
+        f"output/experiments/plots/{experiment}_phase_transition.png"
+    ) and not os.path.exists(
+        f"output/experiments/outcomes/{experiment}_phase_summary.csv"
+    ):
+        phase = pl.read_csv(f"output/experiments/outcomes/{experiment}_phase.csv")
 
-    print("Identifying transitions...")
-    phase = identify_transition(
-        phase,
-        variables=variables,
-    )
-
-    phase_summary = transition_summary(
-        phase,
-        variables=variables,
-    )
-
-    phase_summary.write_csv(
-        f"output/experiments/outcomes/{experiment}_phase_summary.csv",
-        separator=",",
-        include_header=True,
-        quote_style="necessary",
-    )
-
-    print("Transition summary:")
-
-    print(phase_summary)
-    print("\n")
-
-    if len(variables) > 1:
-        plot_phase_transition(
+        print("Identifying transitions...")
+        phase = identify_transition(
             phase,
             variables=variables,
         )
 
-        plt.savefig(f"output/experiments/plots/{experiment}_phase_transition.png")
+        phase_summary = transition_summary(
+            phase,
+            variables=variables,
+        )
+
+        phase_summary.write_csv(
+            f"output/experiments/outcomes/{experiment}_phase_summary.csv",
+            separator=",",
+            include_header=True,
+            quote_style="necessary",
+        )
+
+        print("Transition summary:")
+
+        print(phase_summary)
+        print("\n")
+
+        phase = pl.read_csv(f"output/experiments/outcomes/{experiment}_phase.csv")
+
+        if len(variables) > 1:
+            plot_phase_transition(
+                phase,
+                variables=variables,
+            )
+
+            plt.savefig(f"output/experiments/plots/{experiment}_phase_transition.png")
 
     # bifurcation plot
-    print("Plotting bifurcation plots...")
-
-    for population in populations:
-        for variable in variables:
-            plot_bifurcation(data, population=population, variable=variable)
-            plt.savefig(
-                f"output/experiments/plots/{experiment}_{variable}_bifurcation_{population.lower()}.png"
-            )
-            print(f"Saved {variable} bifurcation plot for {population}.")
+    if not os.path.exists(
+        f"output/experiments/plots/{experiment}_{variables[-1]}_bifurcation_{populations[-1].lower()}.png"
+    ):
+        for population in populations:
+            for variable in variables:
+                plot_bifurcation(data, population=population, variable=variable)
+                plt.savefig(
+                    f"output/experiments/plots/{experiment}_{variable}_bifurcation_{population.lower()}.png"
+                )
+                print(f"Saved {variable} bifurcation plot for {population}.")
 
     # plot timeseries
+    if not os.path.exists(
+        f"output/experiments/plots/{experiment}_prey_timeseries_{models[-1].lower()}.png"
+    ):
+        print("Plotting timeseries plots...")
 
-    for population in populations:
-        for model in models:
-            if population == "Apex" and model == "Super":
-                continue  # Skip plotting apex population for Super model
-            print(f"Plotting timeseries for {population.lower()} in {model} model...")
-            plot_time_series(
-                data=data, population=population, model=model, variables=variables
-            )
-            plt.savefig(
-                f"output/experiments/plots/{experiment}_{population.lower()}_timeseries_{model.lower()}.png"
-            )
+        for population in populations:
+            for model in models:
+                if population == "Apex" and model == "Super":
+                    continue  # Skip plotting apex population for Super model
+                print(
+                    f"Plotting timeseries for {population.lower()} in {model} model..."
+                )
+                plot_time_series(
+                    data=data, population=population, model=model, variables=variables
+                )
+                plt.savefig(
+                    f"output/experiments/plots/{experiment}_{population.lower()}_timeseries_{model.lower()}.png"
+                )
             print(f"Timeseries plot for {population.lower()} in {model} model saved.")
 
     print(f"Analysis for {experiment} completed.\n")
