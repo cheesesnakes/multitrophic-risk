@@ -23,7 +23,7 @@ configs = {
         "n_models": 2,
         "populations": ["Prey", "Predator", "Apex"],
         "variables": ["s_breed", "f_breed"],
-        "models": ["Apex", "Super"],
+        "models": ["Apex predator", "Superpredator"],
         "vars": create_space(),
         "models_config": [
             {

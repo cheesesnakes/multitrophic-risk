@@ -361,6 +361,10 @@ def summary(
     print("Begin analysis...")
     print("\n")
 
+    # Set plot style
+    sns.set_theme(style="whitegrid", palette="colorblind")
+    plt.rcParams.update({"font.size": 14, "figure.figsize": (10, 6)})
+
     # Check folders
 
     if not os.path.exists("output/experiments/outcomes/"):
@@ -457,6 +461,7 @@ def summary(
 
         plt.savefig("output/experiments/plots/Experiment-6_max-prey.png")
 
+        plt.close()
         return
 
     # make outcomes
@@ -482,6 +487,8 @@ def summary(
             vars=variables,
             Experiment=experiment,
         )
+
+        plt.close()
 
     # classify outcomes
     if not os.path.exists(f"output/experiments/outcomes/{experiment}_phase.csv"):
@@ -510,13 +517,16 @@ def summary(
             variables=variables,
         )
         plt.savefig(f"output/experiments/plots/{experiment}_phase_probability.png")
+        plt.close()
         print("Phase probability plot saved.")
 
     # plot attractor
     if not os.path.exists(f"output/experiments/plots/{experiment}_attractor.png"):
         print("Plotting attractor...")
-        plot_attractor(data, phase, variables=variables, grid_size=1)
+        phase = pl.read_csv(f"output/experiments/outcomes/{experiment}_phase.csv")
+        plot_attractor(data, variables=variables, grid_size=3)
         plt.savefig(f"output/experiments/plots/{experiment}_attractor.png")
+        plt.close()
         print("Attractor plot saved.")
 
     # transition analysis
@@ -557,8 +567,8 @@ def summary(
                 phase,
                 variables=variables,
             )
-
             plt.savefig(f"output/experiments/plots/{experiment}_phase_transition.png")
+            plt.close()
 
     # bifurcation plot
     if not os.path.exists(
@@ -570,6 +580,7 @@ def summary(
                 plt.savefig(
                     f"output/experiments/plots/{experiment}_{variable}_bifurcation_{population.lower()}.png"
                 )
+                plt.close()
                 print(f"Saved {variable} bifurcation plot for {population}.")
 
     # plot timeseries
@@ -591,6 +602,7 @@ def summary(
                 plt.savefig(
                     f"output/experiments/plots/{experiment}_{population.lower()}_timeseries_{model.lower()}.png"
                 )
+                plt.close()
             print(f"Timeseries plot for {population.lower()} in {model} model saved.")
 
     print(f"Analysis for {experiment} completed.\n")

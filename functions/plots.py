@@ -1,3 +1,5 @@
+from operator import le
+from random import sample
 import polars as pl
 import seaborn as sns
 import numpy as np
@@ -83,24 +85,23 @@ def set_plot_axis_labels(plot, variables):
 # attractor plot
 
 
-def plot_attractor(data, phase, grid_size=1, variables=["s_breed", "f_breed"]):
-    s_breed = (
-        phase.filter(pl.col("phase") == "Coexistence")
-        .select(variables[0])
-        .unique()
-        .sort(by=variables[0], descending=False)
-    )
+def plot_attractor(data, grid_size=1, variables=["s_breed", "f_breed"]):
+    s_breed = data.select(variables[0]).unique().sort(by=variables[0], descending=False)
     s_breed = s_breed.to_numpy().T.flatten()
 
-    # subset values
-    if grid_size > 1:
-        n = s_breed.shape[0] // grid_size
+    if len(s_breed) == 50:
+        sample_space = s_breed[30]
     else:
-        n = 1
+        s = s_breed.shape[0] // 2
+        sample_space = s_breed[s]
 
-    samples = range(0, s_breed.shape[0], n)
+    # reduce number of rep_ids
+    ids = np.array([0, 5, 10, 20, 25])
+    data = data.filter(pl.col("rep_id").is_in(ids))
 
-    sample_space = s_breed[samples]
+    # Remove first 400 steps
+
+    data = data.filter(pl.col("step") > 400)
 
     # filter data
 
@@ -116,43 +117,34 @@ def plot_attractor(data, phase, grid_size=1, variables=["s_breed", "f_breed"]):
             ]
         )
 
-    # plot
-
-    col = variables[0]
-
-    if len(variables) > 1:
-        row = variables[1]
+    # set col_wrap if unique models are more than 2
+    if data.select(pl.col("model").n_unique()).to_numpy()[0][0] > 2:
+        col_wrap = 3
     else:
-        row = None
+        col_wrap = 2
 
     plot = sns.relplot(
-        data=data,
+        data=data.select(["Predator", "Prey", "rep_id", "model", "step"]).sort(
+            ["model", "rep_id", "step"]
+        ),
         x="Predator",
         y="Prey",
-        hue="model",
-        style="model",
+        hue="rep_id",
         palette="Set1",
         height=6,
         aspect=1.3,
         alpha=0.5,
-        edgecolor="w",
-        col=col,
-        row=row,
-    )
-
-    sns.move_legend(
-        plot,
-        "upper center",
-        bbox_to_anchor=(0.5, 1),
-        ncol=2,
-        title=None,
-        frameon=False,
-        fontsize=12,
-        markerscale=2,
+        col="model",
+        col_wrap=col_wrap,
+        legend=False,
+        kind="scatter",
+        marker="o",
     )
 
     # set titles
-    plot = set_plot_titles(plot, variables)
+    plot.set_titles(col_template="Model: {col_name}")
+
+    plt.tight_layout()
 
     return plot
 
@@ -177,6 +169,13 @@ def plot_phase_probability(phase_data, variables=["s_breed", "f_breed"]):
 
     phase_data = phase_data.with_columns(pl.col("prob").cast(pl.Float64))
 
+    # Set number of columns
+
+    if phase_data.select(pl.col("model").n_unique()).to_numpy()[0][0] > 2:
+        col_wrap = 3
+    else:
+        col_wrap = 2
+
     if len(variables) > 1:
         plot = sns.relplot(
             data=phase_data,
@@ -194,7 +193,7 @@ def plot_phase_probability(phase_data, variables=["s_breed", "f_breed"]):
             sizes=(1, 50),
             size_norm=(-0.2, 0.8),
             legend=False,
-            col_wrap=3,
+            col_wrap=col_wrap,
         )
 
         plot.set_titles(
