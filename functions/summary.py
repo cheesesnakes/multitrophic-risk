@@ -193,7 +193,7 @@ def transition_summary(phase_data, variables=["s_breed", "f_breed"], model=True)
 # analysis for experiment 9
 
 
-def analyse_experiment_9():
+def summary_experiment_9():
     """
     Function to analyze experiment 9 data.
     """
@@ -345,7 +345,7 @@ def analyse_experiment_9():
 # main analysis function
 
 
-def analysis(
+def summary(
     experiment="Experiment-1",
     data_path="output/experiments/results/Experiment-1_results.csv",
     multiple=False,
@@ -483,13 +483,6 @@ def analysis(
             Experiment=experiment,
         )
 
-    # plot attractor
-    if not os.path.exists(f"output/experiments/plots/{experiment}_attractor.png"):
-        print("Plotting attractor...")
-        plot_attractor(data, variables=variables, grid_size=3)
-        plt.savefig(f"output/experiments/plots/{experiment}_attractor.png")
-        print("Attractor plot saved.")
-
     # classify outcomes
     if not os.path.exists(f"output/experiments/outcomes/{experiment}_phase.csv"):
         print("Classifying outcomes...")
@@ -518,6 +511,13 @@ def analysis(
         )
         plt.savefig(f"output/experiments/plots/{experiment}_phase_probability.png")
         print("Phase probability plot saved.")
+
+    # plot attractor
+    if not os.path.exists(f"output/experiments/plots/{experiment}_attractor.png"):
+        print("Plotting attractor...")
+        plot_attractor(data, phase, variables=variables, grid_size=1)
+        plt.savefig(f"output/experiments/plots/{experiment}_attractor.png")
+        print("Attractor plot saved.")
 
     # transition analysis
     if not os.path.exists(

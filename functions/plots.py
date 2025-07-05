@@ -83,12 +83,20 @@ def set_plot_axis_labels(plot, variables):
 # attractor plot
 
 
-def plot_attractor(data, grid_size=3, variables=["s_breed", "f_breed"]):
-    s_breed = data.select(variables[0]).unique().sort(by=variables[0], descending=False)
+def plot_attractor(data, phase, grid_size=1, variables=["s_breed", "f_breed"]):
+    s_breed = (
+        phase.filter(pl.col("phase") == "Coexistence")
+        .select(variables[0])
+        .unique()
+        .sort(by=variables[0], descending=False)
+    )
     s_breed = s_breed.to_numpy().T.flatten()
 
     # subset values
-    n = s_breed.shape[0] // grid_size
+    if grid_size > 1:
+        n = s_breed.shape[0] // grid_size
+    else:
+        n = 1
 
     samples = range(0, s_breed.shape[0], n)
 

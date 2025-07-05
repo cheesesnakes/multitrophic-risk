@@ -1,6 +1,6 @@
 # import libraries
 
-from functions.analysis_funcs import analysis, analyse_experiment_9
+from functions.summary import summary, summary_experiment_9
 from configs import configs
 
 # constants
@@ -35,7 +35,7 @@ def main():
         print(f"{e}: {config['description']}")
         print("==================================")
 
-        analysis(
+        summary(
             experiment=f"{e}",
             data_path=config["data_path"],
             multiple=not config.get("append", True),
@@ -50,7 +50,7 @@ def main():
         )
 
     # run experiment 9 analysis
-    analyse_experiment_9()
+    summary_experiment_9()
 
 
 # run the analysis for all experiments
