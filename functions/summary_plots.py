@@ -71,30 +71,31 @@ def set_plot_axis_labels(plot, variables):
 # attractor plot
 
 
-def plot_attractor(data, grid_size=1, variables=["s_breed", "f_breed"]):
+def plot_attractor(data, variables=["s_breed", "f_breed"]):
     set_style()
-
-    s_breed = data.select(variables[0]).unique().sort(by=variables[0], descending=False)
-    s_breed = s_breed.to_numpy().T.flatten()
-
-    if len(s_breed) == 50:
-        sample_space = s_breed[30]
-    else:
-        s = s_breed.shape[0] // 2
-        sample_space = s_breed[s]
 
     # reduce number of rep_ids
     ids = np.array([0, 5, 10, 20, 25])
     data = data.filter(pl.col("rep_id").is_in(ids))
 
+    s_breed = data.select(variables[0]).unique().sort(by=variables[0], descending=False)
+    s_breed = s_breed.to_numpy().T.flatten()
+
+    if variables[0] == "s_breed":
+        data = data.filter(pl.col("s_breed") == s_breed[30])
+        data = data.filter(pl.col("f_breed") == s_breed[20])
+    else:
+        s = s_breed.shape[0] // 2
+        sample_space = s_breed[s]
+
+        # filter data
+
+        for v in variables:
+            data = data.filter(pl.col(v).is_in(sample_space))
+
     # Remove first 400 steps
 
     data = data.filter(pl.col("step") > 400)
-
-    # filter data
-
-    for v in variables:
-        data = data.filter(pl.col(v).is_in(sample_space))
 
     # round s_breed and f_breed to 2 decimal places
 
@@ -108,8 +109,10 @@ def plot_attractor(data, grid_size=1, variables=["s_breed", "f_breed"]):
     # set col_wrap if unique models are more than 2
     if data.select(pl.col("model").n_unique()).to_numpy()[0][0] > 2:
         col_wrap = 3
-    else:
+    elif data.select(pl.col("model").n_unique()).to_numpy()[0][0] == 2:
         col_wrap = 2
+    else:
+        col_wrap = 1
 
     plot = sns.relplot(
         data=data.select(["Predator", "Prey", "rep_id", "model", "step"]).sort(
@@ -236,6 +239,8 @@ def plot_bifurcation(data, grid_size=3, population="Prey", variable="s_breed"):
     # filter DataFrame
 
     data = data.filter(pl.col("step") > 600)
+    data = data.filter(pl.col(population) < 10000)
+    data = data.filter(pl.col("rep_id").is_in([0, 5, 10, 20, 25]))
 
     if variable == "s_breed":
         cat = "f_breed"
@@ -356,7 +361,9 @@ def plot_bifurcation(data, grid_size=3, population="Prey", variable="s_breed"):
 
 
 def plot_time_series(
-    data, population="Prey", model="Apex", variables=["s_breed", "f_breed"], grid_size=3
+    data,
+    populations="Prey",
+    variables=["s_breed", "f_breed"],
 ):
     """
     Function to plot time series of population dynamics.
@@ -368,28 +375,28 @@ def plot_time_series(
     Returns:
         plot: The plot of the population dynamics
     """
-    # filter model
+    set_style()
 
-    data = data.filter((pl.col("model").eq(model)))
+    # filter reps
 
-    # select variables
+    ids = np.array([0, 5, 10, 20, 25])
+    data = data.filter(pl.col("rep_id").is_in(ids))
+
+    # determine sample space
 
     s_breed = data.select(variables[0]).unique().sort(by=variables[0], descending=False)
     s_breed = s_breed.to_numpy().T.flatten()
-    n = s_breed.shape[0] // grid_size
-    samples = range(0, s_breed.shape[0], n)
-    sample_space = s_breed[samples]
 
-    # sample id
+    if variables[0] == "s_breed":
+        data = data.filter(pl.col("s_breed") == s_breed[30])
+        data = data.filter(pl.col("f_breed") == s_breed[20])
+    else:
+        s = s_breed.shape[0] // 2
+        sample_space = s_breed[s]
+        # filter DataFrame
 
-    ids = np.array([0, 5, 10, 20, 25])
-
-    # filter DataFrame
-
-    for v in variables:
-        data = data.filter(pl.col(v).is_in(sample_space))
-
-    data = data.filter(pl.col("rep_id").is_in(ids))
+        for v in variables:
+            data = data.filter(pl.col(v).is_in(sample_space))
 
     # round s_breed and f_breed to 2 decimal places
 
@@ -400,128 +407,63 @@ def plot_time_series(
             ]
         )
 
-    # plot main line
-
-    if len(variables) > 1:
-        row = variables[1]
+    # set col_wrap if unique models are more than 2
+    if data.select(pl.col("model").n_unique()).to_numpy()[0][0] > 2:
+        col_wrap = 3
+    elif data.select(pl.col("model").n_unique()).to_numpy()[0][0] == 2:
+        col_wrap = 2
     else:
-        row = None
+        col_wrap = 1
+
+    # unpivot populations
+
+    data = data.unpivot(
+        on=populations,
+        variable_name="population",
+        value_name="N",
+        index=["step", "rep_id", "model"],
+    )
+
+    # Rename population column
+    mapping = {
+        "Predator": "Mesopredator",
+        "Apex": "Apex predator",
+        "Super": "Superpredator",
+        "Prey": "Prey",
+    }
+
+    data = data.with_columns(pl.col("population").replace(mapping).alias("population"))
 
     plot = sns.relplot(
         kind="line",
         data=data,
         x="step",
-        y=population,
-        hue=variables[0],
+        y="N",
+        hue="population",
         palette="Set1",
         height=6,
         aspect=1.3,
         alpha=0.25,
-        col=variables[0],
-        row=row,
-        legend=False,
+        col="model",
+        legend=True,
         units="rep_id",
         estimator=None,
-    )
-
-    # add a bold line
-
-    for ax in plot.axes.flat:
-        # filter data
-
-        for v in variables:
-            line = data.filter(pl.col(v).is_in(sample_space))
-
-        line = line.filter(pl.col("rep_id") == 0)
-
-        # plot line
-
-        sns.lineplot(
-            data=line,
-            x="step",
-            y=population,
-            color="black",
-            linewidth=1,
-            ax=ax,
-        )
-
-    # set titles
-
-    plot = set_plot_titles(plot, variables)
-
-    return plot
-
-
-# Plot transition between phases
-
-
-def plot_phase_transition(
-    transition_data, variables=["s_breed", "f_breed"], model=True
-):
-    """
-    Function to plot phase transition between phases as a function of state varible/s.
-    """
-
-    transition_data = transition_data.with_columns(
-        pl.col("phase")
-        .cast(pl.Categorical)
-        .cast(
-            pl.Enum(
-                [
-                    "Prey Only",
-                    "P - C Bistable",
-                    "Coexistence",
-                    "C - E Bistable",
-                    "Extinction",
-                    "P - E Bistable",
-                ]
-            )
-        )
-    )
-    if model:
-        # filter data
-        col = "model"
-    else:
-        col = None
-
-    # set col_wrap if unique models are more than 2
-
-    if (
-        model
-        and transition_data.select(pl.col("model").n_unique()).to_numpy()[0][0] > 2
-    ):
-        col_wrap = 3
-    else:
-        col_wrap = 2
-
-    plot = sns.relplot(
-        data=transition_data,
-        x=variables[0],
-        y=variables[1],
-        hue="phase",
-        palette="Set1",
-        height=6,
-        aspect=1,
-        alpha=0.5,
-        edgecolor="w",
-        legend=True,
-        col=col,
-        s=25,
-        marker="o",
         col_wrap=col_wrap,
     )
 
-    if model:
-        plot.set_titles(
-            col_template="Model: {col_name}",
-        )
-
-    # plt.add_legend(title="Phase")
+    # Set legend title
+    plot._legend.set_title("Population")
+    plot._legend.set_bbox_to_anchor((0.95, 0.8))
 
     # set titles
 
-    plot = set_plot_axis_labels(plot, variables)
+    plot.set_titles(
+        col_template="Model: {col_name}",
+    )
 
+    plt.tight_layout()
+
+    # legend
     return plot
 
 

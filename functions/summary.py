@@ -6,15 +6,13 @@ from functions.summary_plots import (
     plot_bifurcation,
     plot_max_prey,
     plot_phase_probability,
-    plot_phase_transition,
     plot_time_series,
 )
 from matplotlib import pyplot as plt
 import seaborn as sns
 from functions.summary_funcs import (
     classify_model_phase,
-    identify_transition,
-    transition_summary,
+    phase_summary,
     summaries,
     create_space,
 )
@@ -308,6 +306,25 @@ def summary(
             quote_style="necessary",
         )
 
+    # phase summary
+
+    if not os.path.exists(f"output/experiments/outcome/{experiment}_phase_summary.csv"):
+        print("Generating phase summary...")
+        phase = pl.read_csv(f"output/experiments/outcomes/{experiment}_phase.csv")
+
+        summary_phases = phase_summary(
+            phase,
+            variables=variables,
+            model=True,
+        )
+
+        summary_phases.write_csv(
+            f"output/experiments/outcomes/{experiment}_phase_summary.csv",
+            separator=",",
+            include_header=True,
+            quote_style="necessary",
+        )
+
     # plot phase probability
     if not os.path.exists(
         f"output/experiments/plots/{experiment}_phase_probability.png"
@@ -327,61 +344,22 @@ def summary(
     if not os.path.exists(f"output/experiments/plots/{experiment}_attractor.png"):
         print("Plotting attractor...")
         phase = pl.read_csv(f"output/experiments/outcomes/{experiment}_phase.csv")
-        plot_attractor(data, variables=variables, grid_size=3)
+        plot_attractor(data, variables=variables)
         plt.savefig(f"output/experiments/plots/{experiment}_attractor.png")
         plt.close()
         print("Attractor plot saved.")
 
-    # transition analysis
-    if not os.path.exists(
-        f"output/experiments/plots/{experiment}_phase_transition.png"
-    ) and not os.path.exists(
-        f"output/experiments/outcomes/{experiment}_phase_summary.csv"
-    ):
-        phase = pl.read_csv(f"output/experiments/outcomes/{experiment}_phase.csv")
-
-        print("Identifying transitions...")
-        phase = identify_transition(
-            phase,
-            variables=variables,
-        )
-
-        phase_summary = transition_summary(
-            phase,
-            variables=variables,
-        )
-
-        phase_summary.write_csv(
-            f"output/experiments/outcomes/{experiment}_phase_summary.csv",
-            separator=",",
-            include_header=True,
-            quote_style="necessary",
-        )
-
-        print("Transition summary:")
-
-        print(phase_summary)
-        print("\n")
-
-        phase = pl.read_csv(f"output/experiments/outcomes/{experiment}_phase.csv")
-
-        if len(variables) > 1:
-            plot_phase_transition(
-                phase,
-                variables=variables,
-            )
-            plt.savefig(f"output/experiments/plots/{experiment}_phase_transition.png")
-            plt.close()
-
     # bifurcation plot
     if not os.path.exists(
-        f"output/experiments/plots/{experiment}_{variables[-1]}_bifurcation_{populations[-1].lower()}.png"
+        f"output/experiments/plots/{experiment}_bifurcation_{variables[-1]}_{populations[-1].lower()}.png"
     ):
         for population in populations:
+            if population == "Super" or population == "Apex":
+                continue
             for variable in variables:
                 plot_bifurcation(data, population=population, variable=variable)
                 plt.savefig(
-                    f"output/experiments/plots/{experiment}_{variable}_bifurcation_{population.lower()}.png"
+                    f"output/experiments/plots/{experiment}_bifurcation_{variable}_{population.lower()}.png"
                 )
                 plt.close()
                 print(f"Saved {variable} bifurcation plot for {population}.")
@@ -392,20 +370,9 @@ def summary(
     ):
         print("Plotting timeseries plots...")
 
-        for population in populations:
-            for model in models:
-                if population == "Apex" and model == "Super":
-                    continue  # Skip plotting apex population for Super model
-                print(
-                    f"Plotting timeseries for {population.lower()} in {model} model..."
-                )
-                plot_time_series(
-                    data=data, population=population, model=model, variables=variables
-                )
-                plt.savefig(
-                    f"output/experiments/plots/{experiment}_{population.lower()}_timeseries_{model.lower()}.png"
-                )
-                plt.close()
-            print(f"Timeseries plot for {population.lower()} in {model} model saved.")
+        plot_time_series(data=data, populations=populations, variables=variables)
+
+        plt.savefig(f"output/experiments/plots/{experiment}_timeseries.png")
+        plt.close()
 
     print(f"Analysis for {experiment} completed.\n")

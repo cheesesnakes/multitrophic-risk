@@ -39,7 +39,7 @@ configs = {
         "status": "complete",
         "append": True,
         "n_models": 2,
-        "populations": ["Prey", "Predator", "Apex"],
+        "populations": ["Prey", "Predator", "Apex", "Super"],
         "variables": ["s_breed", "f_breed"],
         "models": ["Apex predator", "Superpredator"],
         "vars": create_space(),
@@ -61,7 +61,7 @@ configs = {
         "status": "complete",
         "append": False,
         "n_models": 6,
-        "populations": ["Prey", "Predator"],
+        "populations": ["Prey", "Predator", "Super"],
         "variables": ["s_breed", "f_breed"],
         "models": [
             f"{leth} -> {t}"
