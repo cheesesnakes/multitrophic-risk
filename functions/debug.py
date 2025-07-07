@@ -2,6 +2,8 @@ from functions.runner import model_run
 from functions.runner import plot_pop, plot_space
 import pandas as pd
 import os
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 scenarios = {
     "debug-prey-only": {"predator": 0, "apex": 0, "prey": 500, "super": 0},
@@ -43,6 +45,10 @@ def run_debug(kwargs):
 
 
 def plot_debug(kwargs):
+    sns.set_theme(style="whitegrid", font_scale=1.5)
+    plt.rcParams.update({"font.size": 14, "figure.figsize": (10, 6)})
+    sns.color_palette()
+
     for model, params in scenarios.items():
         kwargs["model"] = model
         kwargs.update(params)

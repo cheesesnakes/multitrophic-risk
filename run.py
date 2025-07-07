@@ -45,14 +45,6 @@ def main():
                 plot_example(kwargs, model=model_name)
 
         return
-    elif args[0] == "Strategies":
-        print("Running model strategies examples script...")
-
-        from functions.strategies import run_strategies, plot_strategy
-
-        run_strategies(kwargs)
-        plot_strategy(kwargs)
-        return
     elif args[0] == "Experiments":
         print("Running model experiments script...")
         from functions.experiment import run_experiment
@@ -78,7 +70,7 @@ def main():
                     run_experiment(configs[experiment_name], kwargs)
     else:
         print(
-            f"Unknown argument '{args[0]}'. Available options are: Debug, Examples, Strategies, and Experiments"
+            f"Unknown argument '{args[0]}'. Available options are: Debug, Examples, and Experiments"
         )
         return
 

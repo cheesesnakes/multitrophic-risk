@@ -14,6 +14,24 @@ def create_space():
 # models configs
 
 configs = {
+    "Experiment-0": {
+        "name": "Experiment-0",
+        "description": "Baseline model with mesopredator and prey",
+        "data_path": "output/experiments/results/Experiment-0_results.csv",
+        "status": "complete",
+        "append": True,
+        "n_models": 1,
+        "populations": ["Prey", "Predator"],
+        "variables": ["s_breed", "f_breed"],
+        "models": ["Baseline"],
+        "vars": create_space(),
+        "models_config": [
+            {
+                "description": "lv",
+                "params": {"model": "lv", "apex": 0, "super": 0},
+            }
+        ],
+    },
     "Experiment-1": {
         "name": "Experiment-1",
         "description": "Replacing the apex predator with super predator",
@@ -62,36 +80,6 @@ configs = {
             }
             for l in [0, 1]  # noqa: E741
             for t in ["1", "2", "Both"]
-        ],
-    },
-    "Experiment-3": {
-        "name": "Experiment-3",
-        "description": "Determining the effects of predator and prey information",
-        "data_path": "output/experiments/results/Experiment-3_results.csv",
-        "status": "running",
-        "append": False,
-        "n_models": 4,
-        "populations": ["Prey", "Predator"],
-        "variables": ["s_breed", "f_breed"],
-        "models": [
-            "Both Informed",
-            "Prey Informed",
-            "Predator Informed",
-            "Both Naive",
-        ],
-        "vars": create_space(),
-        "models_config": [
-            {
-                "params": {
-                    "prey_info": p,
-                    "predator_info": d,
-                    "model": "lv",
-                    "apex": 0,
-                    "super": 0,
-                }
-            }
-            for p in [True, False]
-            for d in [True, False]
         ],
     },
     "Experiment-4a": {

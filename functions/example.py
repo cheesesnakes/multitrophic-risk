@@ -2,6 +2,8 @@ from functions.runner import model_run
 from functions.runner import plot_pop, plot_density, plot_space, plot_space_pop
 import pandas as pd
 import os
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 
 model_params = {
@@ -41,6 +43,10 @@ def run_example(kwargs, model="lv"):
 
 
 def plot_example(kwargs, model="lv"):
+    sns.set_theme(style="whitegrid", font_scale=1.5)
+    plt.rcParams.update({"font.size": 14, "figure.figsize": (10, 6)})
+    sns.color_palette()
+
     kwargs.update(model_params[model])
 
     # load data

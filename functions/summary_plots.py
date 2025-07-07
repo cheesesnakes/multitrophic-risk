@@ -1,32 +1,18 @@
-from operator import le
-from random import sample
 import polars as pl
 import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
+
 # set style
 
-sns.set_theme(style="whitegrid", font_scale=1.5)
-sns.color_palette()
 
-# example data
-
-
-def example_data():
-    data = pl.DataFrame(
-        {
-            "Predator": [1, 2, 3, 4, 5],
-            "Prey": [1, 2, 3, 4, 5],
-            "s_breed": np.linspace(0, 1, 5),
-            "f_breed": np.linspace(0, 1, 5),
-            "model": ["Apex"] * 5,
-        }
-    )
-
-    return data
+def set_style():
+    sns.set_theme(style="whitegrid", font_scale=1.5)
+    plt.rcParams.update({"font.size": 14, "figure.figsize": (10, 6)})
+    sns.color_palette()
 
 
-data = example_data()
+# Helper functions for setting plot titles and axis labels
 
 
 def set_plot_titles(plot, variables):
@@ -86,6 +72,8 @@ def set_plot_axis_labels(plot, variables):
 
 
 def plot_attractor(data, grid_size=1, variables=["s_breed", "f_breed"]):
+    set_style()
+
     s_breed = data.select(variables[0]).unique().sort(by=variables[0], descending=False)
     s_breed = s_breed.to_numpy().T.flatten()
 
