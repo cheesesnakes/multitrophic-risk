@@ -96,13 +96,14 @@ def phase_summary(phase_data, variables=["s_breed", "f_breed"], model=True):
     agg_exprs = [pl.sum("len").alias("count")]
 
     # Add min, max, mean, std for each variable
-    for var in variables:
-        agg_exprs.extend(
-            [
-                pl.min(var).alias(f"{var}_min"),
-                pl.max(var).alias(f"{var}_max"),
-            ]
-        )
+    if variables is not None:
+        for var in variables:
+            agg_exprs.extend(
+                [
+                    pl.min(var).alias(f"{var}_min"),
+                    pl.max(var).alias(f"{var}_max"),
+                ]
+            )
 
     # Add hard-coded Coexistence outcomes
     agg_exprs.extend(

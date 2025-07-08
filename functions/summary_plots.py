@@ -384,28 +384,31 @@ def plot_time_series(
 
     # determine sample space
 
-    s_breed = data.select(variables[0]).unique().sort(by=variables[0], descending=False)
-    s_breed = s_breed.to_numpy().T.flatten()
+    if variables is not None:
+        s_breed = (
+            data.select(variables[0]).unique().sort(by=variables[0], descending=False)
+        )
+        s_breed = s_breed.to_numpy().T.flatten()
 
-    if variables[0] == "s_breed":
-        data = data.filter(pl.col("s_breed") == s_breed[30])
-        data = data.filter(pl.col("f_breed") == s_breed[20])
-    else:
-        s = s_breed.shape[0] // 2
-        sample_space = s_breed[s]
-        # filter DataFrame
+        if variables[0] == "s_breed":
+            data = data.filter(pl.col("s_breed") == s_breed[30])
+            data = data.filter(pl.col("f_breed") == s_breed[20])
+        else:
+            s = s_breed.shape[0] // 2
+            sample_space = s_breed[s]
+            # filter DataFrame
+
+            for v in variables:
+                data = data.filter(pl.col(v).is_in(sample_space))
+
+        # round s_breed and f_breed to 2 decimal places
 
         for v in variables:
-            data = data.filter(pl.col(v).is_in(sample_space))
-
-    # round s_breed and f_breed to 2 decimal places
-
-    for v in variables:
-        data = data.with_columns(
-            [
-                pl.col(v).round(2),
-            ]
-        )
+            data = data.with_columns(
+                [
+                    pl.col(v).round(2),
+                ]
+            )
 
     # set col_wrap if unique models are more than 2
     if data.select(pl.col("model").n_unique()).to_numpy()[0][0] > 2:

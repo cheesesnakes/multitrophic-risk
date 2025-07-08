@@ -57,8 +57,157 @@ def summary_experiment_6(data):
 
 def summary_experiment_9(data):
     """
-    Function to analyze experiment 9 data.
+    Varying initial density of agents
     """
+
+    initial_densities = {
+        "Prey": [100, 500, 1000, 2000, 5000],
+        "Predator": [100, 500, 1000, 2000, 5000],
+        "Apex": [0, 100, 500, 1000, 2000],
+        "Super": [0, 100, 500, 1000, 2000],
+    }
+
+    # Combinations
+
+    N0 = (
+        np.array(
+            np.meshgrid(
+                initial_densities["Prey"],
+                initial_densities["Predator"],
+                initial_densities["Apex"],
+                initial_densities["Super"],
+            )
+        )
+        .reshape(4, -1)
+        .T
+    )
+
+    # Fixed initial densities for plotting
+
+    N0_fixed = {"Prey": 2000, "Predator": 500, "Apex": 500, "Super": 100}
+
+    # Add N0 as a column to the data
+    data = data.with_columns(
+        pl.lit(N0[:, 0]).alias("N0_prey"),
+        pl.lit(N0[:, 1]).alias("N0_predator"),
+        pl.lit(N0[:, 2]).alias("N0_apex"),
+        pl.lit(N0[:, 3]).alias("N0_super"),
+    )
+
+    # Make dataframes to hold phase and summary
+
+    phase_full = pl.DataFrame()
+    summary_phase_full = pl.DataFrame()
+
+    # Plot
+
+    for agent in initial_densities.keys():
+        # Use fixed initial densities of other agents
+        plot_data = (
+            data.filter(
+                (
+                    pl.col(f"N0_{a.lower()}") == N0_fixed[a]
+                    for a in initial_densities.keys()
+                    if a != agent
+                )
+            )
+            .drop([f"N0_{a.lower()}" for a in initial_densities.keys() if a != agent])
+            .with_columns(
+                (r"$N_0$" + f"({agent})={pl.col(f'N0_{agent.lower()}')})").alias(
+                    "model"
+                )
+            )
+            .rename(
+                {
+                    f"N0_{agent.lower()}": "N0",
+                }
+            )
+        )
+
+        if plot_data.is_empty():
+            print(f"No data available for {agent} with fixed initial densities.")
+            continue
+
+        if not os.path.exists(
+            f"output/experiments/plots/Experiment-9_timeseries_{agent.lower()}.png"
+        ):
+            # Plot timeseries
+            plot_time_series(
+                data=plot_data,
+                populations=["Prey", "Predator", "Apex", "Super"],
+                variables=None,
+            )
+
+            plt.savefig(
+                f"output/experiments/plots/Experiment-9_timeseries_{agent.lower()}.png"
+            )
+            plt.close()
+
+        # Classify model phase
+
+        if not os.path.exists("output/experiments/outcomes/Experiment-9_phase.csv"):
+            phase = classify_model_phase(
+                plot_data,
+                variables=["N0"],
+                model=True,
+                reps=10,
+            )
+
+            phase_full = pl.concat([phase_full, phase])
+
+        # Phase summary
+
+        if not os.path.exists(
+            "output/experiments/outcomes/Experiment-9_phase_summary.csv"
+        ):
+            summary_phases = phase_summary(
+                phase,
+                variables=None,
+                model=True,
+            )
+
+            summary_phase_full = pl.concat([summary_phase_full, summary_phases])
+
+    # Save phase data
+
+    if not phase_full.is_empty():
+        phase_full.write_csv(
+            "output/experiments/outcomes/Experiment-9_phase.csv",
+            separator=",",
+            include_header=True,
+            quote_style="necessary",
+        )
+
+    # Plot phase probability
+
+    if not os.path.exists(
+        "output/experiments/plots/Experiment-9_phase_probability.png"
+    ):
+        if phase_full.is_empty():
+            print("No phase data available for plotting.")
+            return
+
+        phase_full = pl.read_csv("output/experiments/outcomes/Experiment-9_phase.csv")
+
+        phase_full = phase_full.with_columns(
+            (pl.col("model").str.replace_all(r"=\d+", "")).alias("model")
+        )
+
+        plot_phase_probability(phase_full, variables=["N0"])
+        plt.savefig("output/experiments/plots/Experiment-9_phase_probability.png")
+        plt.close()
+
+    # Save phase summary
+
+    if not summary_phase_full.is_empty():
+        summary_phase_full.write_csv(
+            "output/experiments/outcomes/Experiment-9_phase_summary.csv",
+            separator=",",
+            include_header=True,
+            quote_style="necessary",
+        )
+
+    print("Experiment 9 analysis completed.")
 
     return 0
 
@@ -128,13 +277,13 @@ def summary(
 
     if experiment == "Experiment-6":
         summary_experiment_6(data)
-        return
+        return 0
 
     # summary for experiment 9
 
     if experiment == "Experiment-9":
         summary_experiment_9(data)
-        return
+        return 0
 
     # classify outcomes
     if not os.path.exists(f"output/experiments/outcomes/{experiment}_phase.csv"):
