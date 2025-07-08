@@ -229,6 +229,11 @@ def create_results_df(params):
 def run_experiment(cfg, kwargs):
     print(f"\n{cfg.get('description', '')}")
 
+    if cfg["reps"] is not None:
+        kwargs["reps"] = cfg["reps"]
+    if cfg["steps"] is not None:
+        kwargs["steps"] = cfg["steps"]
+
     for i, model_cfg in enumerate(cfg["models_config"]):
         # update parameters
 

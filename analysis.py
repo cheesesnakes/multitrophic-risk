@@ -1,7 +1,8 @@
 # import libraries
 
-from functions.summary import summary, summary_experiment_9
+from functions.summary import summary
 from configs import configs
+import sys
 
 # constants
 
@@ -17,7 +18,7 @@ def main():
     Main function to run the analysis for all experiments.
     """
 
-    for e in configs.keys():
+    def run_summary(e):
         # get the experiment config
         config = configs[e]
 
@@ -25,12 +26,7 @@ def main():
 
         if config["status"] != "complete":
             print(f"Experiment {e} is not complete, skipping...")
-            continue
-
-        # skip experiment 9
-        if e == "Experiment-9":
-            print(f"Skipping experiment {e}...")
-            continue
+            return
 
         print(f"{e}: {config['description']}")
         print("==================================")
@@ -49,8 +45,23 @@ def main():
             n_params=config.get("n_params", None),
         )
 
-    # run experiment 9 analysis
-    summary_experiment_9()
+    args = sys.argv[1:]
+
+    if not args:
+        print("Running analysis for all experiments...")
+
+        for e in configs.keys():
+            run_summary(e)
+            continue
+    else:
+        e = args[0]
+        print(f"Running analysis for {e}...")
+
+        if e not in configs.keys():
+            print(f"Experiment {e} not found in configs.")
+            return
+
+        run_summary(e)
 
 
 # run the analysis for all experiments

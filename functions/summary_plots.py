@@ -471,24 +471,24 @@ def plot_time_series(
 
 
 def plot_max_prey(data):
-    data = data.filter(pl.col("step") > 600)
+    data = data.filter(pl.col("step") > 400)
 
     plot = sns.relplot(
         data,
         x="L2",
         y="Prey",
         hue="f_max",
-        alpha=0.5,
-        edgecolor="w",
         legend=True,
-        s=50,
+        kind="line",
+        linewidth=5,
+        linestyle="-",
+        markers="o",
         height=6,
         aspect=1,
     )
 
     plot.set_axis_labels(x_var=r"$L^{2}$")
 
-    plt.legend(
-        title=r"$K$",
-    )
+    plot._legend.set_title("S")
+
     return plot

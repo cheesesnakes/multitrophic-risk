@@ -162,12 +162,12 @@ configs = {
         "data_path": "output/experiments/results/Experiment-6_results.csv",
         "status": "complete",
         "n_models": 4,
-        "n_params": 8,
+        "n_params": 4,
         "populations": ["Prey"],
         "variables": ["f_max"],
         "models": [r"$L^{2}$ = 10", r"$L^{2}$ = 20", r"$L^{2}$ = 50", r"$L^{2}$ = 100"],
-        "reps": 25,
-        "steps": 1000,
+        "reps": 5,
+        "steps": 500,
         "vars": None,
         "append": True,
         "models_config": [
@@ -185,7 +185,7 @@ configs = {
                 }
             }
             for l in [10, 20, 50, 100]  # noqa: E741
-            for f in [0, 1, 2, 5, 10, 20, 25, 50]
+            for f in [1, 2, 5, 10]
         ],
     },
     "Experiment-7": {
@@ -239,14 +239,16 @@ configs = {
     },
     "Experiment-9": {
         "name": "Experiment-9",
-        "description": "Varying lethality of apex predator",
-        "data_path": "output/experiments/results/Experiment-8_results.csv",
+        "description": "Effect of starting density on model dynamics",
+        "data_path": "output/experiments/results/Experiment-9_results.csv",
         "status": "complete",
+        "reps": 10,
+        "steps": 1000,
         "n_models": 1,
-        "n_params": 20,
-        "populations": ["Prey", "Predator", "Apex"],
-        "variables": ["a_lethality"],
-        "models": ["Apex"],
+        "n_params": None,
+        "populations": ["Prey", "Predator", "Apex", "Super"],
+        "variables": [],
+        "models": None,
         "vars": None,
         "append": True,
         "models_config": [
