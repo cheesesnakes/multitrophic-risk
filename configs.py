@@ -1,4 +1,3 @@
-from logging import config
 import numpy as np
 
 depth = 50
@@ -261,10 +260,10 @@ configs_b = {
             }
         ],
     }
-    for i, (lethality, l, target, t) in enumerate(
+    for i, (lethality, l, target, t) in enumerate(  # noqa: E741
         (
             (lethality, l, target, t)
-            for lethality, l in {"Non-lethal": 0, "Lethal": 1}.items()
+            for lethality, l in {"Non-lethal": 0, "Lethal": 1}.items()  # noqa: E741
             for target, t in {"Prey": "1", "Predator": "2", "Both": "Both"}.items()
         ),
         start=1,
