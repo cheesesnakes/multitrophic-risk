@@ -45,7 +45,7 @@ def main():
                 plot_example(kwargs, model=model_name)
 
         return
-    elif args[0] == "Experiments":
+    elif args[0] in ["Experiment", "Scenario", "Test"]:
         print("Running model experiments script...")
         from functions.experiment import run_experiment
 
@@ -58,7 +58,7 @@ def main():
                 run_experiment(cfg, kwargs)
         else:
             for m in range(1, len(args)):
-                experiment_name = "Experiment-" + str(args[m])
+                experiment_name = args[0] + "-" + str(args[m])
                 if experiment_name not in configs.keys():
                     print(
                         f"No config found with name '{experiment_name}'. Available names are:"
@@ -70,7 +70,7 @@ def main():
                     run_experiment(configs[experiment_name], kwargs)
     else:
         print(
-            f"Unknown argument '{args[0]}'. Available options are: Debug, Examples, and Experiments"
+            f"Unknown argument '{args[0]}'. Available options are: Debug, Examples, and Experiment, Test or Scenario."
         )
         return
 

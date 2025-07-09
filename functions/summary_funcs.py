@@ -167,38 +167,41 @@ def load_data(data_path, experiment, multiple=False, n_models=1):
 # verify data
 
 
-def verify_data(data, n_params, parameter_depth, models, reps, steps, n_models=1):
+def verify_data(
+    data, n_params, parameter_depth, models, reps, steps, n_models=1, variables=None
+):
     print("Calculating number of runs...")
 
     if n_params is None:
-        # Experiment 9
+        if len(variables) == 0:
+            # Experiment 9
 
-        initial_densities = {
-            "Prey": [100, 500, 1000, 2000, 5000],
-            "Predator": [100, 500, 1000, 2000, 5000],
-            "Apex": [0, 100, 500, 1000, 2000],
-            "Super": [0, 100, 500, 1000, 2000],
-        }
+            initial_densities = {
+                "Prey": [100, 500, 1000, 2000, 5000],
+                "Predator": [100, 500, 1000, 2000, 5000],
+                "Apex": [0, 100, 500, 1000, 2000],
+                "Super": [0, 100, 500, 1000, 2000],
+            }
 
-        # Combinations
+            # Combinations
 
-        param_space = (
-            np.array(
-                np.meshgrid(
-                    initial_densities["Prey"],
-                    initial_densities["Predator"],
-                    initial_densities["Apex"],
-                    initial_densities["Super"],
+            param_space = (
+                np.array(
+                    np.meshgrid(
+                        initial_densities["Prey"],
+                        initial_densities["Predator"],
+                        initial_densities["Apex"],
+                        initial_densities["Super"],
+                    )
                 )
+                .reshape(4, -1)
+                .T
             )
-            .reshape(4, -1)
-            .T
-        )
 
-    else:
-        param_space = create_space(parameter_depth)
+        else:
+            param_space = create_space(parameter_depth)
 
-    n_params = param_space.shape[0]
+        n_params = param_space.shape[0]
 
     runs = reps * steps * n_params * n_models
 

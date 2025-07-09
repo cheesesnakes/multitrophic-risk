@@ -164,6 +164,8 @@ def plot_phase_probability(phase_data, variables=["s_breed", "f_breed"]):
 
     if phase_data.select(pl.col("model").n_unique()).to_numpy()[0][0] > 2:
         col_wrap = 3
+    elif phase_data.select(pl.col("model").n_unique()).to_numpy()[0][0] == 1:
+        col_wrap = 1
     else:
         col_wrap = 2
 
@@ -188,17 +190,22 @@ def plot_phase_probability(phase_data, variables=["s_breed", "f_breed"]):
         )
 
         plot.set_titles(
-            col_template="Phase: {col_name}",
+            col_template="Model: {col_name}",
         )
 
     else:
+        # Check if model column exists
+        if "model" in phase_data.columns:
+            cols = "model"
+        else:
+            cols = None
         plot = sns.relplot(
             data=phase_data,
             x=variables[0],
             y="prob",
             hue="phase",
             palette="Set1",
-            col="model",
+            col=cols,
             hue_norm=(-1, 1),
             height=6,
             aspect=1.3,

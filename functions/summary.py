@@ -20,11 +20,11 @@ from functions.summary_funcs import (
 )
 
 
-# Summary for experiment 6
+# Summary for test 4
 
 
-def summary_experiment_6(data):
-    if os.path.exists("output/experiments/plots/Experiment-6_max-prey.png"):
+def summary_test_4(data):
+    if os.path.exists("output/experiments/plots/Test-4_max-prey.png"):
         print("Max prey plot already exists, skipping...")
         return
     # L2 as a variable based on model
@@ -45,17 +45,17 @@ def summary_experiment_6(data):
 
     plot_max_prey(data)
 
-    plt.savefig("output/experiments/plots/Experiment-6_max-prey.png")
+    plt.savefig("output/experiments/plots/Test-4_max-prey.png")
 
     plt.close()
 
     return 0
 
 
-# analysis for experiment 9
+# analysis for test 7
 
 
-def summary_experiment_9(data, reps=10, steps=1000):
+def summary_test_7(data, reps=10, steps=1000):
     """
     Varying initial density of agents
     """
@@ -132,7 +132,7 @@ def summary_experiment_9(data, reps=10, steps=1000):
             continue
 
         if not os.path.exists(
-            f"output/experiments/plots/Experiment-9_timeseries_{agent.lower()}.png"
+            f"output/experiments/plots/Test-7_timeseries_{agent.lower()}.png"
         ):
             # Plot timeseries
             plot_time_series(
@@ -142,13 +142,13 @@ def summary_experiment_9(data, reps=10, steps=1000):
             )
 
             plt.savefig(
-                f"output/experiments/plots/Experiment-9_timeseries_{agent.lower()}.png"
+                f"output/experiments/plots/Test-7_timeseries_{agent.lower()}.png"
             )
             plt.close()
 
         # Classify model phase
 
-        if not os.path.exists("output/experiments/outcomes/Experiment-9_phase.csv"):
+        if not os.path.exists("output/experiments/outcomes/Test-7_phase.csv"):
             phase = classify_model_phase(
                 plot_data,
                 variables=["N0"],
@@ -160,9 +160,7 @@ def summary_experiment_9(data, reps=10, steps=1000):
 
         # Phase summary
 
-        if not os.path.exists(
-            "output/experiments/outcomes/Experiment-9_phase_summary.csv"
-        ):
+        if not os.path.exists("output/experiments/outcomes/Test-7_phase_summary.csv"):
             summary_phases = phase_summary(
                 phase,
                 variables=None,
@@ -175,7 +173,7 @@ def summary_experiment_9(data, reps=10, steps=1000):
 
     if not phase_full.is_empty():
         phase_full.write_csv(
-            "output/experiments/outcomes/Experiment-9_phase.csv",
+            "output/experiments/outcomes/Test-7_phase.csv",
             separator=",",
             include_header=True,
             quote_style="necessary",
@@ -183,28 +181,26 @@ def summary_experiment_9(data, reps=10, steps=1000):
 
     # Plot phase probability
 
-    if not os.path.exists(
-        "output/experiments/plots/Experiment-9_phase_probability.png"
-    ):
+    if not os.path.exists("output/experiments/plots/Test-7_phase_probability.png"):
         if phase_full.is_empty():
             print("No phase data available for plotting.")
             return
 
-        phase_full = pl.read_csv("output/experiments/outcomes/Experiment-9_phase.csv")
+        phase_full = pl.read_csv("output/experiments/outcomes/Test-7_phase.csv")
 
         phase_full = phase_full.with_columns(
             (pl.col("model").str.replace_all(r"=\d+", "")).alias("model")
         )
 
         plot_phase_probability(phase_full, variables=["N0"])
-        plt.savefig("output/experiments/plots/Experiment-9_phase_probability.png")
+        plt.savefig("output/experiments/plots/Test-7_phase_probability.png")
         plt.close()
 
     # Save phase summary
 
     if not summary_phase_full.is_empty():
         summary_phase_full.write_csv(
-            "output/experiments/outcomes/Experiment-9_phase_summary.csv",
+            "output/experiments/outcomes/Test-7_phase_summary.csv",
             separator=",",
             include_header=True,
             quote_style="necessary",
@@ -266,6 +262,7 @@ def summary(
         reps=reps,
         steps=steps,
         n_models=n_models,
+        variables=variables,
     )
 
     # Set order for models in experiment 2
@@ -278,14 +275,14 @@ def summary(
 
     # plot for experiment 6
 
-    if experiment == "Experiment-6":
-        summary_experiment_6(data)
+    if experiment == "Test-4":
+        summary_test_4(data)
         return 0
 
     # summary for experiment 9
 
-    if experiment == "Experiment-9":
-        summary_experiment_9(data)
+    if experiment == "Test-7":
+        summary_test_7(data)
         return 0
 
     # classify outcomes

@@ -1,3 +1,4 @@
+from logging import config
 import numpy as np
 
 depth = 50
@@ -14,10 +15,10 @@ def create_space():
 # models configs
 
 configs = {
-    "Experiment-0": {
-        "name": "Experiment-0",
+    "Scenario-0": {
+        "name": "Scenario-0",
         "description": "Baseline model with mesopredator and prey",
-        "data_path": "output/experiments/results/Experiment-0_results.csv",
+        "data_path": "output/experiments/results/scenario-0_results.csv",
         "status": "complete",
         "append": True,
         "n_models": 1,
@@ -32,60 +33,28 @@ configs = {
             }
         ],
     },
-    "Experiment-1": {
-        "name": "Experiment-1",
-        "description": "Replacing the apex predator with super predator",
-        "data_path": "output/experiments/results/Experiment-1_results.csv",
+    "Scenario-1": {
+        "name": "Scenario-1",
+        "description": "Apex predator targets mesopredator",
+        "data_path": "output/experiments/results/scenario-1_results.csv",
         "status": "complete",
         "append": True,
-        "n_models": 2,
-        "populations": ["Prey", "Predator", "Apex", "Super"],
+        "n_models": 1,
+        "populations": ["Prey", "Predator", "Apex"],
         "variables": ["s_breed", "f_breed"],
-        "models": ["Apex predator", "Superpredator"],
+        "models": ["Apex predator"],
         "vars": create_space(),
         "models_config": [
             {
                 "description": "apex",
                 "params": {"model": "apex", "apex": 500, "super": 0},
             },
-            {
-                "description": "super",
-                "params": {"model": "super", "apex": 0, "super": 100},
-            },
         ],
     },
-    "Experiment-2": {
-        "name": "Experiment-2",
-        "description": "Varying the target and lethality of superpredators",
-        "data_path": "output/experiments/results/Experiment-2_results.csv",
-        "status": "complete",
-        "append": False,
-        "n_models": 6,
-        "populations": ["Prey", "Predator", "Super"],
-        "variables": ["s_breed", "f_breed"],
-        "models": [
-            f"{leth} -> {t}"
-            for leth in ["Non-lethal", "Lethal"]
-            for t in ["Prey", "Predator", "Both"]
-        ],
-        "vars": create_space(),
-        "models_config": [
-            {
-                "params": {
-                    "model": "super",
-                    "super": 100,
-                    "super_target": t,
-                    "super_lethality": l,
-                }
-            }
-            for l in [0, 1]  # noqa: E741
-            for t in ["1", "2", "Both"]
-        ],
-    },
-    "Experiment-4a": {
-        "name": "Experiment-4a",
+    "Test-1": {
+        "name": "Test-1",
         "description": "Effect of handling limit on mesopredator",
-        "data_path": "output/experiments/results/Experiment-4_lv_results.csv",
+        "data_path": "output/experiments/results/test-1_results.csv",
         "status": "complete",
         "n_models": 1,
         "populations": ["Prey", "Predator"],
@@ -107,10 +76,10 @@ configs = {
         ],
         "model_prefix": "lv",
     },
-    "Experiment-4b": {
-        "name": "Experiment-4b",
+    "Test-2": {
+        "name": "Test-2",
         "description": "Effect of handling limit on apex predator",
-        "data_path": "output/experiments/results/Experiment-4_apex_results.csv",
+        "data_path": "output/experiments/results/test-2_results.csv",
         "status": "complete",
         "n_models": 1,
         "populations": ["Prey", "Predator", "Apex"],
@@ -132,10 +101,10 @@ configs = {
         ],
         "model_prefix": "apex",
     },
-    "Experiment-5": {
-        "name": "Experiment-5",
+    "Test-3": {
+        "name": "Test-3",
         "description": "Varying birth rates of apex predator",
-        "data_path": "output/experiments/results/Experiment-5_results.csv",
+        "data_path": "output/experiments/results/test-3_results.csv",
         "status": "complete",
         "n_models": 1,
         "n_params": 50,
@@ -156,10 +125,10 @@ configs = {
             }
         ],
     },
-    "Experiment-6": {
-        "name": "Experiment-6",
+    "Test-4": {
+        "name": "Test-4",
         "description": "Varying lattice size and local saturation of prey for LV model",
-        "data_path": "output/experiments/results/Experiment-6_results.csv",
+        "data_path": "output/experiments/results/test-4_results.csv",
         "status": "complete",
         "n_models": 4,
         "n_params": 4,
@@ -188,10 +157,10 @@ configs = {
             for f in [1, 2, 5, 10]
         ],
     },
-    "Experiment-7": {
-        "name": "Experiment-7",
+    "Test-5": {
+        "name": "Test-5",
         "description": "Varying lethality of mesopredator",
-        "data_path": "output/experiments/results/Experiment-7_results.csv",
+        "data_path": "output/experiments/results/test-5_results.csv",
         "status": "complete",
         "n_models": 1,
         "n_params": 50,
@@ -212,10 +181,10 @@ configs = {
             }
         ],
     },
-    "Experiment-8": {
-        "name": "Experiment-8",
+    "Test-6": {
+        "name": "Test-6",
         "description": "Apex predator lethality",
-        "data_path": "output/experiments/results/Experiment-8_results.csv",
+        "data_path": "output/experiments/results/test-6_results.csv",
         "status": "complete",
         "n_models": 1,
         "n_params": 20,
@@ -237,10 +206,10 @@ configs = {
             }
         ],
     },
-    "Experiment-9": {
-        "name": "Experiment-9",
+    "Test-7": {
+        "name": "Test-7",
         "description": "Effect of starting density on model dynamics",
-        "data_path": "output/experiments/results/Experiment-9_results.csv",
+        "data_path": "output/experiments/results/test-7_results.csv",
         "status": "complete",
         "reps": 10,
         "steps": 1000,
@@ -268,3 +237,38 @@ configs = {
         ],
     },
 }
+
+configs_b = {
+    f"Scenario-{i + 1}": {
+        "name": f"Scenario-{i + 1}",
+        "description": "Varying the target and lethality of superpredators",
+        "data_path": f"output/experiments/results/scenario-{i + 1}_results.csv",
+        "status": "complete",
+        "append": True,
+        "n_models": 1,
+        "populations": ["Prey", "Predator", "Super"],
+        "variables": ["s_breed", "f_breed"],
+        "models": [f"{lethality} -> {target}"],
+        "vars": create_space(),
+        "models_config": [
+            {
+                "params": {
+                    "model": "super",
+                    "super": 100,
+                    "super_target": t,
+                    "super_lethality": l,
+                }
+            }
+        ],
+    }
+    for i, (lethality, l, target, t) in enumerate(
+        (
+            (lethality, l, target, t)
+            for lethality, l in {"Non-lethal": 0, "Lethal": 1}.items()
+            for target, t in {"Prey": "1", "Predator": "2", "Both": "Both"}.items()
+        ),
+        start=1,
+    )
+}
+
+configs.update(configs_b)
