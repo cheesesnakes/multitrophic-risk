@@ -171,19 +171,34 @@ def verify_data(data, n_params, parameter_depth, models, reps, steps, n_models=1
     print("Calculating number of runs...")
 
     if n_params is None:
-        if vars is None:
-            prey = np.array([100, 500, 1000, 2000, 5000])
-            predator = np.array([100, 500, 1000, 2000, 5000])
-            apex = np.array([0, 100, 500, 1000, 2000])
-            super = np.array([0, 100, 500, 1000, 2000])
+        # Experiment 9
 
-            param_space = (
-                np.array(np.meshgrid(prey, predator, apex, super)).reshape(4, -1).T
+        initial_densities = {
+            "Prey": [100, 500, 1000, 2000, 5000],
+            "Predator": [100, 500, 1000, 2000, 5000],
+            "Apex": [0, 100, 500, 1000, 2000],
+            "Super": [0, 100, 500, 1000, 2000],
+        }
+
+        # Combinations
+
+        param_space = (
+            np.array(
+                np.meshgrid(
+                    initial_densities["Prey"],
+                    initial_densities["Predator"],
+                    initial_densities["Apex"],
+                    initial_densities["Super"],
+                )
             )
-        else:
-            param_space = create_space(parameter_depth)
+            .reshape(4, -1)
+            .T
+        )
 
-        n_params = param_space.shape[0]
+    else:
+        param_space = create_space(parameter_depth)
+
+    n_params = param_space.shape[0]
 
     runs = reps * steps * n_params * n_models
 
@@ -195,7 +210,7 @@ def verify_data(data, n_params, parameter_depth, models, reps, steps, n_models=1
     if models is not None:
         model = [m for m in models for _ in range(runs // n_models)]
     else:
-        model = [None for _ in range(runs // n_models)]
+        model = [None for _ in range(runs)]
 
     # check if data is complete
     print("Checking if data is complete...")

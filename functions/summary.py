@@ -55,7 +55,7 @@ def summary_experiment_6(data):
 # analysis for experiment 9
 
 
-def summary_experiment_9(data):
+def summary_experiment_9(data, reps=10, steps=1000):
     """
     Varying initial density of agents
     """
@@ -81,6 +81,9 @@ def summary_experiment_9(data):
         .reshape(4, -1)
         .T
     )
+
+    # Repeat each row reps * steps times
+    N0 = np.repeat(N0, reps * steps, axis=0)
 
     # Fixed initial densities for plotting
 
@@ -113,9 +116,9 @@ def summary_experiment_9(data):
             )
             .drop([f"N0_{a.lower()}" for a in initial_densities.keys() if a != agent])
             .with_columns(
-                (r"$N_0$" + f"({agent})={pl.col(f'N0_{agent.lower()}')})").alias(
-                    "model"
-                )
+                (
+                    r"$N_0$" + f"({agent})=" + pl.col(f"N0_{agent.lower()}").cast(str)
+                ).alias("model")
             )
             .rename(
                 {
