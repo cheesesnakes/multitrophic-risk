@@ -1,6 +1,7 @@
 # import libraries
 
 from functions.summary import summary
+from functions.compare import compare_scenarios
 from configs import configs
 import sys
 
@@ -48,20 +49,47 @@ def main():
     args = sys.argv[1:]
 
     if not args:
-        print("Running analysis for all experiments...")
+        print("Running summary and comparison for all experiments...")
 
         for e in configs.keys():
             run_summary(e)
             continue
+
+        comparisons = ["Apex - Super", "Superpredators"]
+
+        for comparison in comparisons:
+            print(f"Comparing scenarios for {comparison}...")
+            compare_scenarios(comparison)
     else:
-        e = args[0]
-        print(f"Running analysis for {e}...")
+        if args[0] == "Summary":
+            if not len(args) == 2:
+                print("Running all summaries...")
+                for e in configs.keys():
+                    run_summary(e)
+                    continue
+                return 0
 
-        if e not in configs.keys():
-            print(f"Experiment {e} not found in configs.")
-            return
+            e = args[1]
 
-        run_summary(e)
+            print(f"Running analysis for {e}...")
+
+            if e not in configs.keys():
+                print(f"Experiment {e} not found in configs.")
+                return
+
+            run_summary(e)
+        elif args[0] == "Compare":
+            if not len(args) == 2:
+                comparisons = ["Apex - Super", "Superpredators"]
+                print("Running comparisons for all scenarios...")
+                for comparison in comparisons:
+                    print(f"Comparing scenarios for {comparison}...")
+                    compare_scenarios(comparison)
+                return
+
+            comparison = args[1]
+            print(f"Comparing scenarios for {comparison}...")
+            compare_scenarios(comparison)
 
 
 # run the analysis for all experiments

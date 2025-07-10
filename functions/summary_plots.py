@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 
 def set_style():
-    sns.set_theme(style="whitegrid", font_scale=1.5)
-    plt.rcParams.update({"font.size": 14, "figure.figsize": (10, 6)})
+    sns.set_theme(style="whitegrid", font_scale=2)
+    plt.rcParams.update({"font.size": 30, "figure.figsize": (10, 6), "figure.dpi": 96})
     sns.color_palette()
 
 
