@@ -1,4 +1,3 @@
-import os
 import sys
 import polars as pl
 import numpy as np
@@ -56,6 +55,39 @@ def calculate_periodicity(data, populations):
         raise ValueError("No valid data found for periodicity calculation.")
     else:
         return pl.DataFrame(results)
+
+
+# Summary of periodicity
+
+
+def summary_periodicity(periodicity):
+    """
+    Summarize the periodicity of populations.
+    """
+    periodicity = periodicity.unpivot(
+        index=["rep_id", "sample_id"],
+        variable_name="Population",
+        value_name="Period",
+    )
+
+    periodicity = periodicity.with_columns(
+        pl.col("Population").str.replace("period_", "")
+    )
+
+    summary = (
+        periodicity.group_by("Population")
+        .agg(
+            [
+                pl.mean("Period").alias("Mean Period"),
+                pl.std("Period").alias("Std Dev Period"),
+                pl.min("Period").alias("Min Period"),
+                pl.max("Period").alias("Max Period"),
+            ]
+        )
+        .sort("Population")
+    )
+
+    return summary
 
 
 # plot period

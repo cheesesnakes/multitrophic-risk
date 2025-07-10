@@ -18,7 +18,11 @@ from functions.summary_funcs import (
     load_data,
     verify_data,
 )
-from functions.signals import calculate_periodicity, plot_periodicity
+from functions.signals import (
+    calculate_periodicity,
+    plot_periodicity,
+    summary_periodicity,
+)
 
 # Summary for test 4
 
@@ -369,8 +373,6 @@ def summary(
         plt.savefig(f"output/experiments/plots/{experiment}_timeseries.png")
         plt.close()
 
-    print(f"Analysis for {experiment} completed.\n")
-
     # Calculate periodicity
     if "Scenario" in experiment:
         if not os.path.exists(
@@ -384,9 +386,21 @@ def summary(
                 include_header=True,
                 quote_style="necessary",
             )
+
+            period_summary = summary_periodicity(
+                periodicity,
+            )
+            period_summary.write_csv(
+                f"output/experiments/outcomes/{experiment}_periodicity_summary.csv",
+                separator=",",
+                include_header=True,
+                quote_style="necessary",
+            )
             plot_periodicity(periodicity, populations=populations)
             plt.savefig(f"output/experiments/plots/{experiment}_periodicity.png")
             plt.close()
             print("Periodicity plot saved.")
+
+    print(f"Analysis for {experiment} completed.\n")
 
     return 0
