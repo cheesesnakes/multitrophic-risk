@@ -60,10 +60,17 @@ def calculate_periodicity(data, populations):
 # Summary of periodicity
 
 
-def summary_periodicity(periodicity):
+def summary_periodicity(periodicity, phase):
     """
     Summarize the periodicity of populations.
     """
+    # Determine sample_id where predator and prey coexist
+    coexist_sample_ids = phase.filter(
+        (pl.col("phase") == "Coexistence") & (pl.col("prob") > 0)
+    )["sample_id"].unique()
+
+    periodicity = periodicity.filter(pl.col("sample_id").is_in(coexist_sample_ids))
+
     periodicity = periodicity.unpivot(
         index=["rep_id", "sample_id"],
         variable_name="Population",

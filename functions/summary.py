@@ -379,6 +379,7 @@ def summary(
             f"output/experiments/outcomes/{experiment}_periodicity.csv"
         ):
             print("Calculating periodicity...")
+            # Calculate periodicity
             periodicity = calculate_periodicity(data, populations=populations)
             periodicity.write_csv(
                 f"output/experiments/outcomes/{experiment}_periodicity.csv",
@@ -387,19 +388,28 @@ def summary(
                 quote_style="necessary",
             )
 
-            period_summary = summary_periodicity(
-                periodicity,
+            # Plot periodicity
+            plot_periodicity(periodicity, populations=populations)
+            plt.savefig(f"output/experiments/plots/{experiment}_periodicity.png")
+            plt.close()
+            print("Periodicity plot saved.")
+
+        if not os.path.exists(
+            f"output/experiments/outcomes/{experiment}_periodicity_summary.csv"
+        ):
+            print("Summarizing periodicity...")
+            periodicity = pl.read_csv(
+                f"output/experiments/outcomes/{experiment}_periodicity.csv"
             )
-            period_summary.write_csv(
+            phase = pl.read_csv(f"output/experiments/outcomes/{experiment}_phase.csv")
+            periodicity_summary = summary_periodicity(periodicity, phase)
+            periodicity_summary.write_csv(
                 f"output/experiments/outcomes/{experiment}_periodicity_summary.csv",
                 separator=",",
                 include_header=True,
                 quote_style="necessary",
             )
-            plot_periodicity(periodicity, populations=populations)
-            plt.savefig(f"output/experiments/plots/{experiment}_periodicity.png")
-            plt.close()
-            print("Periodicity plot saved.")
+            print("Periodicity summary saved.")
 
     print(f"Analysis for {experiment} completed.\n")
 
