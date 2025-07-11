@@ -13,6 +13,7 @@ import seaborn as sns
 from functions.summary_funcs import (
     classify_model_phase,
     phase_summary,
+    parameter_summary,
     set_model_order,
     summaries,
     load_data,
@@ -104,7 +105,6 @@ def summary_test_7(data, reps=10, steps=1000):
     # Make dataframes to hold phase and summary
 
     phase_full = pl.DataFrame()
-    summary_phase_full = pl.DataFrame()
 
     # Plot
 
@@ -162,17 +162,6 @@ def summary_test_7(data, reps=10, steps=1000):
 
             phase_full = pl.concat([phase_full, phase])
 
-        # Phase summary
-
-        if not os.path.exists("output/experiments/outcomes/Test-7_phase_summary.csv"):
-            summary_phases = phase_summary(
-                phase,
-                variables=None,
-                model=True,
-            )
-
-            summary_phase_full = pl.concat([summary_phase_full, summary_phases])
-
     # Save phase data
 
     if not phase_full.is_empty():
@@ -199,16 +188,6 @@ def summary_test_7(data, reps=10, steps=1000):
         plot_phase_probability(phase_full, variables=["N0"])
         plt.savefig("output/experiments/plots/Test-7_phase_probability.png")
         plt.close()
-
-    # Save phase summary
-
-    if not summary_phase_full.is_empty():
-        summary_phase_full.write_csv(
-            "output/experiments/outcomes/Test-7_phase_summary.csv",
-            separator=",",
-            include_header=True,
-            quote_style="necessary",
-        )
 
     print("Experiment 9 analysis completed.")
 
@@ -314,12 +293,29 @@ def summary(
 
         summary_phases = phase_summary(
             phase,
-            variables=variables,
-            model=True,
         )
 
         summary_phases.write_csv(
             f"output/experiments/outcomes/{experiment}_phase_summary.csv",
+            separator=",",
+            include_header=True,
+            quote_style="necessary",
+        )
+
+    # Parameter summary
+
+    if not os.path.exists(
+        f"output/experiments/outcomes/{experiment}_param_summary.csv"
+    ):
+        print("Generating parameter summary...")
+        phase = pl.read_csv(f"output/experiments/outcomes/{experiment}_phase.csv")
+        param_summary = parameter_summary(
+            phase,
+            variables=variables,
+        )
+
+        param_summary.write_csv(
+            f"output/experiments/outcomes/{experiment}_param_summary.csv",
             separator=",",
             include_header=True,
             quote_style="necessary",

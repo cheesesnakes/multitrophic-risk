@@ -80,47 +80,150 @@ def classify_model_phase(data, variables=["s_breed", "f_breed"], model=True, rep
 
     data = data.with_columns((pl.col("len") / reps).alias("prob"))
 
+    data = data.sort(["sample_id", "phase"])
+
     return data
 
 
-def phase_summary(phase_data, variables=["s_breed", "f_breed"], model=True):
+def phase_summary(phase_data: pl.DataFrame) -> pl.DataFrame:
     """
-    Function to summarize the transitions between different phases in the model.
+    Function to summarize the transitions between different phases in the model using Bayesian bootstrap.
 
     Args:
-        phase_data (pl.DataFrame): The data to classify
-        variables (list): The variables to classify
-        model (bool): Whether to include model in classification
+        phase_data (pl.DataFrame): A DataFrame with columns: 'sample_id', 'phase', 'len' representing
+                                   counts of each phase per sample.
+
+    Returns:
+        pl.DataFrame: Summarized probabilities with Bayesian credible intervals for each phase.
     """
-    # Start with count
-    agg_exprs = [pl.sum("len").alias("count")]
+    phases = ["Prey Only", "Coexistence", "Extinction"]
+    n_boot = 1000
 
-    # Add min, max, mean, std for each variable
-    if variables is not None:
-        for var in variables:
-            agg_exprs.extend(
-                [
-                    pl.min(var).alias(f"{var}_min"),
-                    pl.max(var).alias(f"{var}_max"),
-                ]
-            )
+    # Complete cases
+    sample_ids = phase_data.select("sample_id").unique()
+    phase_df = pl.DataFrame({"phase": phases})
 
-    # Add hard-coded Coexistence outcomes
-    agg_exprs.extend(
-        [
-            pl.mean("prob").alias("prob_mean"),
-            pl.std("prob").alias("prob_std"),
-        ]
+    df = (
+        sample_ids.join(phase_df, how="cross")
+        .join(phase_data, on=["sample_id", "phase"], how="left")
+        .fill_null(0)
     )
 
-    # Perform groupby and aggregation
+    # Ensure proper ordering
+    df = df.sort(["sample_id", "phase"])
 
-    if model:
-        summary = phase_data.group_by(["model", "phase"]).agg(*agg_exprs)
+    # Convert 'len' column into a numpy array with shape (n_samples, 3)
+    alpha = (
+        df.select("len").to_numpy().reshape(-1, 3)  # assumes 3 phases per sample
+    ) + 1  # Add 1 for Dirichlet prior
+
+    # Draw Dirichlet weights (shape: n_samples x 3 x n_boot)
+    weights = np.stack(
+        [np.random.dirichlet(a, n_boot).T for a in alpha]
+    )  # shape: (n_samples, 3, n_boot)
+
+    # Average over samples (axis=0), result shape: (3, n_boot)
+    P = weights.mean(axis=0).T  # shape: (n_boot, 3)
+
+    # Calculate summary stats per phase
+    mean = np.mean(P, axis=0)
+    lower = np.percentile(P, 5, axis=0)
+    upper = np.percentile(P, 95, axis=0)
+
+    # Build results dataframe
+    results = pl.DataFrame(
+        {"phase": phases, "mean": mean, "lower": lower, "upper": upper}
+    )
+
+    return results
+
+
+# Find and summarise necessary conditions for each state
+
+
+def parameter_summary(phase_data: pl.DataFrame, variables: list) -> pl.DataFrame:
+    """
+    Summarize the necessary conditions (min/max ranges) for each phase and parameter
+    using Bayesian bootstrap.
+    """
+    phases = ["Prey Only", "Coexistence", "Extinction"]
+
+    # Complete cases
+    sample_ids = phase_data.select("sample_id").unique()
+    phase_df = pl.DataFrame({"phase": phases})
+
+    df = (
+        sample_ids.join(phase_df, how="cross")
+        .join(phase_data, on=["sample_id", "phase"], how="left")
+        .fill_null(0)
+    )
+
+    # Values of the variables
+
+    var_values = phase_data.select(["sample_id"] + variables).unique()
+
+    # Ensure proper ordering
+    df = df.sort(["sample_id", "phase"])
+
+    def bootstrap_ranges(data_phase, n_boot=1000):
+        # Use number times each phase occurs in each sample as Dirichlet prior
+        alpha = (
+            data_phase.select("len").to_numpy().flatten().astype(float) + 0.1
+        ) / 25  # Divide by reps to get average counts
+
+        sample_ids = data_phase.select("sample_id").to_numpy().flatten()
+
+        # Draw Dirichlet weights
+        weights = np.random.dirichlet(alpha, n_boot)
+
+        # sampling
+        sampled_ids = np.array(
+            [np.random.choice(sample_ids, p=weights[i]) for i in range(n_boot)]
+        )
+
+        # Calculate min/max for each variable
+        boots = []
+        for var in variables:
+            values = var_values.select("sample_id", var)
+            for boot in range(n_boot):
+                sampled_data = (
+                    values.filter(pl.col("sample_id").is_in(sampled_ids[boot]))
+                    .select(var)
+                    .to_numpy()
+                    .flatten()
+                )
+                if len(sampled_data) > 0:
+                    boots.append(
+                        {
+                            "boot": boot,
+                            "phase": data_phase.select("phase").to_numpy()[0][0],
+                            "variable": var,
+                            "value": sampled_data,
+                        }
+                    )
+        boots_df = pl.DataFrame(boots)
+
+        # Calculate mean, lower, and upper bounds
+        summary = boots_df.group_by(["phase", "variable"]).agg(
+            pl.mean("value").alias("mean"),
+            pl.quantile("value", 0.05).alias("lower"),
+            pl.quantile("value", 0.95).alias("upper"),
+        )
+
+        return summary
+
+    # Group by phase and apply bootstrap ranges
+    summaries = []
+    for phase in phases:
+        data_phase = df.filter(pl.col("phase") == phase)
+        if not data_phase.is_empty():
+            summary = bootstrap_ranges(data_phase)
+            summaries.append(summary)
+
+    if summaries:
+        return pl.concat(summaries).sort(["phase", "variable"])
     else:
-        summary = phase_data.group_by("phase").agg(*agg_exprs)
-
-    return summary
+        raise ValueError("No data available for summarization.")
 
 
 # set model order for experiment 2
