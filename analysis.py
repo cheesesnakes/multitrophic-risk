@@ -2,6 +2,7 @@
 
 from functions.summary import summary
 from functions.compare import compare_scenarios
+from functions.figures import make_figure
 from configs import configs
 import sys
 
@@ -60,6 +61,16 @@ def main():
         for comparison in comparisons:
             print(f"Comparing scenarios for {comparison}...")
             compare_scenarios(comparison)
+
+        # Figure 3
+
+        make_figure([0, 6], ["phase_probability"], "figure3a")
+        make_figure([0, 6], ["timeseries"], "figure3b")
+
+        # Figure 4
+        make_figure(range(2, 8), ["phase_probability"], "figure4a", rows=2, cols=3)
+        make_figure(range(2, 8), ["timeseries"], "figure4b", rows=2, cols=3)
+
     else:
         if args[0] == "Summary":
             if not len(args) == 2:
@@ -90,6 +101,16 @@ def main():
             comparison = args[1]
             print(f"Comparing scenarios for {comparison}...")
             compare_scenarios(comparison)
+        elif args[0] == "Figures":
+            # make all figures
+
+            print("Creating all figures...")
+            make_figure([0, 6], ["phase_probability"], "figure3a")
+            make_figure([0, 6], ["timeseries"], "figure3b")
+            make_figure(range(2, 8), ["phase_probability"], "figure4a", rows=2, cols=3)
+            make_figure(range(2, 8), ["timeseries"], "figure4b", rows=2, cols=3)
+        else:
+            print("Invalid argument. Use 'Summary', 'Compare', or 'Figures'.")
 
 
 # run the analysis for all experiments
