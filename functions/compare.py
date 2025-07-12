@@ -9,13 +9,6 @@ import os
 # Helper functions to load data
 
 
-def load_phase_data(scenario):
-    """
-    Load the phase data for a given scenario.
-    """
-    return pl.read_csv(f"output/experiments/outcomes/Scenario-{scenario}_phase.csv")
-
-
 def load_period_data(scenario):
     """
     Load the period data for a given scenario.
@@ -23,6 +16,34 @@ def load_period_data(scenario):
     return pl.read_csv(
         f"output/experiments/outcomes/Scenario-{scenario}_periodicity.csv"
     )
+
+
+def load_phase_data(scenario):
+    """
+    Load the phase data for a given scenario.
+    """
+    phase_data = pl.read_csv(
+        f"output/experiments/outcomes/Scenario-{scenario}_phase.csv"
+    )
+
+    phases = ["Prey Only", "Coexistence", "Extinction"]
+
+    # Complete cases
+    sample_ids = phase_data.select("sample_id").unique()
+    models = phase_data.select("model").unique()
+    phase_df = pl.DataFrame({"phase": phases})
+
+    df = (
+        sample_ids.join(phase_df, how="cross")
+        .join(models, how="cross")
+        .join(phase_data, on=["sample_id", "phase"], how="left")
+        .fill_null(0)
+    )
+
+    # Ensure proper ordering
+    df = df.sort(["sample_id", "phase"])
+
+    return df
 
 
 def extract_parameters(df):
@@ -56,32 +77,73 @@ def effect_states(scenario):
 
     # Concatenate the phase data for both scenarios
     phase_data = pl.concat([phase1, phase2], how="vertical")
+    # Columns: ['sample_id', "model", 'phase', 'len']
 
     del phase1, phase2
 
-    # Pivot probabilities of each state on model
+    # Define boot strap for state probabilities
 
-    phase_data = phase_data.pivot(
-        index=["sample_id", "phase"],
-        columns="model",
-        values="prob",
-    )
+    def bootstrap_phase(df, reps=2000):
+        """
+        Bootstrap the phase probabilities.
+        Expects columns: 'sample_id', 'phase', 'len'
+        Returns dataframe with bootstrap posterior probabilities for each phase.
+        """
 
-    # Calculate effect of model on state probabilities
+        # Sort values for consistent reshaping
+        df = df.sort(["sample_id", "phase"])
+        phases = np.sort(df["phase"].unique())
+        n_samples = df["sample_id"].n_unique()
+        model = df["model"].unique()[0]
 
-    phase_data = phase_data.with_columns(
-        (pl.col("Baseline") - pl.col(model)).alias("effect")
-    )
+        # Reshape into array: samples x phases
+        arr_len = df.select("len").to_numpy().flatten()
 
-    phase_data = phase_data.select(
-        [
-            pl.col("sample_id"),
-            pl.col("phase"),
-            pl.col("effect"),
-        ]
-    ).rename({"effect": model})
+        try:
+            alpha = arr_len.reshape((n_samples, len(phases)))
+        except Exception as e:
+            raise ValueError(f"Reshape failed, check input DataFrame structure: {e}")
 
-    return phase_data
+        alpha = alpha + 1  # Dirichlet prior
+
+        # Dirichlet draws for each model/sample: reps x samples x models x phases
+        # We'll average over samples as usual
+
+        dirichlet_draws = np.array(
+            [np.random.dirichlet(alpha[i], reps) for i in range(n_samples)]
+        )  # samples, reps, phases
+
+        dirichlet_draws = dirichlet_draws.reshape(n_samples, reps, len(phases))
+
+        # Probability per reps and phase (average over samples)
+        prob_mean = dirichlet_draws.mean(axis=0)  # reps, phases
+
+        # Prepare result DataFrame
+        result = pl.DataFrame(
+            {
+                "boot": np.repeat(np.arange(reps), len(phases)),
+                "phase": np.tile(phases, reps),
+                "prob": prob_mean.flatten(),
+                "model": np.repeat(model, len(phases) * reps),
+            }
+        )
+
+        return result
+
+    # Run bootstrap
+
+    effect = phase_data.group_by("model").map_groups(lambda df: bootstrap_phase(df))
+
+    # pivot the data to have models as columns
+    effect = effect.pivot(index=["boot", "phase"], columns=["model"], values="prob")
+
+    # Calculate the effect of the scenario on state probabilities
+    effect = effect.with_columns((pl.col(model) - pl.col("Baseline")).alias("effect"))
+
+    # Rename effect column to model name
+    effect = effect.select("boot", "phase", "effect").rename({"effect": model})
+
+    return effect
 
 
 # compare coexistence cycles
@@ -158,33 +220,78 @@ def effect_periods(scenario):
     # Remove period_ prefix from agent names
 
     period_data = period_data.with_columns(pl.col("agent").str.replace("period_", ""))
+    # columns: # ['rep_id', 'sample_id', 'model', 'agent', 'period']
 
-    # Pivot period on model
+    # Calculate the mean period for each rep_id across samples
 
-    period_data = period_data.pivot(
-        index=["rep_id", "sample_id", "agent"],
-        on="model",
-        values="period",
+    period_data = period_data.group_by(["rep_id", "model", "agent"]).agg(
+        pl.mean("period").alias("period")
     )
 
-    # Calculate effect of model on period
+    # Bootstrap the periodicity effect
+    boots = 2000  # Number of bootstrap samples
 
-    period_data = period_data.with_columns(
-        (pl.col("Baseline") - pl.col(model)).alias("effect")
+    def bootstrap_period(x, boots=boots):
+        """
+        Bootstrap the periodicity effect.
+        """
+
+        # Alpha parameters for Dirichlet distribution
+        alpha = np.ones(len(x))
+
+        # Dirichlet draws for each rep nested in models and agents
+        dirichlet_draws = np.random.dirichlet(alpha, boots)
+
+        # Get periods
+
+        periods = np.tile(x, boots).reshape(len(x), boots).T  # shape: (boots, len(x))
+
+        # Calculate the posterior distribution of periods
+
+        posterior = dirichlet_draws * periods
+
+        # Calculate mean across reps
+
+        mean_period = posterior.sum(axis=1)  # models, agents, boots
+
+        return mean_period
+
+    # Run bootstrap
+    boot_period_data = (
+        period_data.group_by(["model", "agent"])
+        .agg(
+            pl.col("period")
+            .map_batches(lambda s: bootstrap_period(s.to_numpy()))
+            .alias("mean_period")
+        )
+        .explode("mean_period")
     )
 
-    # Select relevant columns
+    # Add boot column
 
-    period_data = period_data.select(
-        [
-            pl.col("rep_id"),
-            pl.col("sample_id"),
-            pl.col("agent"),
-            pl.col("effect"),
-        ]
-    ).rename({"effect": model})
+    boot_period_data = boot_period_data.with_columns(
+        pl.Series(np.tile(np.arange(boots), 4)).alias("boot")
+    ).sort(["boot", "model", "agent"])
 
-    return period_data
+    # Pivot data
+
+    boot_period_data = boot_period_data.pivot(
+        index=["boot", "agent"],
+        columns="model",
+        values="mean_period",
+    )
+
+    # Calculate the effect of the scenario on periodicity
+    boot_period_data = boot_period_data.with_columns(
+        (pl.col(model) - pl.col("Baseline")).alias("effect")
+    )
+
+    # Rename effect to model name
+    boot_period_data = boot_period_data.select("boot", "agent", "effect").rename(
+        {"effect": model}
+    )
+
+    return boot_period_data
 
 
 # Plot state effect
@@ -200,11 +307,11 @@ def plot_state_effect(state_comparisons):
     melted = (
         state_comparisons.to_pandas()
         .melt(
-            id_vars=["sample_id", "phase"],
+            id_vars=["boot", "phase"],
             var_name="model",
             value_name="effect",
         )
-        .sort_values(by=["sample_id", "phase", "model"])
+        .sort_values(by=["boot", "phase", "model"])
         .reset_index(drop=True)
     )
 
@@ -229,6 +336,7 @@ def plot_state_effect(state_comparisons):
         y="effect",
         legend=False,
         width=0.2,
+        hue="phase",
         palette="Set2",
         order=["Prey Only", "Coexistence", "Extinction"],
         linewidth=3,
@@ -256,11 +364,11 @@ def plot_period_effect(period_comparisons):
     melted = (
         period_comparisons.to_pandas()
         .melt(
-            id_vars=["rep_id", "sample_id", "agent"],
+            id_vars=["boot", "agent"],
             var_name="model",
             value_name="effect",
         )
-        .sort_values(by=["rep_id", "sample_id", "agent", "model"])
+        .sort_values(by=["boot", "agent", "model"])
         .reset_index(drop=True)
     )
 
@@ -284,6 +392,7 @@ def plot_period_effect(period_comparisons):
         sns.boxplot,
         x="agent",
         y="effect",
+        hue="agent",
         legend=False,
         width=0.3,
         palette="Set2",
@@ -311,11 +420,7 @@ def summarise_effects(effect_df):
     """
     # Melt
 
-    id_vars = (
-        ["sample_id", "phase"]
-        if "phase" in effect_df.columns
-        else ["rep_id", "sample_id", "agent"]
-    )
+    id_vars = ["boot", "phase"] if "phase" in effect_df.columns else ["boot", "agent"]
 
     effect_df = effect_df.unpivot(
         index=id_vars,
@@ -368,9 +473,7 @@ def compare_scenarios(comparison="Apex - Super"):
     # Merge all states on sample_id and phase
     state_comparison = compare_states[0]
     for df in compare_states[1:]:
-        state_comparison = state_comparison.join(
-            df, on=["sample_id", "phase"], how="inner"
-        )
+        state_comparison = state_comparison.join(df, on=["boot", "phase"], how="inner")
 
     del compare_states
 
@@ -392,7 +495,7 @@ def compare_scenarios(comparison="Apex - Super"):
     timeseries_comparison = compare_periods[0]
     for df in compare_periods[1:]:
         timeseries_comparison = timeseries_comparison.join(
-            df, on=["rep_id", "sample_id", "agent"], how="inner"
+            df, on=["boot", "agent"], how="inner"
         )
     del compare_periods
 

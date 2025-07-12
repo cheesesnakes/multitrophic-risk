@@ -96,7 +96,11 @@ def phase_summary(phase_data: pl.DataFrame) -> pl.DataFrame:
     Returns:
         pl.DataFrame: Summarized probabilities with Bayesian credible intervals for each phase.
     """
-    phases = ["Prey Only", "Coexistence", "Extinction"]
+    phases = [
+        "Coexistence",
+        "Extinction",
+        "Prey Only",
+    ]
     n_boot = 1000
 
     # Complete cases
