@@ -504,3 +504,40 @@ def plot_max_prey(data):
     plot._legend.set_title("S")
 
     return plot
+
+
+# plot power spectrum
+
+
+def plot_power_spectrum(data, populations, step_col="step"):
+    """
+    Plot the power spectrum of population time series using FFT.
+    Args:
+        data (pl.DataFrame): Data containing time series for populations.
+        populations (list): List of population column names.
+        step_col (str): Name of the time/step column.
+    """
+
+    # Filter out early steps
+    data = data.filter(pl.col(step_col) > 400)
+
+    plt.figure(figsize=(12, 6))
+    for pop in populations:
+        if pop == "Super":
+            continue
+        y = data[pop].to_numpy()
+        n = len(y)
+        if n <= 1 or np.all(y == y[0]):
+            continue
+        y_detrended = y - np.mean(y)
+        fft_vals = np.fft.fft(y_detrended)
+        power = np.abs(fft_vals[: n // 2]) ** 2
+        freqs = np.fft.fftfreq(n)[: n // 2]
+        power[0] = 0  # remove zero frequency
+        plt.plot(freqs, power, label=pop)
+    plt.xlabel("Frequency")
+    plt.ylabel("Power")
+    plt.title("Power Spectrum of Populations")
+    plt.legend()
+    plt.tight_layout()
+    return plt

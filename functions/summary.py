@@ -7,6 +7,7 @@ from functions.summary_plots import (
     plot_max_prey,
     plot_phase_probability,
     plot_time_series,
+    plot_power_spectrum,
 )
 from matplotlib import pyplot as plt
 import seaborn as sns
@@ -368,6 +369,14 @@ def summary(
 
         plt.savefig(f"output/experiments/plots/{experiment}_timeseries.png")
         plt.close()
+
+    # Plot power spectrum
+    if not os.path.exists(f"output/experiments/plots/{experiment}_power_spectrum.png"):
+        print("Plotting power spectrum...")
+        plot_power_spectrum(data, populations)
+        plt.savefig(f"output/experiments/plots/{experiment}_power_spectrum.png")
+        plt.close()
+        print("Power spectrum plot saved.")
 
     # Calculate periodicity
     if "Scenario" in experiment:
