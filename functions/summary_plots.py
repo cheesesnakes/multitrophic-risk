@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 def set_style():
     sns.set_theme(style="whitegrid", font_scale=2)
-    plt.rcParams.update({"font.size": 30, "figure.figsize": (10, 6), "figure.dpi": 96})
+    plt.rcParams.update({"font.size": 20, "figure.figsize": (10, 6), "figure.dpi": 96})
     sns.color_palette()
 
 
@@ -541,3 +541,195 @@ def plot_power_spectrum(data, populations, step_col="step"):
     plt.legend()
     plt.tight_layout()
     return plt
+
+# plot oscillatory time series
+
+def plot_oscillatory_time_series(periodicity, data, populations, n=5):
+    """
+    Find sample_ids with oscillations (period != 599 and != 0 for Prey or Predator)
+    and plot n representative time series using seaborn relplot.
+    """
+    set_style()
+
+    # filter reps
+
+    ids = np.array([0, 5, 10, 20, 25])
+    data = data.filter(pl.col("rep_id").is_in(ids))
+    
+    # set col_wrap if unique models are more than 2
+    if data.select(pl.col("model").n_unique()).to_numpy()[0][0] > 2:
+        col_wrap = 3
+    elif data.select(pl.col("model").n_unique()).to_numpy()[0][0] == 2:
+        col_wrap = 2
+    else:
+        col_wrap = 1
+        
+    # Find oscillatory sample_ids
+    samples = (
+        periodicity.filter(
+            (
+                ((pl.col("period_Prey") != 599.0) & (pl.col("period_Prey") != 0.0))
+                | (
+                    (pl.col("period_Predator") != 599.0)
+                    & (pl.col("period_Predator") != 0.0)
+                )
+            )
+        )["sample_id"]
+        .unique()
+        .to_list()
+    )
+
+    if not samples:
+        print("No oscillatory samples found.")
+        return
+    
+    # select the middle sample
+    
+    mid_index = len(samples) // 2
+
+    # Filter data for selected samples
+    plot_data = data.filter(pl.col("sample_id").is_in(samples[mid_index]))
+
+    # Unpivot populations to long format
+    plot_data = plot_data.unpivot(
+        on=populations,
+        variable_name="population",
+        value_name="N",
+        index=["step", "rep_id", "model", "sample_id"],
+    )
+
+    # Rename population column for consistency
+    mapping = {
+        "Predator": "Mesopredator",
+        "Apex": "Apex predator",
+        "Super": "Superpredator",
+        "Prey": "Prey",
+    }
+    plot_data = plot_data.with_columns(pl.col("population").replace(mapping).alias("population"))
+
+    # Plot using seaborn relplot
+    plot = sns.relplot(
+        kind="line",
+        data=plot_data,
+        x="step",
+        y="N",
+        hue="population",
+        palette="Set1",
+        height=6,
+        aspect=1.3,
+        alpha=0.25,
+        col="model",
+        legend=True,
+        units="rep_id",
+        estimator=None,
+        col_wrap=col_wrap,
+    )
+
+    # Set legend title
+    plot._legend.set_title("Population")
+    plot._legend.set_bbox_to_anchor((0.95, 0.8))
+
+    # set titles
+
+    plot.set_titles(
+        col_template="Model: {col_name}",
+    )
+
+    plt.tight_layout()
+    return plot
+
+# plot steady state time series
+
+
+def plot_steady_time_series(periodicity, data, populations, n=5):
+    """
+    Find sample_ids with steady state (period == 599 or period == 0 for Prey or Predator)
+    and plot n representative time series using seaborn relplot.
+    """
+    set_style()
+
+    # filter reps
+    ids = np.array([0, 5, 10, 20, 25])
+    data = data.filter(pl.col("rep_id").is_in(ids))
+
+    # set col_wrap if unique models are more than 2
+    if data.select(pl.col("model").n_unique()).to_numpy()[0][0] > 2:
+        col_wrap = 3
+    elif data.select(pl.col("model").n_unique()).to_numpy()[0][0] == 2:
+        col_wrap = 2
+    else:
+        col_wrap = 1
+
+    # Find steady state sample_ids
+    samples = (
+        periodicity.filter(
+            (
+                ((pl.col("period_Prey") == 599.0) | (pl.col("period_Prey") == 0.0))
+                & (
+                    (pl.col("period_Predator") == 599.0)
+                    | (pl.col("period_Predator") == 0.0)
+                )
+            )
+        )["sample_id"]
+        .unique()
+        .to_list()
+    )
+
+    if not samples:
+        print("No steady state samples found.")
+        return
+
+    # select the one-third sample index (0-based). Uses floor and clamps to valid range.
+    mid_index = min(len(samples) - 1, len(samples) // 3)
+
+    # Filter data for selected samples
+    plot_data = data.filter(pl.col("sample_id").is_in(samples[mid_index]))
+
+    # Unpivot populations to long format
+    plot_data = plot_data.unpivot(
+        on=populations,
+        variable_name="population",
+        value_name="N",
+        index=["step", "rep_id", "model", "sample_id"],
+    )
+
+    # Rename population column for consistency
+    mapping = {
+        "Predator": "Mesopredator",
+        "Apex": "Apex predator",
+        "Super": "Superpredator",
+        "Prey": "Prey",
+    }
+    plot_data = plot_data.with_columns(
+        pl.col("population").replace(mapping).alias("population")
+    )
+
+    # Plot using seaborn relplot
+    plot = sns.relplot(
+        kind="line",
+        data=plot_data,
+        x="step",
+        y="N",
+        hue="population",
+        palette="Set1",
+        height=6,
+        aspect=1.3,
+        alpha=0.25,
+        col="model",
+        legend=True,
+        units="rep_id",
+        estimator=None,
+        col_wrap=col_wrap,
+    )
+
+    # Set legend title
+    plot._legend.set_title("Population")
+    plot._legend.set_bbox_to_anchor((0.95, 0.8))
+
+    # set titles
+    plot.set_titles(
+        col_template="Model: {col_name}",
+    )
+
+    plt.tight_layout()
+    return plot

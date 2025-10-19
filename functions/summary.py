@@ -8,6 +8,8 @@ from functions.summary_plots import (
     plot_phase_probability,
     plot_time_series,
     plot_power_spectrum,
+    plot_oscillatory_time_series,
+    plot_steady_time_series
 )
 from matplotlib import pyplot as plt
 import seaborn as sns
@@ -415,6 +417,33 @@ def summary(
                 quote_style="necessary",
             )
             print("Periodicity summary saved.")
+            
+        # Plot oscillatory time series
+        if not os.path.exists(f"output/experiments/plots/{experiment}_oscillatory_timeseries.png"):
+            
+            print("Plotting oscillatory time series...")
+            periodicity = pl.read_csv(
+                f"output/experiments/outcomes/{experiment}_periodicity.csv"
+            )
+            plot_oscillatory_time_series(periodicity, data, populations, n=5)
+            plt.savefig(f"output/experiments/plots/{experiment}_oscillatory_timeseries.png")
+            plt.close()
+            print("Oscillatory time series plot saved.")
+        
+        # Plot steady state time series
+        if not os.path.exists(
+            f"output/experiments/plots/{experiment}_steady_state_timeseries.png"
+        ):
+            print("Plotting steady state time series...")
+            periodicity = pl.read_csv(
+                f"output/experiments/outcomes/{experiment}_periodicity.csv"
+            )
+            plot_steady_time_series(periodicity, data, populations, n=5)
+            plt.savefig(
+                f"output/experiments/plots/{experiment}_steady_state_timeseries.png"
+            )
+            plt.close()
+            print("Steady state time series plot saved.")
 
     print(f"Analysis for {experiment} completed.\n")
 
