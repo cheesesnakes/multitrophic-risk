@@ -150,15 +150,18 @@ def plot_phase_probability(phase_data, variables=["s_breed", "f_breed"]):
 
     # set phase as ordered categorical
 
-    phase_data = phase_data.with_columns(
-        pl.col("phase")
-        .cast(pl.Categorical)
-        .cast(pl.Enum(["Prey Only", "Coexistence", "Extinction"]))
-    )
+    phase_order = ["Extinction", "Prey Only", "Coexistence"]
+    phase_data = phase_data.with_columns(pl.col("phase").cast(pl.Utf8))
 
     # Set probability as float
-
     phase_data = phase_data.with_columns(pl.col("prob").cast(pl.Float64))
+
+    # Fixed colors per phase
+    phase_palette = {
+        "Extinction": "#F44201",
+        "Prey Only": "#3B4275",
+        "Coexistence": "#61A035",
+    }
 
     # Set number of columns
 
@@ -175,11 +178,11 @@ def plot_phase_probability(phase_data, variables=["s_breed", "f_breed"]):
             x="s_breed",
             y="f_breed",
             hue="phase",
+            hue_order=phase_order,
+            palette=phase_palette,
             alpha=0.5,
             size="prob",
             col="model",
-            palette="pastel",
-            hue_norm=(-1, 1),
             edgecolor=".7",
             height=6,
             aspect=1,
@@ -204,9 +207,9 @@ def plot_phase_probability(phase_data, variables=["s_breed", "f_breed"]):
             x=variables[0],
             y="prob",
             hue="phase",
-            palette="Set1",
+            hue_order=phase_order,
+            palette=phase_palette,
             col=cols,
-            hue_norm=(-1, 1),
             height=6,
             aspect=1.3,
             kind="line",
@@ -216,7 +219,6 @@ def plot_phase_probability(phase_data, variables=["s_breed", "f_breed"]):
         plot.set(ylim=(0, 1.1))
 
     plot = set_plot_axis_labels(plot, variables)
-
     return plot
 
 
