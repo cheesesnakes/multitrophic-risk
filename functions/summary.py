@@ -375,7 +375,7 @@ def summary(
     # Plot power spectrum
     if not os.path.exists(f"output/experiments/plots/{experiment}_power_spectrum.png"):
         print("Plotting power spectrum...")
-        plot_power_spectrum(data, populations)
+        plot_power_spectrum(data, populations, variables=variables)
         plt.savefig(f"output/experiments/plots/{experiment}_power_spectrum.png")
         plt.close()
         print("Power spectrum plot saved.")

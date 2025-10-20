@@ -1,4 +1,5 @@
 import polars as pl
+import pandas as pd
 import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,7 +9,7 @@ import matplotlib.pyplot as plt
 
 def set_style():
     sns.set_theme(style="whitegrid", font_scale=2)
-    plt.rcParams.update({"font.size": 20, "figure.figsize": (10, 6), "figure.dpi": 96})
+    plt.rcParams.update({"font.size": 20, "figure.figsize": (12, 10), "figure.dpi": 96})
     sns.color_palette()
 
 
@@ -509,7 +510,11 @@ def plot_max_prey(data):
 # plot power spectrum
 
 
-def plot_power_spectrum(data, populations, step_col="step"):
+def plot_power_spectrum(
+    data,
+    populations,
+    variables=["s_breed", "f_breed"],
+):
     """
     Plot the power spectrum of population time series using FFT.
     Args:
@@ -519,28 +524,114 @@ def plot_power_spectrum(data, populations, step_col="step"):
     """
 
     # Filter out early steps
-    data = data.filter(pl.col(step_col) > 400)
+    data = data.filter(pl.col("step") > 400)
+    
+    # filter out where prey and predators are > zero
+    data = data.filter((pl.col("Prey") > 0) & (pl.col("Predator") > 0))
 
+    # determine sample space
+
+    if variables is not None:
+        s_breed = (
+            data.select(variables[0]).unique().sort(by=variables[0], descending=False)
+        )
+        s_breed = s_breed.to_numpy().T.flatten()
+
+        if variables[0] == "s_breed":
+            data = data.filter(pl.col("s_breed") == s_breed[30])
+            data = data.filter(pl.col("f_breed") == s_breed[20])
+        else:
+            s = s_breed.shape[0] // 2
+            sample_space = s_breed[s]
+            # filter DataFrame
+
+            for v in variables:
+                data = data.filter(pl.col(v).is_in(sample_space))
+
+        # round s_breed and f_breed to 2 decimal places
+
+        for v in variables:
+            data = data.with_columns(
+                [
+                    pl.col(v).round(2),
+                ]
+            )
+
+    # set col_wrap if unique models are more than 2
+    if data.select(pl.col("model").n_unique()).to_numpy()[0][0] > 2:
+        col_wrap = 3
+    elif data.select(pl.col("model").n_unique()).to_numpy()[0][0] == 2:
+        col_wrap = 2
+    else:
+        col_wrap = 1
+    
     plt.figure(figsize=(12, 6))
-    for pop in populations:
-        if pop == "Super":
-            continue
-        y = data[pop].to_numpy()
-        n = len(y)
-        if n <= 1 or np.all(y == y[0]):
-            continue
-        y_detrended = y - np.mean(y)
-        fft_vals = np.fft.fft(y_detrended)
-        power = np.abs(fft_vals[: n // 2]) ** 2
-        freqs = np.fft.fftfreq(n)[: n // 2]
-        power[0] = 0  # remove zero frequency
-        plt.plot(freqs, power, label=pop)
-    plt.xlabel("Frequency")
-    plt.ylabel("Power")
-    plt.title("Power Spectrum of Populations")
-    plt.legend()
+
+    plot_data = pd.DataFrame()
+    
+    for model in data.select(pl.col("model").unique()).to_numpy().T.flatten():
+        model_df = data.filter(pl.col("model") == model)
+        for pop in populations:
+            if pop == "Super":
+                continue
+            spectra = []
+            for rep in data.select(pl.col("rep_id").unique()).to_numpy().T.flatten():
+                df = model_df.filter(pl.col("rep_id") == rep)
+                y = df[pop].to_numpy()
+                n = len(y)
+                if n <= 1 or np.all(y == y[0]):
+                    continue
+                y_detrended = y - np.mean(y)
+                fft_vals = np.fft.fft(y_detrended)
+                power = np.abs(fft_vals) / n * 2
+                power[0] = 0  # remove zero frequency
+                power = power / np.sum(power)  # normalize power
+                spectra.append(power)
+            if not spectra:
+                continue    
+            power = np.mean(spectra, axis=0)
+            se = np.std(spectra, axis=0) / np.sqrt(len(spectra))
+            freqs = np.fft.fftfreq(n, d=1)
+            idx = freqs > 0
+            periods = 1 / freqs[idx]
+            pop_data = pd.DataFrame({
+                "periods": periods,
+                "power": power[idx],
+                "se": se[idx],
+                "population": pop,
+                "model": model,
+            })
+            plot_data = pd.concat([plot_data, pop_data], ignore_index=True)
+
+    plot = sns.relplot(
+        kind="line",
+        data=plot_data,
+        x="periods",
+        y="power",
+        hue="population",
+        palette="Set1",
+        height=6,
+        aspect=1.3,
+        col="model",
+        legend=True,
+        estimator=None,
+        col_wrap=col_wrap,
+    )
+    plt.xlabel("Period")
+    plt.ylabel("Relative Power")  # Set legend title
+    
+    # set titles
+
+    plot.set_titles(
+        col_template="Model: {col_name}",
+    )
+    
+    # Set legend title
+    plot._legend.set_title("Population")
+    plot._legend.set_bbox_to_anchor((0.95, 0.8))
+    
     plt.tight_layout()
-    return plt
+    return plot
 
 # plot oscillatory time series
 
@@ -627,7 +718,7 @@ def plot_oscillatory_time_series(periodicity, data, populations, n=5):
 
     # Set legend title
     plot._legend.set_title("Population")
-    plot._legend.set_bbox_to_anchor((0.95, 0.8))
+    plot._legend.set_bbox_to_anchor((0.95, 0.7))
 
     # set titles
 
@@ -724,7 +815,7 @@ def plot_steady_time_series(periodicity, data, populations, n=5):
 
     # Set legend title
     plot._legend.set_title("Population")
-    plot._legend.set_bbox_to_anchor((0.95, 0.8))
+    plot._legend.set_bbox_to_anchor((0.95, 0.7))
 
     # set titles
     plot.set_titles(
