@@ -947,6 +947,32 @@ class model(mesa.Model):
 
             self.grid.place_agent(a, (x, y))
 
+    ## Apex predator pulse
+
+    def migrate_apex(self, N_apex, N_meso, **kwargs):
+
+        if N_apex < 50 and N_meso > 0:
+
+            for i in range(kwargs.get("apex", 0)):
+                x = self.random.randrange(self.width)
+                y = self.random.randrange(self.height)
+
+                a = Apex(
+                    unique_id=i, model=self, pos=(x, y), **{k: v for k, v in kwargs.items()}
+                )
+
+                self.schedule.add(a)
+
+                ## add the agent to a random grid cell
+
+                self.grid.place_agent(a, (x, y))
+            
+            return 1
+        else:
+            pass
+
+        return 1
+
     ## step function
 
     def step(self):
@@ -961,12 +987,17 @@ class model(mesa.Model):
 
     def run_model(self, steps=100, progress=False, limit=10000, stop=False):
         for i in range(steps):
+            
             ## end the model if there are no prey or predator agents
 
             self.n_Predators = self.data_collector(Predator)
             self.n_Prey = self.data_collector(Prey)
             self.n_Apex = self.data_collector(Apex)
             self.n_Super = self.data_collector(Super)
+
+            # Pulse apex
+
+            self.migrate_apex(self.n_Apex, self.n_Predators, **self.kwargs)
 
             if self.n_Predators + self.n_Prey > limit:
                 break
