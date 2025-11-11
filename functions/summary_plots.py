@@ -401,8 +401,8 @@ def plot_time_series(
         s_breed = s_breed.to_numpy().T.flatten()
 
         if variables[0] == "s_breed":
-            data = data.filter(pl.col("s_breed") == s_breed[30])
-            data = data.filter(pl.col("f_breed") == s_breed[20])
+            data = data.filter(pl.col("s_breed") == s_breed[40])
+            data = data.filter(pl.col("f_breed") == s_breed[30])
         else:
             s = s_breed.shape[0] // 2
             sample_space = s_breed[s]

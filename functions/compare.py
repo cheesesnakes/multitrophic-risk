@@ -302,7 +302,8 @@ def plot_state_effect(state_comparisons):
     Plot the effect of different scenarios on state probabilities.
     """
     set_style()
-
+    plt.figure(figsize=(8, 8))
+    
     # Unpivot the DataFrame for easier plotting
     melted = (
         state_comparisons.to_pandas()
@@ -315,39 +316,40 @@ def plot_state_effect(state_comparisons):
         .reset_index(drop=True)
     )
 
-    # Set col_wrap
-    if len(melted["model"].unique()) > 3:
-        col_wrap = 3
-        plt.figure(figsize=(8, 8))
-    else:
-        col_wrap = len(melted["model"].unique())
+    # rename models
+    
+    models = {
 
-        plt.figure(figsize=(8, 6))
-    plot = sns.FacetGrid(
-        data=melted,
-        col="model",
-        height=6,
-        aspect=2,
-        col_wrap=col_wrap,
-    )
-    plot.map_dataframe(
-        sns.boxplot,
+        "Lethal -> Predator": "Superpredator consumes mesopredator",
+        "Lethal -> Prey": "Superpredator consumes prey",
+        "Lethal -> Both": "Superpredator consumes both",
+        "Non-lethal -> Predator": "Mesopredator only responds to superpredator",
+        "Non-lethal -> Prey": "Prey only responds to superpredator",
+        "Non-lethal -> Both": "Both respond to superpredator",
+        "Apex predator": "Apex predator consumes mesopredator",
+
+    }
+    
+    melted["model"] = melted["model"].replace(models)
+    
+    # plot
+    plot = sns.barplot(
         x="phase",
         y="effect",
-        legend=False,
-        width=0.2,
-        hue="phase",
+        hue ="model",
+        data=melted,
+        width=0.5,
         palette="Set2",
-        order=["Prey Only", "Coexistence", "Extinction"],
-        linewidth=3,
-        fliersize=0,
+        order=["Prey Only", "Coexistence", "Extinction"]
     )
 
     # add line at 0
-    plot.map(plt.axhline, y=0, color="black", linestyle="--", linewidth=2)
+    plot.axhline(y=0, color="black", linestyle="--", linewidth=2)
 
-    plot.set_titles("{col_name}")
-    plot.set_axis_labels("Phase", r"$\Delta$ " + "Probability")
+    plt.legend(title="Scenario", fontsize=12, title_fontsize=14)
+    plt.xlabel("State", fontsize=25)
+    plt.ylabel(r"$\Delta$ " + "Probability", fontsize=25)
+    plt.ylim(-.2, .2)
     plt.tight_layout()
 
     return 0
@@ -372,28 +374,26 @@ def plot_period_effect(period_comparisons):
         .reset_index(drop=True)
     )
 
-    # Set col_wrap
-    if len(melted["model"].unique()) > 3:
-        col_wrap = 3
+    # rename models
 
-        plt.figure(figsize=(8, 8))
-    else:
-        col_wrap = len(melted["model"].unique())
-        plt.figure(figsize=(8, 6))
+    models = {
+        "Lethal -> Predator": "Superpredator consumes mesopredator",
+        "Lethal -> Prey": "Superpredator consumes prey",
+        "Lethal -> Both": "Superpredator consumes both",
+        "Non-lethal -> Predator": "Mesopredator only responds to superpredator",
+        "Non-lethal -> Prey": "Prey only responds to superpredator",
+        "Non-lethal -> Both": "Both respond to superpredator",
+        "Apex predator": "Apex predator consumes mesopredator",
+    }
 
-    plot = sns.FacetGrid(
-        data=melted,
-        col="model",
-        height=6,
-        aspect=2,
-        col_wrap=col_wrap,
-    )
-    plot.map_dataframe(
-        sns.boxplot,
+    melted["model"] = melted["model"].replace(models)
+    
+    # plot
+    plot = sns.boxplot(
         x="agent",
         y="effect",
-        hue="agent",
-        legend=False,
+        data=melted,
+        hue="model",
         width=0.3,
         palette="Set2",
         order=["Prey", "Predator"],
@@ -402,10 +402,11 @@ def plot_period_effect(period_comparisons):
     )
 
     # add line at 0
-    plot.map(plt.axhline, y=0, color="black", linestyle="--", linewidth=2)
-
-    plot.set_titles("{col_name}")
-    plot.set_axis_labels("Agent", r"$\Delta$ " + "Period")
+    plot.axhline(y=0, color="black", linestyle="--", linewidth=2)
+    plt.legend(title="Scenario", fontsize=12, title_fontsize=14)
+    plt.xlabel("Agent", fontsize=25)
+    plt.ylabel(r"$\Delta$ " + "Cycle Length", fontsize=25)
+    plt.ylim(-15, 55)
     plt.tight_layout()
 
     return 0
@@ -464,8 +465,10 @@ def compare_scenarios(comparison="Apex - Super"):
 
     if comparison == "Apex - Super":
         scenarios = [1, 6]
+    elif comparison == "Non-lethal":
+        scenarios = [2, 3, 4]
     else:
-        scenarios = range(2, 8)
+        scenarios = [5, 6, 7]
 
     # Compare states
     compare_states = [effect_states(scenario) for scenario in scenarios]

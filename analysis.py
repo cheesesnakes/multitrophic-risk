@@ -3,6 +3,7 @@
 from functions.summary import summary
 from functions.compare import compare_scenarios
 from functions.figures import make_figure
+from functions.summary_plots import set_style
 from configs import configs
 import sys
 
@@ -19,7 +20,8 @@ def main():
     """
     Main function to run the analysis for all experiments.
     """
-
+    set_style()
+    
     def run_summary(e):
         # get the experiment config
         config = configs[e]
@@ -91,7 +93,7 @@ def main():
             run_summary(e)
         elif args[0] == "Compare":
             if not len(args) == 2:
-                comparisons = ["Apex - Super", "Superpredators"]
+                comparisons = ["Apex - Super", "Lethal", "Non-lethal"]
                 print("Running comparisons for all scenarios...")
                 for comparison in comparisons:
                     print(f"Comparing scenarios for {comparison}...")
@@ -105,12 +107,12 @@ def main():
             # make all figures
 
             print("Creating all figures...")
-            make_figure([0, 6], ["phase_probability"], "figure3a")
-            make_figure([0, 6], ["timeseries"], "figure3b")
+            make_figure([1, 6], ["phase_probability"], "figure3a")
+            make_figure([1, 6], ["timeseries"], "figure3b")
             make_figure(range(2, 8), ["phase_probability"], "figure4a", rows=2, cols=3)
             make_figure(range(2, 8), ["timeseries"], "figure4b", rows=2, cols=3)
 
-            make_figure([0, 6], ["power_spectrum"], "figureA3_1")
+            make_figure([1, 6], ["power_spectrum"], "figureA3_1")
             make_figure(range(2, 8), ["power_spectrum"], "figureA3_2", rows=2, cols=3)
         else:
             print("Invalid argument. Use 'Summary', 'Compare', or 'Figures'.")
