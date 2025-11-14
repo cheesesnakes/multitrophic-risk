@@ -25,7 +25,7 @@ def calculate_periodicity(data, populations):
         row = {"rep_id": rep_id, "sample_id": sample_id}
 
         for pop in populations:
-            if pop == "Super":
+            if pop == "Super" or pop == "Apex":
                 continue
 
             y = group[pop].to_numpy()
@@ -106,7 +106,7 @@ def plot_periodicity(periodicity, populations):
     """
 
     # remove super predator
-    populations = [pop for pop in populations if pop != "Super"]
+    populations = [pop for pop in populations if pop != "Super" or pop != "Apex"]
 
     # Create a DataFrame for plotting
     plot_data = periodicity.melt(
