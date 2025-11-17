@@ -996,8 +996,10 @@ class model(mesa.Model):
             self.n_Super = self.data_collector(Super)
 
             # Pulse apex
+            
+            if self.migrate:
 
-            self.migrate_apex(self.n_Apex, self.n_Predators, **self.kwargs)
+                self.migrate_apex(self.n_Apex, self.n_Predators, **self.kwargs)
 
             if self.n_Predators + self.n_Prey > limit:
                 break

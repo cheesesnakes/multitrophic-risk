@@ -90,6 +90,7 @@ configs = {
             {
                 "params": {
                     "model": "apex",
+                    "migrate": False,
                     "apex": 500,
                     "super": 0,
                     "predator": 500,
@@ -115,6 +116,7 @@ configs = {
             {
                 "params": {
                     "model": "apex",
+                    "migrate": False,
                     "apex": 500,
                     "super": 0,
                     "predator": 500,
@@ -196,6 +198,7 @@ configs = {
             {
                 "params": {
                     "model": "apex",
+                    "migrate": False,
                     "apex": 500,
                     "super": 0,
                     "predator": 500,
@@ -227,6 +230,7 @@ configs = {
                     "apex": a,
                     "super": s,
                     "model": "lv",
+                    "migrate": False,
                 }
             }
             for p in [100, 500, 1000, 2000, 5000]

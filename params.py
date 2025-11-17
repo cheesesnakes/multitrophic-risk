@@ -33,6 +33,7 @@ kwargs = {
     "a_die": 0.1,
     "a_lethality": 0.15,
     "a_steps": 1,
+    "migrate": True,
     # super predator traits
     "super_target": 2,
     "super_lethality": 1,
