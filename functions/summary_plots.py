@@ -3,13 +3,14 @@ import pandas as pd
 import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
+from configs import pop_meta, scenario_meta
 
 # set style
 
 
 def set_style():
-    sns.set_theme(style="whitegrid", font_scale=2)
-    plt.rcParams.update({"font.size": 20, "figure.figsize": (12, 10), "figure.dpi": 96})
+    sns.set_theme(style="whitegrid", font_scale=1.2)
+    plt.rcParams.update({"font.size": 20, "figure.figsize": (8, 6), "figure.dpi": 300})
     sns.color_palette()
 
 
@@ -19,20 +20,20 @@ def set_style():
 def set_plot_titles(plot, variables):
     if variables[0] == "s_breed":
         plot.set_titles(
-            row_template=r"$b_{{predator}}$" + "= {row_name}",
+            row_template=r"$b_{{mesopredator}}$" + "= {row_name}",
             col_template=r"$b_{{prey}}$" + " = {col_name}",
         )
     elif variables[0] == "s_max":
         plot.set_titles(
-            col_template=r"$S_{{predator}}$" + " = {col_name}",
+            col_template=r"$S_{{mesopredator}}$" + " = {col_name}",
         )
     elif variables[0] == "a_max":
         plot.set_titles(
-            col_template=r"$S_{{apex}}$" + " = {col_name}",
+            col_template=r"$S_{{apex predator}}$" + " = {col_name}",
         )
     elif variables[0] == "a_breed":
         plot.set_titles(
-            col_template=r"$b_{{apex}}$" + " = {col_name}",
+            col_template=r"$b_{{apex predator}}$" + " = {col_name}",
         )
     elif variables[0] == "f_max":
         plot.set_titles(
@@ -40,11 +41,11 @@ def set_plot_titles(plot, variables):
         )
     elif variables[0] == "s_lethality":
         plot.set_titles(
-            col_template=r"$Lethality_{{predator}}$" + " = {col_name}",
+            col_template=r"$Lethality_{{mesopredator}}$" + " = {col_name}",
         )
     elif variables[0] == "a_lethality":
         plot.set_titles(
-            col_template=r"$Lethality_{{apex}}$" + " = {col_name}",
+            col_template=r"$Lethality_{{apex predator}}$" + " = {col_name}",
         )
 
     return plot
@@ -52,19 +53,19 @@ def set_plot_titles(plot, variables):
 
 def set_plot_axis_labels(plot, variables):
     if variables[0] == "s_breed":
-        plot.set_axis_labels(x_var=r"$b_{{predator}}$", y_var=r"$b_{{prey}}$")
+        plot.set_axis_labels(x_var=r"$b_{{mesopredator}}$", y_var=r"$b_{{prey}}$")
     elif variables[0] == "s_max":
-        plot.set_axis_labels(x_var=r"$S_{{predator}}$", y_var="Probability")
+        plot.set_axis_labels(x_var=r"$S_{{mesopredator}}$", y_var="Probability")
     elif variables[0] == "a_max":
-        plot.set_axis_labels(x_var=r"$S_{{apex}}$", y_var="Probability")
+        plot.set_axis_labels(x_var=r"$S_{{apex predator}}$", y_var="Probability")
     elif variables[0] == "a_breed":
-        plot.set_axis_labels(x_var=r"$b_{{apex}}$", y_var="Probability")
+        plot.set_axis_labels(x_var=r"$b_{{apex predator}}$", y_var="Probability")
     elif variables[0] == "f_max":
         plot.set_axis_labels(x_var=r"$K$", y_var="Probability")
     elif variables[0] == "s_lethality":
-        plot.set_axis_labels(x_var=r"$Lethality_{{predator}}$", y_var="Probability")
+        plot.set_axis_labels(x_var=r"$Lethality_{{mesopredator}}$", y_var="Probability")
     elif variables[0] == "a_lethality":
-        plot.set_axis_labels(x_var=r"$Lethality_{{apex}}$", y_var="Probability")
+        plot.set_axis_labels(x_var=r"$Lethality_{{apex predator}}$", y_var="Probability")
 
     return plot
 
@@ -114,7 +115,13 @@ def plot_attractor(data, variables=["s_breed", "f_breed"]):
         col_wrap = 2
     else:
         col_wrap = 1
-
+        
+    # Set model names from scenario_meta
+    
+    model_mapping = {name: meta["description"] for name, meta in scenario_meta.items()}
+        
+    data = data.with_columns(pl.col("model").replace(model_mapping).alias("model"))
+    
     plot = sns.relplot(
         data=data.select(["Predator", "Prey", "rep_id", "model", "step"]).sort(
             ["model", "rep_id", "step"]
@@ -130,9 +137,13 @@ def plot_attractor(data, variables=["s_breed", "f_breed"]):
         col_wrap=col_wrap,
         legend=False,
         kind="scatter",
+        
         marker="o",
     )
 
+    # Set axis labels
+    plot.set_axis_labels(x_var="Mesopredator", y_var="Prey")
+    
     # set titles
     plot.set_titles(col_template="Model: {col_name}")
 
@@ -151,7 +162,11 @@ def plot_phase_probability(phase_data, variables=["s_breed", "f_breed"]):
 
     # set phase as ordered categorical
 
-    phase_order = ["Extinction", "Prey Only", "Coexistence"]
+    phase_order = [
+        "Prey Only",
+        "Coexistence",
+        "Extinction",
+    ]
     phase_data = phase_data.with_columns(pl.col("phase").cast(pl.Utf8))
 
     # Set probability as float
@@ -172,6 +187,12 @@ def plot_phase_probability(phase_data, variables=["s_breed", "f_breed"]):
         col_wrap = 1
     else:
         col_wrap = 2
+
+    # Set model names from scenario_meta
+
+    model_mapping = {name: meta["description"] for name, meta in scenario_meta.items()}
+
+    phase_data = phase_data.with_columns(pl.col("model").replace(model_mapping).alias("model"))
 
     if len(variables) > 1:
         plot = sns.relplot(
@@ -245,7 +266,7 @@ def plot_bifurcation(data, grid_size=3, population="Prey", variable="s_breed"):
         plot_apex: The plot of apex predators
 
     """
-
+    
     # filter DataFrame
 
     data = data.filter(pl.col("step") > 600)
@@ -276,7 +297,7 @@ def plot_bifurcation(data, grid_size=3, population="Prey", variable="s_breed"):
         )
 
         row_label = r"$b_{{prey}}$"
-        x_label = r"$b_{{predator}}$"
+        x_label = r"$b_{{mesopredator}}$"
 
     elif variable == "f_breed":
         cat = "s_breed"
@@ -302,29 +323,35 @@ def plot_bifurcation(data, grid_size=3, population="Prey", variable="s_breed"):
             ]
         )
 
-        row_label = r"$b_{{predator}}$"
+        row_label = r"$b_{{mesopredator}}$"
         x_label = r"$b_{{prey}}$"
     elif variable == "s_max":
         cat = None
-        x_label = r"$S_{{predator}}$"
+        x_label = r"$S_{{mesopredator}}$"
     elif variable == "a_max":
         cat = None
-        x_label = r"$S_{{apex}}$"
+        x_label = r"$S_{{apex predator}}$"
     elif variable == "a_breed":
         cat = None
-        x_label = r"$b_{{apex}}$"
+        x_label = r"$b_{{apex predator}}$"
     elif variable == "f_max":
         cat = None
         x_label = r"$K$"
     elif variable == "s_lethality":
         cat = None
-        x_label = r"$Lethality_{{predator}}$"
+        x_label = r"$Lethality_{{mesopredator}}$"
     elif variable == "a_lethality":
         cat = None
-        x_label = r"$Lethality_{{apex}}$"
+        x_label = r"$Lethality_{{apex predator}}$"
 
     else:
         raise ValueError("Variable must be one of: s_breed, f_breed, s_max, a_max")
+
+    # Set model names from scenario_meta
+
+    model_mapping = {name: meta["description"] for name, meta in scenario_meta.items()}
+
+    data = data.with_columns(pl.col("model").replace(model_mapping).alias("model"))
 
     # plot prey
     plot = sns.relplot(
@@ -356,13 +383,13 @@ def plot_bifurcation(data, grid_size=3, population="Prey", variable="s_breed"):
         plot.set_axis_labels(x_var=x_label, y_var="Prey")
 
     elif population == "Predator":
-        plot.set_axis_labels(x_var=x_label, y_var="Predator")
+        plot.set_axis_labels(x_var=x_label, y_var="Mesopredator")
 
     elif population == "Apex":
         plot.set_axis_labels(x_var=x_label, y_var="Apex")
 
     else:
-        raise ValueError("Population must be one of: Predator, Prey, Apex")
+        raise ValueError("Population must be one of: Mesopredator, Prey, Apex")
 
     return plot
 
@@ -401,8 +428,11 @@ def plot_time_series(
         s_breed = s_breed.to_numpy().T.flatten()
 
         if variables[0] == "s_breed":
-            data = data.filter(pl.col("s_breed") == s_breed[40])
-            data = data.filter(pl.col("f_breed") == s_breed[30])
+            
+            data = data.filter(pl.col("s_breed") == s_breed[5])
+            data = data.filter(pl.col("f_breed") == s_breed[25])
+
+            print(f"Filtered s_breed to {s_breed[5]} and f_breed to {s_breed[25]}")
         else:
             s = s_breed.shape[0] // 2
             sample_space = s_breed[s]
@@ -428,7 +458,7 @@ def plot_time_series(
     else:
         col_wrap = 1
 
-    # unpivot populations
+    # Unpivot populations
 
     data = data.unpivot(
         on=populations,
@@ -437,15 +467,28 @@ def plot_time_series(
         index=["step", "rep_id", "model"],
     )
 
-    # Rename population column
-    mapping = {
+    # Rename population column for consistency
+    pop_names = {
         "Predator": "Mesopredator",
         "Apex": "Apex predator",
         "Super": "Superpredator",
         "Prey": "Prey",
     }
+    data = data.with_columns(pl.col("population").replace(pop_names).alias("population"))
 
-    data = data.with_columns(pl.col("population").replace(mapping).alias("population"))
+    # Color palette keys must match renamed population names
+    pop_colors = {
+        "Prey": pop_meta["Prey"]["color"],
+        "Mesopredator": pop_meta["Predator"]["color"],
+        "Apex predator": pop_meta["Apex"]["color"],
+        "Superpredator": pop_meta["Super"]["color"],
+    }
+    
+    # update model names from scenario_meta
+    
+    model_mapping = {name: meta["description"] for name, meta in scenario_meta.items()}
+
+    data = data.with_columns(pl.col("model").replace(model_mapping).alias("model"))
 
     plot = sns.relplot(
         kind="line",
@@ -453,7 +496,7 @@ def plot_time_series(
         x="step",
         y="N",
         hue="population",
-        palette="Set1",
+        palette=pop_colors,
         height=6,
         aspect=1.3,
         alpha=0.25,
@@ -467,6 +510,10 @@ def plot_time_series(
     # Set legend title
     plot._legend.set_title("Population")
     plot._legend.set_bbox_to_anchor((0.95, 0.8))
+    
+    # Set axis labels
+
+    plot.set_axis_labels(x_var="Time", y_var="Number of Agents")
 
     # set titles
 
@@ -484,6 +531,9 @@ def plot_time_series(
 
 
 def plot_max_prey(data):
+    
+    set_style()
+    
     data = data.filter(pl.col("step") > 400)
 
     plot = sns.relplot(
@@ -497,7 +547,7 @@ def plot_max_prey(data):
         linestyle="-",
         markers="o",
         height=6,
-        aspect=1,
+        aspect=1.3,
     )
 
     plot.set_axis_labels(x_var=r"$L^{2}$")
@@ -520,17 +570,14 @@ def plot_power_spectrum(
     Args:
         data (pl.DataFrame): Data containing time series for populations.
         populations (list): List of population column names.
-        step_col (str): Name of the time/step column.
     """
+    set_style()
 
     # Filter out early steps
     data = data.filter(pl.col("step") > 400)
-    
-    # filter out where prey and predators are > zero
     data = data.filter((pl.col("Prey") > 0) & (pl.col("Predator") > 0))
 
     # determine sample space
-
     if variables is not None:
         s_breed = (
             data.select(variables[0]).unique().sort(by=variables[0], descending=False)
@@ -538,98 +585,114 @@ def plot_power_spectrum(
         s_breed = s_breed.to_numpy().T.flatten()
 
         if variables[0] == "s_breed":
-            data = data.filter(pl.col("s_breed") == s_breed[30])
-            data = data.filter(pl.col("f_breed") == s_breed[20])
+            data = data.filter(pl.col("s_breed") == s_breed[25])
+            data = data.filter(pl.col("f_breed") == s_breed[30])
         else:
             s = s_breed.shape[0] // 2
             sample_space = s_breed[s]
-            # filter DataFrame
-
             for v in variables:
                 data = data.filter(pl.col(v).is_in(sample_space))
 
-        # round s_breed and f_breed to 2 decimal places
-
         for v in variables:
-            data = data.with_columns(
-                [
-                    pl.col(v).round(2),
-                ]
-            )
+            data = data.with_columns([pl.col(v).round(2)])
 
     # set col_wrap if unique models are more than 2
-    if data.select(pl.col("model").n_unique()).to_numpy()[0][0] > 2:
-        col_wrap = 3
-    elif data.select(pl.col("model").n_unique()).to_numpy()[0][0] == 2:
-        col_wrap = 2
-    else:
-        col_wrap = 1
-    
-    plt.figure(figsize=(12, 6))
+    n_models = data.select(pl.col("model").n_unique()).to_numpy()[0][0]
+    col_wrap = 3 if n_models > 2 else 2 if n_models == 2 else 1
 
     plot_data = pd.DataFrame()
-    
+
+    # Loop over each model
     for model in data.select(pl.col("model").unique()).to_numpy().T.flatten():
         model_df = data.filter(pl.col("model") == model)
         for pop in populations:
+            # skip super predator
             if pop == "Super":
                 continue
-            spectra = []
-            for rep in data.select(pl.col("rep_id").unique()).to_numpy().T.flatten():
+            
+            # Loop over each replicate
+            
+            for rep in model_df.select(pl.col("rep_id").unique()).to_numpy().T.flatten():
+                # extract time series for the replicate and population
                 df = model_df.filter(pl.col("rep_id") == rep)
+                
+                # get time series as numpy array
                 y = df[pop].to_numpy()
                 n = len(y)
                 if n <= 1 or np.all(y == y[0]):
                     continue
+                
+                # detrend the time series
                 y_detrended = y - np.mean(y)
+                
+                # compute FFT and power spectrum
                 fft_vals = np.fft.fft(y_detrended)
+                
                 power = np.abs(fft_vals) / n * 2
-                power[0] = 0  # remove zero frequency
-                power = power / np.sum(power)  # normalize power
-                spectra.append(power)
-            if not spectra:
-                continue    
-            power = np.mean(spectra, axis=0)
-            se = np.std(spectra, axis=0) / np.sqrt(len(spectra))
-            freqs = np.fft.fftfreq(n, d=1)
-            idx = freqs > 0
-            periods = 1 / freqs[idx]
-            pop_data = pd.DataFrame({
-                "periods": periods,
-                "power": power[idx],
-                "se": se[idx],
-                "population": pop,
-                "model": model,
-            })
-            plot_data = pd.concat([plot_data, pop_data], ignore_index=True)
+                power[0] = 0
+                
+                freqs = np.fft.fftfreq(n, d=1)
+                
+                # calculate periods
+                
+                idx = freqs > 0
+                periods = 1 / freqs[idx]
+                
+                # Smooth the power spectrum using a moving average
+                
+                window = 5  # Adjust window size as needed
+                power_smoothed = pd.Series(power[idx]).rolling(window, center=True, min_periods=1).mean().values
+                
+                # calculate relative power
+                
+                power_smoothed = power_smoothed / np.max(power_smoothed)
 
+                # create dataframe for each replicate
+                rep_data = pd.DataFrame({
+                    "periods": periods,
+                    "power": power_smoothed,
+                    "rep_id": rep,
+                    "population": pop,
+                    "model": model,
+                })
+                plot_data = pd.concat([plot_data, rep_data], ignore_index=True)
+
+    # set colors for populations
+    pop_colors = {
+        "Prey": pop_meta["Prey"]["color"],
+        "Mesopredator": pop_meta["Predator"]["color"],
+    }
+    pop_names = {
+        "Predator": "Mesopredator",
+        "Prey": "Prey",
+    }
+    plot_data["population"] = plot_data["population"].replace(pop_names)
+    model_mapping = {name: meta["description"] for name, meta in scenario_meta.items()}
+    plot_data["model"] = plot_data["model"].replace(model_mapping)
+
+    # Plot using seaborn lineplot with estimator and errorbar
     plot = sns.relplot(
         kind="line",
         data=plot_data,
         x="periods",
         y="power",
         hue="population",
-        palette="Set1",
-        height=6,
-        aspect=1.3,
+        palette=pop_colors,
         col="model",
         legend=True,
-        estimator=None,
+        estimator="mean",
+        errorbar="se",
         col_wrap=col_wrap,
+        alpha=0.7,
+        linewidth=2,
+        height=6,
+        aspect=1.3,
     )
     plt.xlabel("Period")
-    plt.ylabel("Relative Power")  # Set legend title
-    
-    # set titles
-
-    plot.set_titles(
-        col_template="Model: {col_name}",
-    )
-    
-    # Set legend title
+    plt.ylabel("Relative Power")
+    plot.set_titles(col_template="Model: {col_name}")
     plot._legend.set_title("Population")
     plot._legend.set_bbox_to_anchor((0.95, 0.8))
-    
     plt.tight_layout()
     return plot
 
@@ -678,9 +741,20 @@ def plot_oscillatory_time_series(periodicity, data, populations, n=5):
     
     mid_index = len(samples) // 2
 
+    # print s_breed and f_breed values for the selected sample_id
+
+    sample_info = (
+        data.filter(pl.col("sample_id") == samples[mid_index])
+        .select(["s_breed", "f_breed"])
+        .unique()
+    )
+
+    print(f"s_breed: {sample_info[0, 's_breed']}, f_breed: {sample_info[0, 'f_breed']}")
+
     # Filter data for selected samples
     plot_data = data.filter(pl.col("sample_id").is_in(samples[mid_index]))
-
+    
+    
     # Unpivot populations to long format
     plot_data = plot_data.unpivot(
         on=populations,
@@ -698,103 +772,21 @@ def plot_oscillatory_time_series(periodicity, data, populations, n=5):
     }
     plot_data = plot_data.with_columns(pl.col("population").replace(mapping).alias("population"))
 
-    # Plot using seaborn relplot
-    plot = sns.relplot(
-        kind="line",
-        data=plot_data,
-        x="step",
-        y="N",
-        hue="population",
-        palette="Set1",
-        height=6,
-        aspect=1.3,
-        alpha=0.25,
-        col="model",
-        legend=True,
-        units="rep_id",
-        estimator=None,
-        col_wrap=col_wrap,
-    )
-
-    # Set legend title
-    plot._legend.set_title("Population")
-    plot._legend.set_bbox_to_anchor((0.95, 0.7))
-
-    # set titles
-
-    plot.set_titles(
-        col_template="Model: {col_name}",
-    )
-
-    plt.tight_layout()
-    return plot
-
-# plot steady state time series
-
-
-def plot_steady_time_series(periodicity, data, populations, n=5):
-    """
-    Find sample_ids with steady state (period == 599 or period == 0 for Prey or Predator)
-    and plot n representative time series using seaborn relplot.
-    """
-    set_style()
-
-    # filter reps
-    ids = np.array([0, 5, 10, 20, 25])
-    data = data.filter(pl.col("rep_id").is_in(ids))
-
-    # set col_wrap if unique models are more than 2
-    if data.select(pl.col("model").n_unique()).to_numpy()[0][0] > 2:
-        col_wrap = 3
-    elif data.select(pl.col("model").n_unique()).to_numpy()[0][0] == 2:
-        col_wrap = 2
-    else:
-        col_wrap = 1
-
-    # Find steady state sample_ids
-    samples = (
-        periodicity.filter(
-            (
-                ((pl.col("period_Prey") == 599.0) | (pl.col("period_Prey") == 0.0))
-                & (
-                    (pl.col("period_Predator") == 599.0)
-                    | (pl.col("period_Predator") == 0.0)
-                )
-            )
-        )["sample_id"]
-        .unique()
-        .to_list()
-    )
-
-    if not samples:
-        print("No steady state samples found.")
-        return
-
-    # select the one-third sample index (0-based). Uses floor and clamps to valid range.
-    mid_index = min(len(samples) - 1, len(samples) // 3)
-
-    # Filter data for selected samples
-    plot_data = data.filter(pl.col("sample_id").is_in(samples[mid_index]))
-
-    # Unpivot populations to long format
-    plot_data = plot_data.unpivot(
-        on=populations,
-        variable_name="population",
-        value_name="N",
-        index=["step", "rep_id", "model", "sample_id"],
-    )
-
-    # Rename population column for consistency
-    mapping = {
-        "Predator": "Mesopredator",
-        "Apex": "Apex predator",
-        "Super": "Superpredator",
-        "Prey": "Prey",
+    # set colors for populations
+    
+    pop_colors = {
+        "Prey": pop_meta["Prey"]["color"],
+        "Mesopredator": pop_meta["Predator"]["color"],
+        "Apex predator": pop_meta["Apex"]["color"],
+        "Superpredator": pop_meta["Super"]["color"],
     }
-    plot_data = plot_data.with_columns(
-        pl.col("population").replace(mapping).alias("population")
-    )
-
+    
+    # update model names from scenario_meta
+    
+    model_mapping = {name: meta["description"] for name, meta in scenario_meta.items()}
+    
+    plot_data = plot_data.with_columns(pl.col("model").replace(model_mapping).alias("model"))
+    
     # Plot using seaborn relplot
     plot = sns.relplot(
         kind="line",
@@ -802,22 +794,27 @@ def plot_steady_time_series(periodicity, data, populations, n=5):
         x="step",
         y="N",
         hue="population",
-        palette="Set1",
-        height=6,
-        aspect=1.3,
+        palette=pop_colors,
         alpha=0.25,
         col="model",
         legend=True,
         units="rep_id",
         estimator=None,
         col_wrap=col_wrap,
+        height=6,
+        aspect=1.3,
     )
 
     # Set legend title
     plot._legend.set_title("Population")
     plot._legend.set_bbox_to_anchor((0.95, 0.7))
+    
+    # set axis labels
+    
+    plot.set_axis_labels(x_var="Time", y_var="Number of Agents")
 
     # set titles
+
     plot.set_titles(
         col_template="Model: {col_name}",
     )

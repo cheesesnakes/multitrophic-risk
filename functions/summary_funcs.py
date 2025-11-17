@@ -275,7 +275,7 @@ def load_data(data_path, experiment, multiple=False, n_models=1):
 
 
 def verify_data(
-    data, n_params, parameter_depth, models, reps, steps, n_models=1, variables=None
+    data, name, n_params, parameter_depth, models, reps, steps, n_models=1, variables=None
 ):
     print("Calculating number of runs...")
 
@@ -316,8 +316,10 @@ def verify_data(
 
     # add model names as columns
     print("Adding model names...")
-
-    if models is not None:
+    
+    if n_models == 1:
+        model = [name for _ in range(runs)]
+    elif models is not None:
         model = [m for m in models for _ in range(runs // n_models)]
     else:
         model = [None for _ in range(runs)]

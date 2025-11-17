@@ -275,3 +275,23 @@ configs_b = {
 }
 
 configs.update(configs_b)
+
+# combined population metadata (names + colors) with backward-compatible mappings
+pop_meta = {
+    "Prey": {"label": "Prey", "color": "#2CF561"},
+    "Predator": {"label": "Mesopredator", "color": "#2C41F5"},
+    "Apex": {"label": "Apex Predator", "color": "#F5C82C"},
+    "Super": {"label": "Superpredator", "color": "#F52D34"},
+}
+
+# set scenario info (label + description)
+scenario_meta = {
+    "Scenario-0": {"label": "0", "description": "Mesopredator consumes prey"},
+    "Scenario-1": {"label": "1", "description": "Apex predator consumes mesopredator"},
+    "Scenario-2": {"label": "5", "description": "Prey respond to non-lethal superpredator"},
+    "Scenario-3": {"label": "6", "description": "Mesopredator respond to non-lethal superpredator"},
+    "Scenario-4": {"label": "7", "description": "Both prey and mesopredator respond to non-lethal superpredator"},
+    "Scenario-5": {"label": "2", "description": "Superpredator consumes prey"},
+    "Scenario-6": {"label": "3", "description": "Superpredator consumes mesopredator"},
+    "Scenario-7": {"label": "4", "description": "Superpredator consumes both prey and mesopredator"},
+}

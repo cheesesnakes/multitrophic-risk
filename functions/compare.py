@@ -1,3 +1,4 @@
+from turtle import heading
 import polars as pl
 from configs import configs
 import numpy as np
@@ -5,6 +6,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from functions.summary_plots import set_style
 import os
+from configs import pop_meta, scenario_meta
 
 # Helper functions to load data
 
@@ -67,9 +69,7 @@ def effect_states(scenario):
     Compare the marginal probabilities of each state across scenarios over all parameters
     """
 
-    cfg = configs[f"Scenario-{scenario}"]
-
-    model = cfg["models"][0]
+    model = "Scenario-" + str(scenario)
 
     # Load phase data for both scenarios
     phase1 = load_phase_data(0)
@@ -138,7 +138,7 @@ def effect_states(scenario):
     effect = effect.pivot(index=["boot", "phase"], columns=["model"], values="prob")
 
     # Calculate the effect of the scenario on state probabilities
-    effect = effect.with_columns((pl.col(model) - pl.col("Baseline")).alias("effect"))
+    effect = effect.with_columns((pl.col(model) - pl.col("Scenario-0")).alias("effect"))
 
     # Rename effect column to model name
     effect = effect.select("boot", "phase", "effect").rename({"effect": model})
@@ -154,9 +154,7 @@ def effect_periods(scenario):
     Compare the period of cycles when predators and prey coexist across scenarios over all parameters
     """
 
-    cfg = configs[f"Scenario-{scenario}"]
-
-    model = cfg["models"][0]
+    model = "Scenario-" + str(scenario)
 
     # Load periodicity data for both scenarios
     period1 = load_period_data(0)
@@ -302,7 +300,6 @@ def plot_state_effect(state_comparisons):
     Plot the effect of different scenarios on state probabilities.
     """
     set_style()
-    plt.figure(figsize=(8, 8))
     
     # Unpivot the DataFrame for easier plotting
     melted = (
@@ -316,40 +313,32 @@ def plot_state_effect(state_comparisons):
         .reset_index(drop=True)
     )
 
-    # rename models
+    # set model names
     
-    models = {
+    model_mapping = {name: meta["label"] for name, meta in scenario_meta.items()}
 
-        "Lethal -> Predator": "Superpredator consumes mesopredator",
-        "Lethal -> Prey": "Superpredator consumes prey",
-        "Lethal -> Both": "Superpredator consumes both",
-        "Non-lethal -> Predator": "Mesopredator only responds to superpredator",
-        "Non-lethal -> Prey": "Prey only responds to superpredator",
-        "Non-lethal -> Both": "Both respond to superpredator",
-        "Apex predator": "Apex predator consumes mesopredator",
+    melted["model"] = melted["model"].replace(model_mapping)
 
-    }
-    
-    melted["model"] = melted["model"].replace(models)
-    
     # plot
     plot = sns.barplot(
-        x="phase",
+        x="model",
         y="effect",
-        hue ="model",
+        hue ="phase",
         data=melted,
         width=0.5,
         palette="Set2",
-        order=["Prey Only", "Coexistence", "Extinction"]
+        order=range(1, len(model_mapping)),
+        errorbar=None,
+        linewidth=1,
+        edgecolor="black",
     )
 
     # add line at 0
     plot.axhline(y=0, color="black", linestyle="--", linewidth=2)
 
-    plt.legend(title="Scenario", fontsize=12, title_fontsize=14)
-    plt.xlabel("State", fontsize=25)
-    plt.ylabel(r"$\Delta$ " + "Probability", fontsize=25)
-    plt.ylim(-.2, .2)
+    plt.legend(title="State", fontsize=12, title_fontsize=14)
+    plt.xlabel("Scenario")
+    plt.ylabel(r"$\Delta$ " + "Probability")
     plt.tight_layout()
 
     return 0
@@ -376,37 +365,34 @@ def plot_period_effect(period_comparisons):
 
     # rename models
 
-    models = {
-        "Lethal -> Predator": "Superpredator consumes mesopredator",
-        "Lethal -> Prey": "Superpredator consumes prey",
-        "Lethal -> Both": "Superpredator consumes both",
-        "Non-lethal -> Predator": "Mesopredator only responds to superpredator",
-        "Non-lethal -> Prey": "Prey only responds to superpredator",
-        "Non-lethal -> Both": "Both respond to superpredator",
-        "Apex predator": "Apex predator consumes mesopredator",
-    }
-
+    models = {name: meta["label"] for name, meta in scenario_meta.items()}
+    
     melted["model"] = melted["model"].replace(models)
+
+    # rename agents
+    
+    agents = {"Prey": "Prey", "Predator": "Mesopredator"}
+
+    melted["agent"] = melted["agent"].replace(agents)
     
     # plot
     plot = sns.boxplot(
-        x="agent",
+        x="model",
         y="effect",
         data=melted,
-        hue="model",
-        width=0.3,
+        hue="agent",
+        width=0.5,
         palette="Set2",
-        order=["Prey", "Predator"],
-        linewidth=3,
+        order=range(1, len(models)),
+        linewidth=1,
         fliersize=0,
     )
 
     # add line at 0
     plot.axhline(y=0, color="black", linestyle="--", linewidth=2)
-    plt.legend(title="Scenario", fontsize=12, title_fontsize=14)
-    plt.xlabel("Agent", fontsize=25)
-    plt.ylabel(r"$\Delta$ " + "Cycle Length", fontsize=25)
-    plt.ylim(-15, 55)
+    plt.legend(title="Agent", fontsize=12, title_fontsize=14)
+    plt.xlabel("Scenario")
+    plt.ylabel(r"$\Delta$ " + "Cycle Length")
     plt.tight_layout()
 
     return 0
@@ -455,7 +441,7 @@ def summarise_effects(effect_df):
 # main comparison function
 
 
-def compare_scenarios(comparison="Apex - Super"):
+def compare_scenarios(comparison="All"):
     """
     Compare two scenarios based on phase and periodicity data.
     """
@@ -463,13 +449,8 @@ def compare_scenarios(comparison="Apex - Super"):
 
     # Set scenarios
 
-    if comparison == "Apex - Super":
-        scenarios = [1, 6]
-    elif comparison == "Non-lethal":
-        scenarios = [2, 3, 4]
-    else:
-        scenarios = [5, 6, 7]
-
+    scenarios = range(1, 8)
+    
     # Compare states
     compare_states = [effect_states(scenario) for scenario in scenarios]
 

@@ -4,7 +4,7 @@ import os
 # Function to make figures for publication
 
 
-def make_figure(scenarios, plots, figure_name, rows=1, cols=2):
+def make_figure(scenarios, plots, figure_name, rows=1, cols=3):
     os.makedirs("output/experiments/figures", exist_ok=True)
     dir = "output/experiments/plots"
 
@@ -35,8 +35,8 @@ def make_figure(scenarios, plots, figure_name, rows=1, cols=2):
 if __name__ == "__main__":
     # Figure 3
 
-    make_figure([0, 6], ["phase_probability"], "figure3a")
-    make_figure([0, 6], ["timeseries"], "figure3b")
+    make_figure([0, 1, 6], ["phase_probability"], "figure3a")
+    make_figure([0, 1, 6], ["timeseries"], "figure3b")
 
     # Figure 4
     make_figure(range(2, 8), ["phase_probability"], "figure4a", rows=2, cols=3)

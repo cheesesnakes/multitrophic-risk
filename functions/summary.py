@@ -9,7 +9,6 @@ from functions.summary_plots import (
     plot_time_series,
     plot_power_spectrum,
     plot_oscillatory_time_series,
-    plot_steady_time_series
 )
 from matplotlib import pyplot as plt
 import seaborn as sns
@@ -212,6 +211,7 @@ def summary(
     populations=["Prey", "Predator", "Apex"],
     variables=["s_breed", "f_breed"],
     models=["Apex", "Super"],
+    name="Scenario-0",
 ):
     print("Begin analysis...")
     print("\n")
@@ -249,6 +249,7 @@ def summary(
         steps=steps,
         n_models=n_models,
         variables=variables,
+        name=name,
     )
 
     # Set order for models in experiment 2
@@ -430,21 +431,6 @@ def summary(
             plt.close()
             print("Oscillatory time series plot saved.")
         
-        # Plot steady state time series
-        if not os.path.exists(
-            f"output/experiments/plots/{experiment}_steady_state_timeseries.png"
-        ):
-            print("Plotting steady state time series...")
-            periodicity = pl.read_csv(
-                f"output/experiments/outcomes/{experiment}_periodicity.csv"
-            )
-            plot_steady_time_series(periodicity, data, populations, n=5)
-            plt.savefig(
-                f"output/experiments/plots/{experiment}_steady_state_timeseries.png"
-            )
-            plt.close()
-            print("Steady state time series plot saved.")
-
     print(f"Analysis for {experiment} completed.\n")
 
     return 0
