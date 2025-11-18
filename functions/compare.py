@@ -324,6 +324,7 @@ def plot_state_effect(state_comparisons):
         x="model",
         y="effect",
         hue ="phase",
+        hue_order=["Prey Only", "Coexistence", "Extinction"],
         data=melted,
         width=0.5,
         palette="Set2",

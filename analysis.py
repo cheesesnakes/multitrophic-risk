@@ -114,8 +114,8 @@ def main():
             make_figure(range(2, 8), ["phase_probability"], "figure4a", rows=2, cols=3)
             make_figure(range(2, 8), ["timeseries"], "figure4b", rows=2, cols=3)
 
-            make_figure([0, 1, 6], ["power_spectrum"], "figureA3_1")
-            make_figure(range(2, 8), ["power_spectrum"], "figureA3_2", rows=2, cols=3)
+            make_figure([0, 1, 6], ["power_spectrum"], "figureA3_1", rows=2, cols=2)
+            make_figure(range(2, 8), ["power_spectrum"], "figureA3_2", rows=3, cols=2)
         else:
             print("Invalid argument. Use 'Summary', 'Compare', or 'Figures'.")
 

@@ -452,7 +452,7 @@ def plot_time_series(
 
     # set col_wrap if unique models are more than 2
     if data.select(pl.col("model").n_unique()).to_numpy()[0][0] > 2:
-        col_wrap = 3
+        col_wrap = 2
     elif data.select(pl.col("model").n_unique()).to_numpy()[0][0] == 2:
         col_wrap = 2
     else:
@@ -509,7 +509,6 @@ def plot_time_series(
 
     # Set legend title
     plot._legend.set_title("Population")
-    plot._legend.set_bbox_to_anchor((0.95, 0.8))
     
     # Set axis labels
 
