@@ -979,16 +979,27 @@ class model(mesa.Model):
 
             self.grid.place_agent(a, (x, y))
 
+    def random_edge_pos(self):
+        # return a random position on the grid edge
+        side = self.random.randrange(4)
+        if side == 0:
+            return (0, self.random.randrange(self.height))  # left
+        elif side == 1:
+            return (self.width - 1, self.random.randrange(self.height))  # right
+        elif side == 2:
+            return (self.random.randrange(self.width), 0)  # top
+        else:
+            return (self.random.randrange(self.width), self.height - 1)  # bottom
+
     ## Apex predator pulse
 
     def migrate_apex(self, N_apex, N_meso, **kwargs):
 
-        if N_apex < 50 and N_meso > 0:
+        if N_apex < 100 and N_meso > 0:
 
-            for i in range(kwargs.get("apex", 0)):
-                x = self.random.randrange(self.width)
-                y = self.random.randrange(self.height)
-
+            for i in range(5):
+                x, y = self.random_edge_pos()
+                
                 a = Apex(
                     unique_id=i, model=self, pos=(x, y), **{k: v for k, v in kwargs.items()}
                 )
