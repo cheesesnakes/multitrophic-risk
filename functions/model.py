@@ -483,6 +483,7 @@ class Apex(mesa.Agent):
         # traits
         self.info = kwargs.get("apex_info", False)
         self.lethality = kwargs.get("a_lethality", 0.15)
+        self.target = kwargs.get("a_target", "2")
 
         self.steps = kwargs.get("a_steps", 20)
 
@@ -492,6 +493,15 @@ class Apex(mesa.Agent):
         self.energy = 1
 
         self.kwargs = kwargs
+
+        if self.target == "1":
+            self.target = "prey"
+
+        elif self.target == "2":
+            self.target = "predator"
+
+        else:
+            self.target = "both"
 
     ## move function
 
@@ -522,9 +532,16 @@ class Apex(mesa.Agent):
             (x, y), moore=True, include_center=True
         )
 
-        ## count the number of prey agents
+        if self.target == "predator":
+            prey = [a for a in neighbours if isinstance(a, Predator)]
 
-        prey = [a for a in neighbours if isinstance(a, Predator)]
+        elif self.target == "prey":
+            prey = [a for a in neighbours if isinstance(a, Prey)]
+
+        else:
+            prey = [
+                a for a in neighbours if isinstance(a, Predator) or isinstance(a, Prey)
+            ]
 
         ## choose a random prey agent
 
@@ -533,7 +550,12 @@ class Apex(mesa.Agent):
 
             ## get the prey pos
 
-            x, y = a.pos
+            x_p, y_p = a.pos
+
+            ## move towards the prey
+
+            x = x_p
+            y = y_p
 
             ## move the agent
 
@@ -553,16 +575,26 @@ class Apex(mesa.Agent):
 
         ## get the prey at the current pos
 
-        this_cell = self.model.grid.get_cell_list_contents((x, y))
+        neighbours = self.model.grid.get_neighbors(
+            (x, y), moore=True, include_center=False
+        )
 
         ## count the number of prey agents
+        if self.target == "predator":
+            prey = [a for a in neighbours if isinstance(a, Predator)]
 
-        prey = [a for a in this_cell if isinstance(a, Predator)]
+        elif self.target == "prey":
+            prey = [a for a in neighbours if isinstance(a, Prey)]
+
+        else:
+            prey = [
+                a for a in neighbours if isinstance(a, Predator) or isinstance(a, Prey)
+            ]
 
         ## choose a random prey agent
 
         while self.energy < self.max_energy and len(prey) > 0:
-            ## choose a random prey agent
+            ## choose
             a = self.model.random.choice(prey)
 
             ## pop the prey agent
