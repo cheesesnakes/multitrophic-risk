@@ -77,7 +77,7 @@ configs = {
     },
     "Test-2": {
         "name": "Test-2",
-        "description": "Effect of handling limit on apex predator",
+        "description": "Effect of handling limit on specialist apex predator",
         "data_path": "output/experiments/results/test-2_results.csv",
         "status": "complete",
         "n_models": 1,
@@ -103,7 +103,7 @@ configs = {
     },
     "Test-3": {
         "name": "Test-3",
-        "description": "Varying birth rates of apex predator",
+        "description": "Varying birth rates of specialist apex predator",
         "data_path": "output/experiments/results/test-3_results.csv",
         "status": "complete",
         "n_models": 1,
@@ -184,7 +184,7 @@ configs = {
     },
     "Test-6": {
         "name": "Test-6",
-        "description": "Apex predator lethality",
+        "description": "Specialist Apex predator lethality",
         "data_path": "output/experiments/results/test-6_results.csv",
         "status": "complete",
         "n_models": 1,
@@ -237,6 +237,86 @@ configs = {
             for pr in [100, 500, 1000, 2000, 5000]
             for a in [0, 100, 500, 1000, 2000]
             for s in [0, 100, 500, 1000, 2000]
+        ],
+    },
+    "Test-8": {
+        "name": "Test-2",
+        "description": "Effect of handling limit on generalist apex predator",
+        "data_path": "output/experiments/results/test-2_results.csv",
+        "status": "complete",
+        "n_models": 1,
+        "populations": ["Prey", "Predator", "Apex"],
+        "variables": ["a_max"],
+        "n_params": 50,
+        "models": ["Apex"],
+        "vars": space_100,
+        "models_config": [
+            {
+                "params": {
+                    "model": "apex",
+                    "target": "Both",
+                    "migrate": False,
+                    "apex": 500,
+                    "super": 0,
+                    "predator": 500,
+                    "prey": 500,
+                    "params": ["a_max"],
+                }
+            }
+        ],
+        "model_prefix": "apex",
+    },
+    "Test-9": {
+        "name": "Test-3",
+        "description": "Varying birth rates of generalist apex predator",
+        "data_path": "output/experiments/results/test-3_results.csv",
+        "status": "complete",
+        "n_models": 1,
+        "n_params": 50,
+        "populations": ["Prey", "Predator", "Apex"],
+        "variables": ["a_breed"],
+        "models": ["Apex"],
+        "vars": space,
+        "models_config": [
+            {
+                "params": {
+                    "model": "apex",
+                    "target": "Both",
+                    "migrate": False,
+                    "apex": 500,
+                    "super": 0,
+                    "predator": 500,
+                    "prey": 500,
+                    "params": ["a_breed"],
+                }
+            }
+        ],
+    },
+    "Test-10": {
+        "name": "Test-6",
+        "description": "Generalist Apex predator lethality",
+        "data_path": "output/experiments/results/test-6_results.csv",
+        "status": "complete",
+        "n_models": 1,
+        "n_params": 20,
+        "populations": ["Prey", "Predator", "Apex"],
+        "variables": ["a_lethality"],
+        "models": ["Apex"],
+        "append": True,
+        "vars": np.linspace(0, 1, 20),
+        "models_config": [
+            {
+                "params": {
+                    "model": "apex",
+                    "target": "Both",
+                    "migrate": False,
+                    "apex": 500,
+                    "super": 0,
+                    "predator": 500,
+                    "prey": 500,
+                    "params": ["a_lethality"],
+                }
+            }
         ],
     },
 }
