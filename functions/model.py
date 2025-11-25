@@ -866,6 +866,7 @@ class model(mesa.Model):
         # initialize model
         self.width = kwargs.get("width", 20)
         self.height = kwargs.get("height", 20)
+        self.migrate = kwargs.get("migrate", False)
 
         self.kwargs = kwargs
 
@@ -997,9 +998,9 @@ class model(mesa.Model):
 
         if N_apex < 100 and N_meso > 0:
 
-            for i in range(5):
+            for i in range(10):
                 x, y = self.random_edge_pos()
-                
+
                 a = Apex(
                     unique_id=i, model=self, pos=(x, y), **{k: v for k, v in kwargs.items()}
                 )
