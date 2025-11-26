@@ -660,10 +660,12 @@ def plot_power_spectrum(
     pop_colors = {
         "Prey": pop_meta["Prey"]["color"],
         "Mesopredator": pop_meta["Predator"]["color"],
+        "Apex predator": pop_meta["Apex"]["color"],
     }
     pop_names = {
         "Predator": "Mesopredator",
         "Prey": "Prey",
+        "Apex": "Apex predator",
     }
     plot_data["population"] = plot_data["population"].replace(pop_names)
     model_mapping = {name: meta["description"] for name, meta in scenario_meta.items()}
