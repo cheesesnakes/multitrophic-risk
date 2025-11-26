@@ -229,7 +229,7 @@ class Predator(mesa.Agent):
         self.steps = kwargs.get("s_steps", 10)
 
         # state variables
-        self.energy = 1
+        self.energy = 0
         self.max_energy = kwargs.get("s_max", 1)
 
         self.kwargs = kwargs
@@ -490,7 +490,7 @@ class Apex(mesa.Agent):
         self.breed = kwargs.get("a_breed", 0.1)
         self.a_die = kwargs.get("a_die", 0.001)
         self.max_energy = kwargs.get("a_max", 10)
-        self.energy = 1
+        self.energy = 0
 
         self.kwargs = kwargs
 
@@ -996,7 +996,7 @@ class model(mesa.Model):
 
     def migrate_apex(self, N_apex, N_meso, **kwargs):
 
-        if N_apex < 100 and N_meso > 0:
+        if N_apex < 100 and kwargs.get("apex", 0) != 0 and N_meso > 0:
 
             for i in range(10):
                 x, y = self.random_edge_pos()
