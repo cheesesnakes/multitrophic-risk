@@ -53,9 +53,12 @@ def main():
         os.makedirs("output/experiments/plots", exist_ok=True)
 
         if len(args) == 1:
-            print("No experiment specified. Running all.")
+            print(f"No {args[0]} specified. Running all.")
             for cfg in configs:
-                run_experiment(cfg, kwargs)
+                if not cfg.lower().startswith(args[0].lower()):
+                    continue
+                print(f"Running experiment '{cfg}'...")
+                run_experiment(configs[cfg], kwargs)
         else:
             for m in range(1, len(args)):
                 experiment_name = args[0] + "-" + str(args[m])
