@@ -278,6 +278,7 @@ def summary(
         phase = classify_model_phase(
             data,
             variables=variables,
+            reps=reps,
         )
 
         phase.write_csv(
@@ -354,7 +355,7 @@ def summary(
         f"output/experiments/plots/{experiment}_bifurcation_{variables[-1]}_prey.png"
     ):
         for population in populations:
-            if population == "Super" or population == "Apex":
+            if population == "Super":
                 continue
             for variable in variables:
                 plot_bifurcation(data, population=population, variable=variable)
