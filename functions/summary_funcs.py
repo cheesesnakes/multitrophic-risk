@@ -60,7 +60,7 @@ def classify_model_phase(data, variables=["s_breed", "f_breed"], model=True, rep
         data (pl.DataFrame): The data to classify.
     """
 
-    data = data.filter(pl.col("step") == 999)
+    data = data.filter(pl.col("step") == pl.col("step").max())
 
     data = data.with_columns(
         pl.when(pl.col("Prey") > 0)

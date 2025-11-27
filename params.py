@@ -21,7 +21,7 @@ kwargs = {
     ## predator traits
     "predator_info": True,
     "s_max": 5,
-    "s_breed": 0.15,  # max birth rate
+    "s_breed": 0.3,  # max birth rate
     "s_die": 0.1,
     "s_lethality": 0.6,
     "s_apex_risk": True,
