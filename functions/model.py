@@ -33,6 +33,7 @@ class Prey(mesa.Agent):
         # traits
         self.info = kwargs.get("prey_info", False)
         self.f_super_risk = kwargs.get("f_super_risk", False)
+        self.f_apex_risk = kwargs.get("f_apex_risk", False)
         self.risk_cost = kwargs.get("risk_cost", 0.1)
         self.f_breed = kwargs.get("f_breed", 0.2)
         self.f_die = kwargs.get("f_die", 0.1)
@@ -99,6 +100,8 @@ class Prey(mesa.Agent):
             predators = [
                 a for a in neighbours if isinstance(a, Super) or isinstance(a, Predator)
             ]
+        elif self.f_apex_risk:
+            predators = [a for a in neighbours if isinstance(a, Apex) or isinstance(a, Predator)]
 
         else:
             predators = [a for a in neighbours if isinstance(a, Predator)]

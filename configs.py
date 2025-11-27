@@ -69,6 +69,7 @@ configs = {
                     "apex": 500,
                     "super": 0,
                     "a_target": "Both",
+                    "f_apex_risk": True,
                 },
             },
         ],
@@ -116,7 +117,7 @@ configs = {
                     "migrate": False,
                     "apex": 500,
                     "super": 0,
-                    "target": 2,
+                    "a_target": 2,
                     "predator": 500,
                     "prey": 500,
                     "params": ["a_max"],
@@ -141,7 +142,7 @@ configs = {
                 "params": {
                     "model": "apex",
                     "migrate": False,
-                    "target": 2,
+                    "a_target": 2,
                     "apex": 500,
                     "super": 0,
                     "predator": 500,
@@ -228,7 +229,7 @@ configs = {
                     "model": "apex",
                     "migrate": False,
                     "apex": 500,
-                    "target": 2,
+                    "a_target": 2,
                     "super": 0,
                     "predator": 500,
                     "prey": 500,
@@ -283,7 +284,8 @@ configs = {
             {
                 "params": {
                     "model": "apex",
-                    "target": "Both",
+                    "a_target": "Both",
+                    "f_apex_risk": True,
                     "migrate": False,
                     "apex": 500,
                     "super": 0,
@@ -310,7 +312,8 @@ configs = {
             {
                 "params": {
                     "model": "apex",
-                    "target": "Both",
+                    "a_target": "Both",
+                    "f_apex_risk": True,
                     "migrate": False,
                     "apex": 500,
                     "super": 0,
@@ -338,7 +341,8 @@ configs = {
             {
                 "params": {
                     "model": "apex",
-                    "target": "Both",
+                    "a_target": "Both",
+                    "f_apex_risk": True,
                     "migrate": False,
                     "apex": 500,
                     "super": 0,
