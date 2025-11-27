@@ -895,17 +895,18 @@ class model(mesa.Model):
                 "Super": lambda m: m.n_Super,
             }
         )
-
-        ## spatial data
-
-        self.spatial = mesa.DataCollector(
-            agent_reporters={
-                "x": lambda a: a.pos[0],
-                "y": lambda a: a.pos[1],
-                "AgentType": lambda a: type(a).__name__,
-                "UniqueID": lambda a: a.unique_id,
-            }
-        )
+        collect_agents = kwargs.get("collect_agents", True)
+        if collect_agents:
+            self.spatial = mesa.DataCollector(
+                agent_reporters={
+                    "x": lambda a: a.pos[0],
+                    "y": lambda a: a.pos[1],
+                    "AgentType": lambda a: type(a).__name__,
+                    "UniqueID": lambda a: a.unique_id,
+                }
+            )
+        else:
+            self.spatial = None
 
     ## data collector function
 
@@ -1022,13 +1023,12 @@ class model(mesa.Model):
 
     ## step function
 
-    def step(self):
+    def step(self, collect=True):
         self.schedule.step()
-
-        ## collect data
-
-        self.count.collect(self)
-        self.spatial.collect(self)
+        if collect:
+            self.count.collect(self)
+            if self.spatial is not None:
+                self.spatial.collect(self)
 
     ## run function
 

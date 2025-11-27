@@ -26,6 +26,10 @@ def run_example(kwargs, model="lv"):
 
     kwargs["progress"] = True
 
+    # Set spatial logging
+
+    kwargs["collect_agents"] = True
+
     # run the model
 
     print(f"Running {model} model")

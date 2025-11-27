@@ -46,7 +46,7 @@ configs = {
         "models_config": [
             {
                 "description": "apex",
-                "params": {"model": "apex", "apex": 500, "super": 0},
+                "params": {"model": "apex", "apex": 500, "super": 0, "a_target": 2},
             },
         ],
     },
