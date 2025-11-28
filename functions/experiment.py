@@ -42,21 +42,6 @@ class experiment:
     def run(self, v, rep_id=1, sample_id=1, params=[], **kwargs):
         warnings.filterwarnings("ignore")
 
-        # results data frame
-
-        results = pd.DataFrame(
-            columns=[
-                "rep_id",
-                "sample_id",
-                *params,
-                "Prey",
-                "Predator",
-                "Apex",
-                "Super",
-                "step",
-            ]
-        )
-
         # sample id
 
         self.sample_id = sample_id
@@ -108,24 +93,18 @@ class experiment:
         for p in params:
             sample[p] = kwargs[p]
 
-        # append to the results
-
-        results = pd.concat([results, sample], axis=0)
-
-        results.to_csv("sample.csv", index=False)
+        if kwargs.get("debug", False):
+            sample.to_csv("sample.csv", index=False)
 
         # update the sample id
 
         self.sample_id += 1
 
-        return results
+        return sample
 
     # parallel processing
 
     def parallel(self, v, params=[], rep=1, **kwargs):
-        num_cpus = kwargs.get("num_cpus", 4)
-
-        ray.init(num_cpus=num_cpus)
 
         # results data frame
 
@@ -200,10 +179,13 @@ class experiment:
 
         res = ray.get(future)
 
+        results_list = []
+        
         for r in res:
-            self.data = pd.concat([self.data, r], axis=0)
-
-        ray.shutdown()
+        
+            results_list.append(r)
+        
+        self.data = pd.concat(results_list, axis=0)
 
         return self.data
 
@@ -229,8 +211,11 @@ def create_results_df(params):
 def run_experiment(cfg, kwargs):
     print(f"\n{cfg.get('description', '')}")
 
+    ray.init(num_cpus=kwargs["num_cpus"])
+
     if cfg.get("reps", None) is not None:
         kwargs["reps"] = cfg["reps"]
+        
     if cfg.get("steps", None) is not None:
         kwargs["steps"] = cfg["steps"]
 
@@ -285,3 +270,5 @@ def run_experiment(cfg, kwargs):
         del results
         del exp
         del run
+        
+    ray.shutdown()

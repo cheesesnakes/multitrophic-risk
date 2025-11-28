@@ -5,6 +5,7 @@ kwargs = {
     "limit": 100000,
     "num_cpus": 40,
     "reps": 25,
+    "debug": False,
     # model parameters
     "width": 100,
     "height": 100,
