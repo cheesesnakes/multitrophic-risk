@@ -7,8 +7,10 @@ import matplotlib.pyplot as plt
 
 
 model_params = {
-    "apex": {"model": "apex", "predator": 500, "prey": 1000, "apex": 250, "super": 0},
-    "super": {"model": "super", "predator": 500, "prey": 1000, "super": 250, "apex": 0},
+    "apex_specialist": {"model": "apex", "predator": 500, "prey": 1000, "apex": 250, "super": 0, "a_target": 2},
+    "apex_generalist": {"model": "apex", "predator": 500, "prey": 1000, "apex": 250, "super": 0, "a_target": "both"},
+    "super_specialist_meso": {"model": "super", "predator": 500, "prey": 1000, "super": 250, "apex": 0, "super_target": "2"},
+    "super_generalist": {"model": "super", "predator": 500, "prey": 1000, "super": 250, "apex": 0, "super_target": "Both"},
     "lv": {"model": "lv", "predator": 500, "prey": 1000, "apex": 0, "super": 0},
 }
 
@@ -41,9 +43,9 @@ def run_example(kwargs, model="lv"):
     model_data = m.count.get_model_vars_dataframe()
     # set name for index column
     model_data.index.name = "Step"
-    model_data.to_csv(f"output/examples/results/data_model_{kwargs['model']}.csv")
+    model_data.to_csv(f"output/examples/results/data_model_{model}.csv")
     agent_data = m.spatial.get_agent_vars_dataframe()
-    agent_data.to_csv(f"output/examples/results/data_agents_{kwargs['model']}.csv")
+    agent_data.to_csv(f"output/examples/results/data_agents_{model}.csv")
 
 
 def plot_example(kwargs, model="lv"):
@@ -56,10 +58,10 @@ def plot_example(kwargs, model="lv"):
     # load data
 
     model_data = pd.read_csv(
-        f"output/examples/results/data_model_{kwargs['model']}.csv"
+        f"output/examples/results/data_model_{model}.csv"
     )
     agent_data = pd.read_csv(
-        f"output/examples/results/data_agents_{kwargs['model']}.csv"
+        f"output/examples/results/data_agents_{model}.csv"
     )
 
     # plot the number of agents over time
@@ -67,7 +69,7 @@ def plot_example(kwargs, model="lv"):
     plot_pop(
         model_data=model_data,
         params=kwargs,
-        file=f"output/examples/plots/pop_{kwargs['model']}.png",
+        file=f"output/examples/plots/pop_{model}.png",
         steps=kwargs.get("steps", 1000),
     )
 
@@ -75,7 +77,7 @@ def plot_example(kwargs, model="lv"):
 
     plot_density(
         spatial_data=agent_data,
-        file=f"output/examples/plots/density_{kwargs['model']}.gif",
+        file=f"output/examples/plots/density_{model}.gif",
         steps=kwargs.get("steps", 1000),
     )
 
@@ -83,7 +85,7 @@ def plot_example(kwargs, model="lv"):
 
     plot_space(
         agent_data=agent_data,
-        file=f"output/examples/plots/space_{kwargs['model']}.gif",
+        file=f"output/examples/plots/space_{model}.gif",
         steps=kwargs.get("steps", 1000),
     )
 
@@ -93,7 +95,7 @@ def plot_example(kwargs, model="lv"):
         agent_data=agent_data,
         model_data=model_data,
         params=kwargs,
-        file=f"output/examples/plots/space_pop_{kwargs['model']}.gif",
+        file=f"output/examples/plots/space_pop_{model}.gif",
         steps=kwargs.get("steps", 1000),
     )
 

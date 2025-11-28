@@ -29,16 +29,22 @@ def main():
 
         if len(args) == 1:
             print("No example specified. Running all.")
-            models = ["lv", "apex", "super"]
+            models = ["lv", "apex_specialist", "apex_generalist", "super_specialist_meso", "super_generalist"]
             for model in models:
                 run_example(kwargs, model=model)
                 plot_example(kwargs, model=model)
         else:
             for m in range(1, len(args)):
                 model_name = args[m]
-                if model_name not in ["lv", "apex", "super"]:
+                if model_name not in [
+                    "lv",
+                    "apex_specialist",
+                    "apex_generalist",
+                    "super_specialist_meso",
+                    "super_generalist",
+                ]:
                     print(
-                        f"Unknown model '{model_name}'. Available models are: lv, apex, and super"
+                        f"Unknown model '{model_name}'. Available models are: lv, apex_specialist, apex_generalist, super_specialist_meso, and super_generalist"
                     )
                     return
                 run_example(kwargs, model=model_name)
