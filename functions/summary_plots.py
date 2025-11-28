@@ -266,7 +266,11 @@ def plot_bifurcation(data, grid_size=3, population="Prey", variable="s_breed"):
         plot_apex: The plot of apex predators
 
     """
-    
+    if population == "Apex":
+        print(data.head())
+    else:
+        print("Not Apex")
+            
     # filter DataFrame
 
     data = data.filter(pl.col("step") > 600)

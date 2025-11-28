@@ -486,7 +486,7 @@ class Apex(mesa.Agent):
         # traits
         self.info = kwargs.get("apex_info", False)
         self.lethality = kwargs.get("a_lethality", 0.15)
-        self.target = kwargs.get("a_target", "2")
+        self.target = kwargs.get("a_target", 2)
 
         self.steps = kwargs.get("a_steps", 20)
 
@@ -497,10 +497,10 @@ class Apex(mesa.Agent):
 
         self.kwargs = kwargs
 
-        if self.target == "1":
+        if self.target == 1:
             self.target = "prey"
 
-        elif self.target == "2":
+        elif self.target == 2:
             self.target = "predator"
 
         else:
