@@ -1,5 +1,6 @@
 # binary search for appropriate parameter space of the model
 
+from math import e
 from functions.runner import model_run
 import pandas as pd
 import ray
@@ -211,7 +212,13 @@ def create_results_df(params):
 def run_experiment(cfg, kwargs):
     print(f"\n{cfg.get('description', '')}")
 
-    ray.init(num_cpus=kwargs["num_cpus"])
+    if kwargs.get("cluster", False):
+
+        ray.init(num_cpus=kwargs["num_cpus"])
+
+    else:
+
+        ray.init()
 
     if cfg.get("reps", None) is not None:
         kwargs["reps"] = cfg["reps"]

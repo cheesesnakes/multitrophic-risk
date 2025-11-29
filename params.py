@@ -4,6 +4,7 @@ kwargs = {
     # model to run
     "limit": 100000,
     "num_cpus": 40,
+    "cluster": True,
     "reps": 25,
     "debug": False,
     # model parameters
