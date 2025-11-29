@@ -267,7 +267,7 @@ configs = {
             for pr in [100, 500, 1000, 2000, 5000]
             for a in [0, 100, 500, 1000, 2000]
             for s in [0, 100, 500, 1000, 2000]
-        ],
+        ], # 625 combinations
     },
     "Test-8": {
         "name": "Test-8",
