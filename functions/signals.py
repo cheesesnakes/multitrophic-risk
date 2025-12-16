@@ -106,8 +106,9 @@ def plot_periodicity(periodicity, populations):
     """
 
     # remove super predator
-    populations = [pop for pop in populations if pop != "Super" or pop != "Apex"]
+    populations = [pop for pop in populations if pop != "Super" and pop != "Apex"]
 
+    print(populations)
     # Create a DataFrame for plotting
     plot_data = periodicity.melt(
         id_vars=["rep_id", "sample_id"],
@@ -124,8 +125,6 @@ def plot_periodicity(periodicity, populations):
     pops = {
         "Prey": "Prey",
         "Predator": "Mesopredator",
-        "Apex": "Apex Predator",
-        "Super": "Superpredator",
     }
 
     plot_data = plot_data.with_columns(pl.col("Population").replace(pops))

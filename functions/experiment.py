@@ -214,11 +214,11 @@ def run_experiment(cfg, kwargs):
 
     if kwargs.get("cluster", False):
 
-        ray.init(num_cpus=kwargs["num_cpus"])
+        ray.init()
 
     else:
-
-        ray.init()
+    
+        ray.init(num_cpus=kwargs["num_cpus"])
 
     if cfg.get("reps", None) is not None:
         kwargs["reps"] = cfg["reps"]
