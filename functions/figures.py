@@ -31,6 +31,32 @@ def make_figure(scenarios, plots, figure_name, rows=1, cols=3):
 
     return 0
 
+def make_comparisons_figure():
+    os.makedirs("output/experiments/figures", exist_ok=True)
+    dir = "output/experiments/comparison"
+
+    # Get the plots
+    images = []
+    
+    images.append(Image.open(f"{dir}/state_All.png"))
+    images.append(Image.open(f"{dir}/period_All.png"))
+
+    # Create grid
+    width = max([img.width for img in images])
+    height = max([img.height for img in images])
+
+    grid_image = Image.new("RGB", (width, 2 * height))
+
+    for i, img in enumerate(images):
+        x = 0
+        y = i * height
+        grid_image.paste(img, (x, y))
+
+    # Save the grid image
+    grid_image.save(f"output/experiments/figures/comparisons_figure.png")
+    print("comparisons_figure created successfully.")
+
+    return 0
 
 if __name__ == "__main__":
     # Figure 3
@@ -41,3 +67,6 @@ if __name__ == "__main__":
     # Figure 4
     make_figure(range(2, 8), ["phase_probability"], "figure4a", rows=2, cols=3)
     make_figure(range(2, 8), ["timeseries"], "figure4b", rows=2, cols=3)
+
+    # Comparisons figure
+    make_comparisons_figure()
