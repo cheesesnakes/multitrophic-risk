@@ -58,6 +58,44 @@ def make_comparisons_figure():
 
     return 0
 
+def make_bifurcation_figure(configs):
+    os.makedirs("output/experiments/figures", exist_ok=True)
+    dir = "output/experiments/plots"
+
+    # Get the plots
+
+    tests = [1, 2, 3, 5, 6, 8, 9, 10]
+
+    pops = ["prey", "predator", "apex"]
+
+    for test in tests:
+        images = []
+    
+        name = "Test-" + str(test)
+
+        variable = configs[name]["variables"][0]
+
+        for pop in pops:
+            if os.path.exists(f"{dir}/{name}_bifurcation_{variable}_{pop}.png"):
+                images.append(Image.open(f"{dir}/{name}_bifurcation_{variable}_{pop}.png"))
+        
+        # Create grid
+        width = max([img.width for img in images])
+        height = max([img.height for img in images])
+
+        grid_image = Image.new("RGB", (width, len(images)*height))
+
+        for i, img in enumerate(images):
+            x = 0
+            y = i * height
+            grid_image.paste(img, (x, y))
+        # Save the grid image
+        grid_image.save(f"output/experiments/figures/{name}_bifurcation.png")
+
+        print(f"Bifurcation figure for {name} created successfully.")
+    
+    return 0
+
 if __name__ == "__main__":
     # Figure 3
 

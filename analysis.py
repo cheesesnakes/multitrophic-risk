@@ -2,7 +2,7 @@
 
 from functions.summary import summary
 from functions.compare import compare_scenarios
-from functions.figures import make_figure, make_comparisons_figure
+from functions.figures import make_figure, make_comparisons_figure, make_bifurcation_figure
 from functions.summary_plots import set_style
 from configs import configs, scenario_meta
 import sys
@@ -116,8 +116,12 @@ def main():
 
             make_figure([0, 1, 6], ["power_spectrum"], "figureA3_1", rows=2, cols=2)
             make_figure(range(2, 8), ["power_spectrum"], "figureA3_2", rows=3, cols=2)
+            
             # Comparisons figure
             make_comparisons_figure()
+
+            # Bifurcation figures
+            make_bifurcation_figure(configs)
         else:
             print("Invalid argument. Use 'Summary', 'Compare', or 'Figures'.")
 
