@@ -10,8 +10,17 @@ This repository contains the code and resources for analyzing the impact of mult
 
 The study explores three models:
 1. **Base Model**: A predator-prey system.
+
+   ![[Base Model video (mp4)]](https://github.com/cheesesnakes/multitrophic-risk/raw/refs/heads/main/examples/space_lv.mp4)
+
+
 2. **Tritrophic Model**: A system including apex predators, mesopredators, and prey.
+
+   ![Tritrophic video (mp4)](https://github.com/cheesesnakes/multitrophic-risk/raw/refs/heads/main/examples/space_apex.mp4)
+
 3. **Superpredator Model**: A system where apex predators are replaced by superpredators with unique characteristics (e.g., 100% lethality, no reproduction, no mortality).
+
+   ![Superpredator video (mp4)](https://github.com/cheesesnakes/multitrophic-risk/raw/refs/heads/main/examples/space_super.mp4)
 
 Simulations were conducted across various parameter combinations to assess the effects of superpredator targets, lethality, and behavioral adaptations.
 
