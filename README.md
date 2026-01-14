@@ -13,7 +13,7 @@ The study explores three models:
 
 <div align="center">
    <a href="examples/space_lv.mp4">
-      <img src="examples/space_lv.png" alt="Base Model thumbnail" width="250"/>
+      <img src="examples/space_lv.png" alt="Base Model thumbnail" width="500"/>
    </a>
    <br/>
 </div>
@@ -22,7 +22,7 @@ The study explores three models:
 
 <div align="center">
    <a href="examples/space_apex.mp4">
-      <img src="examples/space_apex.png" alt="Tritrophic Model thumbnail" width="250"/>
+      <img src="examples/space_apex.png" alt="Tritrophic Model thumbnail" width="500"/>
    </a>
    <br/>
 </div>
@@ -31,7 +31,7 @@ The study explores three models:
 
 <div align="center">
    <a href="examples/space_super.mp4">
-      <img src="examples/space_super.png" alt="Superpredator Model thumbnail" width="250"/>
+      <img src="examples/space_super.png" alt="Superpredator Model thumbnail" width="500"/>
    </a>
    <br/>
 </div>
