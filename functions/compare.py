@@ -315,7 +315,7 @@ def plot_state_effect(state_comparisons):
 
     # set model names
     
-    model_mapping = {name: meta["label"] for name, meta in scenario_meta.items()}
+    model_mapping = {name: meta["label"] for name, meta in scenario_meta.items() if "Test-" not in name}
 
     melted["model"] = melted["model"].replace(model_mapping)
 
@@ -366,7 +366,7 @@ def plot_period_effect(period_comparisons):
 
     # rename models
 
-    models = {name: meta["label"] for name, meta in scenario_meta.items()}
+    models = {name: meta["label"] for name, meta in scenario_meta.items() if "Test-" not in name}
     
     melted["model"] = melted["model"].replace(models)
 
