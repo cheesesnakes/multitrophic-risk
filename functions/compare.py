@@ -300,7 +300,7 @@ def plot_state_effect(state_comparisons):
     Plot the effect of different scenarios on state probabilities.
     """
     set_style()
-    
+
     # Unpivot the DataFrame for easier plotting
     melted = (
         state_comparisons.to_pandas()
@@ -314,8 +314,12 @@ def plot_state_effect(state_comparisons):
     )
 
     # set model names
-    
-    model_mapping = {name: meta["label"] for name, meta in scenario_meta.items() if "Test-" not in name}
+
+    model_mapping = {
+        name: meta["label"]
+        for name, meta in scenario_meta.items()
+        if "Test-" not in name
+    }
 
     melted["model"] = melted["model"].replace(model_mapping)
 
@@ -323,7 +327,7 @@ def plot_state_effect(state_comparisons):
     plot = sns.barplot(
         x="model",
         y="effect",
-        hue ="phase",
+        hue="phase",
         hue_order=["Prey Only", "Coexistence", "Extinction"],
         data=melted,
         width=0.5,
@@ -366,16 +370,20 @@ def plot_period_effect(period_comparisons):
 
     # rename models
 
-    models = {name: meta["label"] for name, meta in scenario_meta.items() if "Test-" not in name}
-    
+    models = {
+        name: meta["label"]
+        for name, meta in scenario_meta.items()
+        if "Test-" not in name
+    }
+
     melted["model"] = melted["model"].replace(models)
 
     # rename agents
-    
+
     agents = {"Prey": "Prey", "Predator": "Mesopredator"}
 
     melted["agent"] = melted["agent"].replace(agents)
-    
+
     # plot
     plot = sns.boxplot(
         x="model",
@@ -436,6 +444,21 @@ def summarise_effects(effect_df):
         (P(pl.col("effect"))).alias("prob"),
     )
 
+    # arrange rows if var is phase
+
+    if var == "phase":
+        phase_order = ["Prey Only", "Coexistence", "Extinction"]
+        # Set categorical ordering for 'phase' column
+        summary = summary.with_columns(pl.col("phase").cast(pl.Enum(phase_order))).sort(
+            ["model", "phase"]
+        )
+    else:
+        pop_order = ["Prey", "Predator"]
+        # Set categorical ordering for 'agent' column
+        summary = summary.with_columns(pl.col("agent").cast(pl.Enum(pop_order))).sort(
+            ["model", "agent"]
+        )
+
     return summary
 
 
@@ -450,8 +473,8 @@ def compare_scenarios(comparison="All"):
 
     # Set scenarios
 
-    scenarios = range(1, 8)
-    
+    scenarios = range(1, 9)
+
     # Compare states
     compare_states = [effect_states(scenario) for scenario in scenarios]
 

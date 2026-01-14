@@ -1,7 +1,19 @@
 pacman::p_load("dplyr", "tidyr", "stringr", "flextable", "here")
 
 here::i_am("tables.R")
-Scenarios <- 0:7
+Scenarios <- 0:8
+descriptions <- c(
+    "Mesopredators target prey",
+    "Apex predators target mesopredators",
+    "Apex predators target both prey and mesopredators",
+    "Prey respond to non-lethal superpredators",
+    "Mesopredators respond to non-lethal superpredators",
+    "Prey and Mesopredators respond to non-lethal superpredators",
+    "Superperedators target prey",
+    "Superpredators target mesopredators",
+    "Superpredators target prey and mesopredators"
+)
+phases = c("Prey Only", "Coexistence", "Extinction")
 
 # Create table for parameter summary
 
@@ -43,7 +55,9 @@ all_scenarios <- all_scenarios %>%
             Scenario == 4 ~ "Prey and Mesopredators respond to non-lethal superpredators",
             Scenario == 5 ~ "Superperedators target prey",
             Scenario == 6 ~ "Superpredators target mesopredators",
-            Scenario == 7 ~ "Superpredators target prey and mesopredators"
+            Scenario == 7 ~ "Superpredators target prey and mesopredators",
+            Scenario == 8 ~ "Apex predators target both prey and mesopredators"
+
         )
     )
 
@@ -52,6 +66,8 @@ all_scenarios <- all_scenarios %>%
 tableb2 <- all_scenarios %>%
     rename(state = phase) %>%
     select(Scenario, variable, state, mean, lower, upper) %>%
+    mutate(Scenario = factor(Scenario, levels = descriptions),
+           state = factor(state, levels = phases)) %>%
     arrange(Scenario, variable, state) %>%
     flextable() %>%
     set_header_labels(
@@ -115,7 +131,8 @@ all_scenarios <- all_scenarios %>%
             Scenario == 4 ~ "Prey and Mesopredators respond to non-lethal superpredators",
             Scenario == 5 ~ "Superperedators target prey",
             Scenario == 6 ~ "Superpredators target mesopredators",
-            Scenario == 7 ~ "Superpredators target prey and mesopredators"
+            Scenario == 7 ~ "Superpredators target prey and mesopredators",
+            Scenario == 8 ~ "Apex predators target both prey and mesopredators"
         )
     )
 
@@ -124,21 +141,19 @@ all_scenarios <- all_scenarios %>%
 
 tableb1 <- all_scenarios %>%
     rename(state = phase) %>%
-    select(Scenario, state, mean, lower, upper) %>%
+    select(Scenario, state, mean) %>%
+    mutate(Scenario = factor(Scenario, levels = descriptions),
+           state = factor(state, levels = phases)) %>%
     arrange(Scenario, state) %>%
     flextable() %>%
     set_header_labels(
         Scenario = "Scenario",
         state = "State",
-        mean = "Mean",
-        lower = "5th Percentile",
-        upper = "95th Percentile"
+        mean = "Mean"
     ) %>%
     # round to 3 decimal places
     set_formatter(
-        mean = function(x) format(round(x, 3), nsmall = 3),
-        lower = function(x) format(round(x, 3), nsmall = 3),
-        upper = function(x) format(round(x, 3), nsmall = 3)
+        mean = function(x) format(round(x, 3), nsmall = 3)
     ) %>%
     set_table_properties(
         width = 0.8,
@@ -192,7 +207,8 @@ all_scenarios <- all_scenarios %>%
             Scenario == 4 ~ "Prey and Mesopredators respond to non-lethal superpredators",
             Scenario == 5 ~ "Superperedators target prey",
             Scenario == 6 ~ "Superpredators target mesopredators",
-            Scenario == 7 ~ "Superpredators target prey and mesopredators"
+            Scenario == 7 ~ "Superpredators target prey and mesopredators", 
+            Scenario == 8 ~ "Apex predators target both prey and mesopredators"
         )
     )
 
@@ -201,24 +217,20 @@ head(all_scenarios)
 # Create a flextable
 
 tableb3 <- all_scenarios %>%
-    select(Scenario, mean, q_05, q_25, q_75, q_95) %>%
-    arrange(Scenario) %>%
+    select(Scenario, Population, Mean.Period, Std.Dev.Period) %>%
+    mutate(Scenario = factor(Scenario, levels = descriptions)) %>%
+    arrange(Scenario, Population) %>%
     flextable() %>%
     set_header_labels(
         Scenario = "Scenario",
-        mean = "Mean",
-        q_05 = "5th Percentile",
-        q_25 = "25th Percentile",
-        q_75 = "75th Percentile",
-        q_95 = "95th Percentile"
+        Population = "Population",
+        Mean.Period = "Mean Period",
+        Std.Dev.Period = "SD Period"
     ) %>%
     # round to 3 decimal places
     set_formatter(
-        mean = function(x) format(round(x, 3), nsmall = 3),
-        q_05 = function(x) format(round(x, 3), nsmall = 3),
-        q_25 = function(x) format(round(x, 3), nsmall = 3),
-        q_75 = function(x) format(round(x, 3), nsmall = 3),
-        q_95 = function(x) format(round(x, 3), nsmall = 3)
+        Mean.Period = function(x) format(round(x, 3), nsmall = 3),
+        Std.Dev.Period = function(x) format(round(x, 3), nsmall = 3)
     ) %>%
     set_table_properties(
         width = 0.8,
