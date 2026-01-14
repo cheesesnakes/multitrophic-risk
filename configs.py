@@ -243,7 +243,7 @@ configs = {
         "name": "Test-7",
         "description": "Effect of starting density on model dynamics",
         "data_path": "output/experiments/results/test-7_results.csv",
-        "status": "incomplete",
+        "status": "complete",
         "reps": 10,
         "steps": 1000,
         "n_models": 1,

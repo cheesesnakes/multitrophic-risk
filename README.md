@@ -1,4 +1,8 @@
-# README: Superpredator Analysis Framework
+# Multi-trophic risk from a superpredator alters the outcome of predator - prey behavioural response races.
+
+**Authors:** Shawn Dsouza, Maria Thaker, Vishwesha Guttal, Kartik Shanker
+
+Center for Ecological Sciences, Indian Institute of Science, Bangalore, India.
 
 ## Overview
 
@@ -15,7 +19,7 @@ Simulations were conducted across various parameter combinations to assess the e
 
 ## Abstract
 
-Predator-prey interactions involve continuous behavioral adaptations that influence population dynamics and ecosystem stability. While traditional models have examined these dynamics at single trophic levels, the impact of multitrophic risk particularly from human "superpredators" targeting multiple levels remains underexplored. We investigated how pervasive multitrophic risk introduced by a superpredator affects a tritrophic system of apex predators, mesopredators, and primary consumers using an agent-based model in Python’s Mesa framework. We explored the effects of replacing apex predators with superpredators, varying superpredator targets, and altering superpredator lethality. Three models were constructed: (1) a base model with predators and prey, (2) a tritrophic model including an apex predator, and (3) a superpredator model with a superpredator that does not die or reproduce and has 100% lethality. Agents were programmed to exhibit behaviors such as reproduction, movement, and predator avoidance. Simulations were conducted across a range of breeding rates with 100 runs for each parameter combination. Our results demonstrate that superpredators significantly destabilize ecosystems. Replacing apex predators with superpredators eliminated coexistence equilibria seen in the tritrophic model, leading to prey-only equilibria or extinction. Superpredators targeting both mesopredators and prey or only mesopredators resulted in extinction trends, while coexistence occurred when superpredators targeted only prey, within a limited range. Importantly, non-lethal superpredators—inducing antipredator responses without direct mortality—enabled coexistence across scenarios, underscoring the role of behavioral adaptations in stability. These findings highlight the significant impact of human superpredators on multitrophic interactions and underscore the importance of integrating human activities into ecological models and conservation strategies to mitigate unintended ecological consequences.
+Overexploitation has led to the trophic downgrading of many of earths ecosystems. Humans, as predators, are extremely efficient and deadly, yet they may also interact with wildlife in benign ways. This study explores how interactions with lethal and non-lethal human “superpredators” alter predator-prey dynamics using an agent-based modelling approach. Our model incorporates both the consumptive (lethal) and non-consumptive (behavioural) effects of predators on prey. We aimed to (1) understand how the extirpation and replacement of apex predators by humans may affect the dynamics of mesopredators and prey, (2) compare the outcomes of scenarios where lethal superpredators target different trophic levels (mesopredators and prey), separately and simultaneously, and (3) assess the effects of superpredators when they have lethal versus non-lethal intent. We found that superpredators have a greater effect on model outcomes than apex predators. When superpredators consume mesopredators alone or with prey, the probability of mesopredator-prey coexistence increases to a greater extent than when apex predators consume mesopredators. In contrast, superpredators consuming prey slightly increases overall extinction risks and reduces coexistence. Non-lethal superpredators, despite eliciting anti-predator responses in mesopredators and prey, had a negligible effect on population dynamics. Our findings demonstrate that human superpredators may functionally replace apex predators when they are lethal.  However, benign interactions with humans may not be as ecologically significant as lethal interactions, even when humans induce antipredator responses. Future research should integrate habitat heterogeneity, resource distribution, and behavioural adaptations to predict and mitigate the impacts of human activities on ecosystems.
 
 **Keywords:** human disturbance, agent-based modeling, predator-prey interactions, behavioral adaptations
 
@@ -23,26 +27,34 @@ Predator-prey interactions involve continuous behavioral adaptations that influe
 
 ```
 superpredator/
-├── functions/          # helper functions
-|  ├── models.py        # ABM models definitions
-|  ├── runner.py        # Model runner and plotting functions
-|  ├── debug.py         # Debugging functions
-|  ├── example.py       # example simulations
-|  ├── strategies.py    # example simulations varying predator and prey strategies
-|  ├── funcs.py         # analysis functions
-|  ├── plots.py         # anlysis plotting functions 
-├── literature/         # literature survey data and analysis
-|  ├── lit-data.R       # R script for literature data processing
-|  ├── articles.csv     # Database of articles
-|  ├── articles_full-text.csv # Articles chosen for full-text screeening
-├── analysis.py        # main analysis script   
-├── configs.py          # configuration file for experiments
-├── params.py           # globalparameter definitions for model
-├── run.py              # main script to run the model
-├── pyproject.toml      # Python project configuration
-├── requirements.txt    # Python dependencies
-├── uv.lock             # Python dependency lock file
-├── README.md           # This file
+├── functions/              # helper functions
+│   ├── compare.py          # comparison utilities
+│   ├── debug.py            # debugging functions
+│   ├── example.py          # example simulations
+│   ├── experiment.py       # experiment logic
+│   ├── figures.py          # plotting figures
+│   ├── model.py            # ABM model definitions
+│   ├── runner.py           # model runner and plotting functions
+│   ├── signals.py          # signal processing
+│   ├── summary_funcs.py    # summary statistics functions
+│   ├── summary_plots.py    # summary plotting functions
+│   ├── summary.py          # summary utilities
+│   └── __pycache__/        # python cache
+├── literature/             # literature survey data and analysis
+│   ├── lit-data.R          # R script for literature data processing
+│   ├── articles.csv        # database of articles
+│   └── articles_full-text.csv # articles chosen for full-text screening
+├── analysis.py             # main analysis script
+├── configs.py              # configuration file for experiments
+├── params.py               # global parameter definitions for model
+├── run.py                  # main script to run the model
+├── pyproject.toml          # Python project configuration
+├── requirements.txt        # Python dependencies
+├── sample.csv              # sample data
+├── tables.R                # R script for tables
+├── LICENSE                 # license file
+├── README.md               # this file
+└── __pycache__/            # python cache
 ```
 
 
@@ -194,6 +206,7 @@ uv run run.py Experiments 2
 ## Configuration
 
 The configuration for experiments is defined in the `configs.py` file. Global model parameters are set in `params.py`. 
+
 ## Citation
 
 This project is currently in development. If you use this code or data in your research, please contact the authors for citation information.
