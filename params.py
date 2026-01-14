@@ -4,7 +4,7 @@ kwargs = {
     # model to run
     "limit": 100000,
     "num_cpus": 40,
-    "cluster": True,
+    "cluster": False,
     "reps": 25,
     "debug": False,
     # model parameters
@@ -31,7 +31,7 @@ kwargs = {
     ## apex predator traits
     "apex_info": True,
     "a_max": 10,
-    "a_breed": 0.15,  # max birth rate
+    "a_breed": 0.335,  # max birth rate
     "a_die": 0.1,
     "a_lethality": 0.35,
     "a_target": "both",

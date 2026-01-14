@@ -214,11 +214,11 @@ def run_experiment(cfg, kwargs):
 
     if kwargs.get("cluster", False):
 
-        ray.init()
+        ray.init(runtime_env={"excludes": ["/examples/*", "/output/", ".git/"]})
 
     else:
     
-        ray.init(num_cpus=kwargs["num_cpus"])
+        ray.init(num_cpus=kwargs["num_cpus"], runtime_env={"excludes": ["/examples/*", "/output/", ".git/"]})
 
     if cfg.get("reps", None) is not None:
         kwargs["reps"] = cfg["reps"]
