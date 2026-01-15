@@ -1,6 +1,4 @@
-from turtle import heading
 import polars as pl
-from configs import configs
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -437,14 +435,24 @@ def summarise_effects(effect_df):
 
     summary = effect_df.group_by(["model", var]).agg(
         pl.mean("effect").alias("mean_effect"),
-        pl.quantile("effect", 0.25).alias("q25_effect"),
-        pl.quantile("effect", 0.75).alias("q75_effect"),
         pl.quantile("effect", 0.05).alias("q05_effect"),
         pl.quantile("effect", 0.95).alias("q95_effect"),
         (P(pl.col("effect"))).alias("prob"),
     )
 
-    # arrange rows if var is phase
+    # arrange rows
+
+    models = {
+        name: meta["description"]
+        for name, meta in scenario_meta.items()
+        if "Test-" not in name
+    }
+
+    summary = summary.with_columns(pl.col("model").replace(models))
+
+    summary = summary.with_columns(pl.col("model").cast(pl.Enum(models.values()))).sort(
+        "model"
+    )
 
     if var == "phase":
         phase_order = ["Prey Only", "Coexistence", "Extinction"]

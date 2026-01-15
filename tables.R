@@ -13,7 +13,7 @@ descriptions <- c(
     "Superpredators target mesopredators",
     "Superpredators target prey and mesopredators"
 )
-phases = c("Prey Only", "Coexistence", "Extinction")
+phases <- c("Prey Only", "Coexistence", "Extinction")
 
 # Create table for parameter summary
 
@@ -45,7 +45,7 @@ all_scenarios <- all_scenarios %>%
     mutate(
         variable = case_when(
             variable == "f_breed" ~ "Prey Birth Rate",
-            variable == "s_breed" ~ "Predator Death Rate"
+            variable == "s_breed" ~ "Predator Birth Rate"
         ),
         Scenario = case_when(
             Scenario == 0 ~ "Mesopredators target prey",
@@ -57,7 +57,6 @@ all_scenarios <- all_scenarios %>%
             Scenario == 6 ~ "Superpredators target mesopredators",
             Scenario == 7 ~ "Superpredators target prey and mesopredators",
             Scenario == 8 ~ "Apex predators target both prey and mesopredators"
-
         )
     )
 
@@ -66,8 +65,10 @@ all_scenarios <- all_scenarios %>%
 tableb2 <- all_scenarios %>%
     rename(state = phase) %>%
     select(Scenario, variable, state, mean, lower, upper) %>%
-    mutate(Scenario = factor(Scenario, levels = descriptions),
-           state = factor(state, levels = phases)) %>%
+    mutate(
+        Scenario = factor(Scenario, levels = descriptions),
+        state = factor(state, levels = phases)
+    ) %>%
     arrange(Scenario, variable, state) %>%
     flextable() %>%
     set_header_labels(
@@ -142,8 +143,10 @@ all_scenarios <- all_scenarios %>%
 tableb1 <- all_scenarios %>%
     rename(state = phase) %>%
     select(Scenario, state, mean) %>%
-    mutate(Scenario = factor(Scenario, levels = descriptions),
-           state = factor(state, levels = phases)) %>%
+    mutate(
+        Scenario = factor(Scenario, levels = descriptions),
+        state = factor(state, levels = phases)
+    ) %>%
     arrange(Scenario, state) %>%
     flextable() %>%
     set_header_labels(
@@ -194,7 +197,6 @@ for (i in Scenarios) {
 }
 
 
-
 # Rename variables
 
 all_scenarios <- all_scenarios %>%
@@ -207,7 +209,7 @@ all_scenarios <- all_scenarios %>%
             Scenario == 4 ~ "Prey and Mesopredators respond to non-lethal superpredators",
             Scenario == 5 ~ "Superperedators target prey",
             Scenario == 6 ~ "Superpredators target mesopredators",
-            Scenario == 7 ~ "Superpredators target prey and mesopredators", 
+            Scenario == 7 ~ "Superpredators target prey and mesopredators",
             Scenario == 8 ~ "Apex predators target both prey and mesopredators"
         )
     )

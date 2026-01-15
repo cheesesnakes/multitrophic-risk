@@ -268,7 +268,7 @@ configs = {
             for pr in [100, 500, 1000, 2000, 5000]
             for a in [0, 100, 500, 1000, 2000]
             for s in [0, 100, 500, 1000, 2000]
-        ], # 625 combinations
+        ],  # 625 combinations
     },
     "Test-8": {
         "name": "Test-8",
@@ -288,6 +288,7 @@ configs = {
                     "a_target": "Both",
                     "f_apex_risk": True,
                     "migrate": False,
+                    "s_breed": 0.3,
                     "apex": 500,
                     "super": 0,
                     "predator": 500,
@@ -316,6 +317,7 @@ configs = {
                     "a_target": "Both",
                     "f_apex_risk": True,
                     "migrate": False,
+                    "s_breed": 0.3,
                     "apex": 500,
                     "super": 0,
                     "predator": 500,
@@ -345,6 +347,7 @@ configs = {
                     "a_target": "Both",
                     "f_apex_risk": True,
                     "migrate": False,
+                    "s_breed": 0.3,
                     "apex": 500,
                     "super": 0,
                     "predator": 500,
@@ -403,22 +406,57 @@ pop_meta = {
 scenario_meta = {
     "Scenario-0": {"label": "0", "description": "Mesopredator consumes prey"},
     "Scenario-1": {"label": "1", "description": "Apex predator consumes mesopredator"},
-    "Scenario-2": {"label": "6", "description": "Prey respond to non-lethal superpredator"},
-    "Scenario-3": {"label": "7", "description": "Mesopredator respond to non-lethal superpredator"},
-    "Scenario-4": {"label": "8", "description": "Both prey and mesopredator respond to non-lethal superpredator"},
+    "Scenario-2": {
+        "label": "6",
+        "description": "Prey respond to non-lethal superpredator",
+    },
+    "Scenario-3": {
+        "label": "7",
+        "description": "Mesopredator respond to non-lethal superpredator",
+    },
+    "Scenario-4": {
+        "label": "8",
+        "description": "Both prey and mesopredator respond to non-lethal superpredator",
+    },
     "Scenario-5": {"label": "3", "description": "Superpredator consumes prey"},
     "Scenario-6": {"label": "4", "description": "Superpredator consumes mesopredator"},
-    "Scenario-7": {"label": "5", "description": "Superpredator consumes both prey and mesopredator"},
-    "Scenario-8": {"label": "2", "description": "Apex predator consumes both prey and mesopredator"},
-    "Test-1": {"label": "T1", "description": "Effect of handling limit on mesopredator"},
-    "Test-2": {"label": "T2", "description": "Effect of handling limit on specialist apex predator"},
-    "Test-3": {"label": "T3", "description": "Varying birth rates of specialist apex predator"},
-    "Test-4": {"label": "T4", "description": "Varying lattice size and local saturation of prey for LV model"},
+    "Scenario-7": {
+        "label": "5",
+        "description": "Superpredator consumes both prey and mesopredator",
+    },
+    "Scenario-8": {
+        "label": "2",
+        "description": "Apex predator consumes both prey and mesopredator",
+    },
+    "Test-1": {
+        "label": "T1",
+        "description": "Effect of handling limit on mesopredator",
+    },
+    "Test-2": {
+        "label": "T2",
+        "description": "Effect of handling limit on specialist apex predator",
+    },
+    "Test-3": {
+        "label": "T3",
+        "description": "Varying birth rates of specialist apex predator",
+    },
+    "Test-4": {
+        "label": "T4",
+        "description": "Varying lattice size and local saturation of prey for LV model",
+    },
     "Test-5": {"label": "T5", "description": "Varying lethality of mesopredator"},
     "Test-6": {"label": "T6", "description": "Specialist Apex predator lethality"},
-    "Test-7": {"label": "T7", "description": "Effect of starting density on model dynamics"},
-    "Test-8": {"label": "T8", "description": "Effect of handling limit on generalist apex predator"},
-    "Test-9": {"label": "T9", "description": "Varying birth rates of generalist apex predator"},
+    "Test-7": {
+        "label": "T7",
+        "description": "Effect of starting density on model dynamics",
+    },
+    "Test-8": {
+        "label": "T8",
+        "description": "Effect of handling limit on generalist apex predator",
+    },
+    "Test-9": {
+        "label": "T9",
+        "description": "Varying birth rates of generalist apex predator",
+    },
     "Test-10": {"label": "T10", "description": "Generalist Apex predator lethality"},
-    
 }
