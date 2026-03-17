@@ -2,7 +2,11 @@
 
 from functions.summary import summary
 from functions.compare import compare_scenarios
-from functions.figures import make_figure, make_comparisons_figure, make_bifurcation_figure
+from functions.figures import (
+    make_figure,
+    make_comparisons_figure,
+    make_bifurcation_figure,
+)
 from functions.summary_plots import set_style
 from configs import configs, scenario_meta
 import sys
@@ -22,7 +26,7 @@ def main():
     Main function to run the analysis for all experiments.
     """
     set_style()
-    
+
     def run_summary(e):
         # get the experiment config
         config = configs[e]
@@ -57,13 +61,14 @@ def main():
 
     scenario_table = []
     for key, meta in scenario_meta.items():
-        scenario_table.append({"Scenario": meta["label"], "Description": meta["description"]})
-    
+        scenario_table.append(
+            {"Scenario": meta["label"], "Description": meta["description"]}
+        )
+
     # save table as csv
-    
+
     df = pd.DataFrame(scenario_table)
     df.to_csv("output/experiments/scenario_descriptions.csv", index=False)
-    
 
     if not args:
         print("Running summary and comparison for all experiments...")
@@ -103,20 +108,20 @@ def main():
             run_summary(e)
         elif args[0] == "Compare":
             print("Comparing scenarios...")
-            
+
             compare_scenarios("All")
         elif args[0] == "Figures":
             # make all figures
 
             print("Creating all figures...")
-            make_figure([0, 1, 6], ["phase_probability"], "figure3a")
-            make_figure([0, 1, 6], ["timeseries"], "figure3b")
-            make_figure(range(2, 8), ["phase_probability"], "figure4a", rows=2, cols=3)
-            make_figure(range(2, 8), ["timeseries"], "figure4b", rows=2, cols=3)
+            make_figure([0, 1, 6], ["phase_probability"], "figure3a", rows=3, cols=1)
+            make_figure([0, 1, 6], ["timeseries"], "figure3b", rows=3, cols=1)
+            make_figure(range(2, 8), ["phase_probability"], "figure4a", rows=3, cols=2)
+            make_figure(range(2, 8), ["timeseries"], "figure4b", rows=3, cols=2)
 
             make_figure([0, 1, 6], ["power_spectrum"], "figureA3_1", rows=2, cols=2)
             make_figure(range(2, 8), ["power_spectrum"], "figureA3_2", rows=3, cols=2)
-            
+
             # Comparisons figure
             make_comparisons_figure()
 

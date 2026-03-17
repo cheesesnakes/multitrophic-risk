@@ -9,8 +9,10 @@ from configs import pop_meta, scenario_meta
 
 
 def set_style():
-    sns.set_theme(style="whitegrid", font_scale=1.2)
-    plt.rcParams.update({"font.size": 20, "figure.figsize": (8, 6), "figure.dpi": 300})
+    sns.set_theme(style="whitegrid", font_scale=1.3)
+    plt.rcParams.update(
+        {"font.size": 12, "figure.figsize": (16, 12), "figure.dpi": 300}
+    )
     sns.color_palette()
 
 
@@ -65,7 +67,9 @@ def set_plot_axis_labels(plot, variables):
     elif variables[0] == "s_lethality":
         plot.set_axis_labels(x_var=r"$Lethality_{{mesopredator}}$", y_var="Probability")
     elif variables[0] == "a_lethality":
-        plot.set_axis_labels(x_var=r"$Lethality_{{apex predator}}$", y_var="Probability")
+        plot.set_axis_labels(
+            x_var=r"$Lethality_{{apex predator}}$", y_var="Probability"
+        )
 
     return plot
 
@@ -115,13 +119,13 @@ def plot_attractor(data, variables=["s_breed", "f_breed"]):
         col_wrap = 2
     else:
         col_wrap = 1
-        
+
     # Set model names from scenario_meta
-    
+
     model_mapping = {name: meta["description"] for name, meta in scenario_meta.items()}
-        
+
     data = data.with_columns(pl.col("model").replace(model_mapping).alias("model"))
-    
+
     plot = sns.relplot(
         data=data.select(["Predator", "Prey", "rep_id", "model", "step"]).sort(
             ["model", "rep_id", "step"]
@@ -130,22 +134,21 @@ def plot_attractor(data, variables=["s_breed", "f_breed"]):
         y="Prey",
         hue="rep_id",
         palette="Set1",
-        height=6,
+        height=7,
         aspect=1.3,
         alpha=0.5,
         col="model",
         col_wrap=col_wrap,
         legend=False,
         kind="scatter",
-        
         marker="o",
     )
 
     # Set axis labels
     plot.set_axis_labels(x_var="Mesopredator", y_var="Prey")
-    
+
     # set titles
-    plot.set_titles(col_template="Model: {col_name}")
+    plot.set_titles(col_template=" {col_name}")
 
     plt.tight_layout()
 
@@ -159,6 +162,8 @@ def plot_phase_probability(phase_data, variables=["s_breed", "f_breed"]):
     """
     Function to plot phase probability as a function of breeding rates.
     """
+
+    set_style()
 
     # set phase as ordered categorical
 
@@ -192,7 +197,9 @@ def plot_phase_probability(phase_data, variables=["s_breed", "f_breed"]):
 
     model_mapping = {name: meta["description"] for name, meta in scenario_meta.items()}
 
-    phase_data = phase_data.with_columns(pl.col("model").replace(model_mapping).alias("model"))
+    phase_data = phase_data.with_columns(
+        pl.col("model").replace(model_mapping).alias("model")
+    )
 
     if len(variables) > 1:
         plot = sns.relplot(
@@ -206,7 +213,7 @@ def plot_phase_probability(phase_data, variables=["s_breed", "f_breed"]):
             size="prob",
             col="model",
             edgecolor=".7",
-            height=6,
+            height=7,
             aspect=1,
             sizes=(1, 50),
             size_norm=(-0.2, 0.8),
@@ -215,7 +222,7 @@ def plot_phase_probability(phase_data, variables=["s_breed", "f_breed"]):
         )
 
         plot.set_titles(
-            col_template="Model: {col_name}",
+            col_template=" {col_name}",
         )
 
     else:
@@ -232,7 +239,7 @@ def plot_phase_probability(phase_data, variables=["s_breed", "f_breed"]):
             hue_order=phase_order,
             palette=phase_palette,
             col=cols,
-            height=6,
+            height=7,
             aspect=1.3,
             kind="line",
         )
@@ -270,7 +277,7 @@ def plot_bifurcation(data, grid_size=3, population="Prey", variable="s_breed"):
         print(data.head())
     else:
         print("Not Apex")
-            
+
     # filter DataFrame
 
     data = data.filter(pl.col("step") > 600)
@@ -366,7 +373,7 @@ def plot_bifurcation(data, grid_size=3, population="Prey", variable="s_breed"):
         hue=cat,
         row=cat,
         palette="Set1",
-        height=6,
+        height=7,
         aspect=1.3,
         alpha=0.5,
         edgecolor="w",
@@ -376,11 +383,11 @@ def plot_bifurcation(data, grid_size=3, population="Prey", variable="s_breed"):
     if cat is not None:
         plot.set_titles(
             row_template=row_label + " = {row_name}",
-            col_template="Model: {col_name}",
+            col_template=" {col_name}",
         )
     else:
         plot.set_titles(
-            col_template="Model: {col_name}",
+            col_template=" {col_name}",
         )
 
     if population == "Prey":
@@ -432,7 +439,6 @@ def plot_time_series(
         s_breed = s_breed.to_numpy().T.flatten()
 
         if variables[0] == "s_breed":
-            
             data = data.filter(pl.col("s_breed") == s_breed[5])
             data = data.filter(pl.col("f_breed") == s_breed[25])
 
@@ -478,7 +484,9 @@ def plot_time_series(
         "Super": "Superpredator",
         "Prey": "Prey",
     }
-    data = data.with_columns(pl.col("population").replace(pop_names).alias("population"))
+    data = data.with_columns(
+        pl.col("population").replace(pop_names).alias("population")
+    )
 
     # Color palette keys must match renamed population names
     pop_colors = {
@@ -487,9 +495,9 @@ def plot_time_series(
         "Apex predator": pop_meta["Apex"]["color"],
         "Superpredator": pop_meta["Super"]["color"],
     }
-    
+
     # update model names from scenario_meta
-    
+
     model_mapping = {name: meta["description"] for name, meta in scenario_meta.items()}
 
     data = data.with_columns(pl.col("model").replace(model_mapping).alias("model"))
@@ -501,7 +509,7 @@ def plot_time_series(
         y="N",
         hue="population",
         palette=pop_colors,
-        height=6,
+        height=7,
         aspect=1.3,
         alpha=0.25,
         col="model",
@@ -513,7 +521,7 @@ def plot_time_series(
 
     # Set legend title
     plot._legend.set_title("Population")
-    
+
     # Set axis labels
 
     plot.set_axis_labels(x_var="Time", y_var="Number of Agents")
@@ -521,7 +529,7 @@ def plot_time_series(
     # set titles
 
     plot.set_titles(
-        col_template="Model: {col_name}",
+        col_template=" {col_name}",
     )
 
     plt.tight_layout()
@@ -534,9 +542,8 @@ def plot_time_series(
 
 
 def plot_max_prey(data):
-    
     set_style()
-    
+
     data = data.filter(pl.col("step") > 400)
 
     plot = sns.relplot(
@@ -549,7 +556,7 @@ def plot_max_prey(data):
         linewidth=5,
         linestyle="-",
         markers="o",
-        height=6,
+        height=7,
         aspect=1.3,
     )
 
@@ -612,52 +619,61 @@ def plot_power_spectrum(
             # skip super predator
             if pop == "Super":
                 continue
-            
+
             # Loop over each replicate
-            
-            for rep in model_df.select(pl.col("rep_id").unique()).to_numpy().T.flatten():
+
+            for rep in (
+                model_df.select(pl.col("rep_id").unique()).to_numpy().T.flatten()
+            ):
                 # extract time series for the replicate and population
                 df = model_df.filter(pl.col("rep_id") == rep)
-                
+
                 # get time series as numpy array
                 y = df[pop].to_numpy()
                 n = len(y)
                 if n <= 1 or np.all(y == y[0]):
                     continue
-                
+
                 # detrend the time series
                 y_detrended = y - np.mean(y)
-                
+
                 # compute FFT and power spectrum
                 fft_vals = np.fft.fft(y_detrended)
-                
+
                 power = np.abs(fft_vals) / n * 2
                 power[0] = 0
-                
+
                 freqs = np.fft.fftfreq(n, d=1)
-                
+
                 # calculate periods
-                
+
                 idx = freqs > 0
                 periods = 1 / freqs[idx]
-                
+
                 # Smooth the power spectrum using a moving average
-                
+
                 window = 5  # Adjust window size as needed
-                power_smoothed = pd.Series(power[idx]).rolling(window, center=True, min_periods=1).mean().values
-                
+                power_smoothed = (
+                    pd.Series(power[idx])
+                    .rolling(window, center=True, min_periods=1)
+                    .mean()
+                    .values
+                )
+
                 # calculate relative power
-                
+
                 power_smoothed = power_smoothed / np.max(power_smoothed)
 
                 # create dataframe for each replicate
-                rep_data = pd.DataFrame({
-                    "periods": periods,
-                    "power": power_smoothed,
-                    "rep_id": rep,
-                    "population": pop,
-                    "model": model,
-                })
+                rep_data = pd.DataFrame(
+                    {
+                        "periods": periods,
+                        "power": power_smoothed,
+                        "rep_id": rep,
+                        "population": pop,
+                        "model": model,
+                    }
+                )
                 plot_data = pd.concat([plot_data, rep_data], ignore_index=True)
 
     # set colors for populations
@@ -690,18 +706,20 @@ def plot_power_spectrum(
         col_wrap=col_wrap,
         alpha=0.7,
         linewidth=2,
-        height=6,
+        height=7,
         aspect=1.3,
     )
     plt.xlabel("Period")
     plt.ylabel("Relative Power")
-    plot.set_titles(col_template="Model: {col_name}")
+    plot.set_titles(col_template=" {col_name}")
     plot._legend.set_title("Population")
     plot._legend.set_bbox_to_anchor((0.95, 0.8))
     plt.tight_layout()
     return plot
 
+
 # plot oscillatory time series
+
 
 def plot_oscillatory_time_series(periodicity, data, populations, n=5):
     """
@@ -714,7 +732,7 @@ def plot_oscillatory_time_series(periodicity, data, populations, n=5):
 
     ids = np.array([0, 5, 10, 20, 25])
     data = data.filter(pl.col("rep_id").is_in(ids))
-    
+
     # set col_wrap if unique models are more than 2
     if data.select(pl.col("model").n_unique()).to_numpy()[0][0] > 2:
         col_wrap = 3
@@ -722,7 +740,7 @@ def plot_oscillatory_time_series(periodicity, data, populations, n=5):
         col_wrap = 2
     else:
         col_wrap = 1
-        
+
     # Find oscillatory sample_ids
     samples = (
         periodicity.filter(
@@ -741,9 +759,9 @@ def plot_oscillatory_time_series(periodicity, data, populations, n=5):
     if not samples:
         print("No oscillatory samples found.")
         return
-    
+
     # select the middle sample
-    
+
     mid_index = len(samples) // 2
 
     # print s_breed and f_breed values for the selected sample_id
@@ -758,8 +776,7 @@ def plot_oscillatory_time_series(periodicity, data, populations, n=5):
 
     # Filter data for selected samples
     plot_data = data.filter(pl.col("sample_id").is_in(samples[mid_index]))
-    
-    
+
     # Unpivot populations to long format
     plot_data = plot_data.unpivot(
         on=populations,
@@ -775,23 +792,27 @@ def plot_oscillatory_time_series(periodicity, data, populations, n=5):
         "Super": "Superpredator",
         "Prey": "Prey",
     }
-    plot_data = plot_data.with_columns(pl.col("population").replace(mapping).alias("population"))
+    plot_data = plot_data.with_columns(
+        pl.col("population").replace(mapping).alias("population")
+    )
 
     # set colors for populations
-    
+
     pop_colors = {
         "Prey": pop_meta["Prey"]["color"],
         "Mesopredator": pop_meta["Predator"]["color"],
         "Apex predator": pop_meta["Apex"]["color"],
         "Superpredator": pop_meta["Super"]["color"],
     }
-    
+
     # update model names from scenario_meta
-    
+
     model_mapping = {name: meta["description"] for name, meta in scenario_meta.items()}
-    
-    plot_data = plot_data.with_columns(pl.col("model").replace(model_mapping).alias("model"))
-    
+
+    plot_data = plot_data.with_columns(
+        pl.col("model").replace(model_mapping).alias("model")
+    )
+
     # Plot using seaborn relplot
     plot = sns.relplot(
         kind="line",
@@ -806,22 +827,22 @@ def plot_oscillatory_time_series(periodicity, data, populations, n=5):
         units="rep_id",
         estimator=None,
         col_wrap=col_wrap,
-        height=6,
+        height=7,
         aspect=1.3,
     )
 
     # Set legend title
     plot._legend.set_title("Population")
     plot._legend.set_bbox_to_anchor((0.95, 0.7))
-    
+
     # set axis labels
-    
+
     plot.set_axis_labels(x_var="Time", y_var="Number of Agents")
 
     # set titles
 
     plot.set_titles(
-        col_template="Model: {col_name}",
+        col_template=" {col_name}",
     )
 
     plt.tight_layout()

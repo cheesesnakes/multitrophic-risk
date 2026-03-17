@@ -46,7 +46,7 @@ def run_debug(kwargs):
 
 def plot_debug(kwargs):
     sns.set_theme(style="whitegrid", font_scale=1.5)
-    plt.rcParams.update({"font.size": 14, "figure.figsize": (10, 6)})
+    plt.rcParams.update({"font.size": 30, "figure.figsize": (10, 6)})
     sns.color_palette()
 
     for model, params in scenarios.items():

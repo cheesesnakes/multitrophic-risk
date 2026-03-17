@@ -7,10 +7,38 @@ import matplotlib.pyplot as plt
 
 
 model_params = {
-    "apex_specialist": {"model": "apex", "predator": 500, "prey": 1000, "apex": 250, "super": 0, "a_target": 2},
-    "apex_generalist": {"model": "apex", "predator": 500, "prey": 1000, "apex": 250, "super": 0, "a_target": "both"},
-    "super_specialist_meso": {"model": "super", "predator": 500, "prey": 1000, "super": 250, "apex": 0, "super_target": "2"},
-    "super_generalist": {"model": "super", "predator": 500, "prey": 1000, "super": 250, "apex": 0, "super_target": "Both"},
+    "apex_specialist": {
+        "model": "apex",
+        "predator": 500,
+        "prey": 1000,
+        "apex": 250,
+        "super": 0,
+        "a_target": 2,
+    },
+    "apex_generalist": {
+        "model": "apex",
+        "predator": 500,
+        "prey": 1000,
+        "apex": 250,
+        "super": 0,
+        "a_target": "both",
+    },
+    "super_specialist_meso": {
+        "model": "super",
+        "predator": 500,
+        "prey": 1000,
+        "super": 250,
+        "apex": 0,
+        "super_target": "2",
+    },
+    "super_generalist": {
+        "model": "super",
+        "predator": 500,
+        "prey": 1000,
+        "super": 250,
+        "apex": 0,
+        "super_target": "Both",
+    },
     "lv": {"model": "lv", "predator": 500, "prey": 1000, "apex": 0, "super": 0},
 }
 
@@ -50,19 +78,15 @@ def run_example(kwargs, model="lv"):
 
 def plot_example(kwargs, model="lv"):
     sns.set_theme(style="whitegrid", font_scale=1.5)
-    plt.rcParams.update({"font.size": 14, "figure.figsize": (10, 6)})
+    plt.rcParams.update({"font.size": 30, "figure.figsize": (10, 6)})
     sns.color_palette()
 
     kwargs.update(model_params[model])
 
     # load data
 
-    model_data = pd.read_csv(
-        f"output/examples/results/data_model_{model}.csv"
-    )
-    agent_data = pd.read_csv(
-        f"output/examples/results/data_agents_{model}.csv"
-    )
+    model_data = pd.read_csv(f"output/examples/results/data_model_{model}.csv")
+    agent_data = pd.read_csv(f"output/examples/results/data_agents_{model}.csv")
 
     # plot the number of agents over time
 
