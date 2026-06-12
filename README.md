@@ -1,9 +1,5 @@
 # Multi-trophic risk from a superpredator alters the outcome of predator - prey behavioural response races.
 
-**Authors:** Shawn Dsouza, Maria Thaker, Vishwesha Guttal, Kartik Shanker
-
-Center for Ecological Sciences, Indian Institute of Science, Bangalore, India.
-
 ## Overview
 
 This repository contains the code and resources for analyzing the impact of multitrophic risk introduced by human "superpredators" on tritrophic ecosystems. Using an agent-based modeling approach implemented in Python's Mesa framework, the project investigates how superpredators influence population dynamics, coexistence equilibria, and ecosystem stability.
