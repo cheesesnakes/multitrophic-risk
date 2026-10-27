@@ -104,7 +104,7 @@ if __name__ == "__main__":
 
     # Figure 4
     make_figure(range(2, 8), ["phase_probability"], "figure4a", rows=2, cols=3)
-    make_figure(range(2, 8), ["timeseries"], "figure4b", rows=2, cols=3)
+    make_figure([2, 5, 3, 6, 4, 7], ["timeseries"], "figure4b", rows=2, cols=3)
 
     # Comparisons figure
     make_comparisons_figure()
